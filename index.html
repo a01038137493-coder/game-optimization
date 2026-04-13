@@ -2674,7 +2674,10 @@
   // ★ 카카오 개발자 콘솔(developers.kakao.com)에서 앱 생성 후
   //   JavaScript 키를 아래에 입력하세요.
   // ══════════════════════════════════════
-  const KAKAO_APP_KEY = '941344d67c71122caf7d6a9480fccd54';
+  const KAKAO_APP_KEY  = '941344d67c71122caf7d6a9480fccd54';
+  const KAKAO_REST_KEY = '314a5f05b1392f959e9c731e1788875a';
+  // ★ 테스트 완료 후 false 로 변경
+  const TEST_MODE = true;
 
   (function initKakao() {
     if (window.Kakao && !Kakao.isInitialized()) Kakao.init(KAKAO_APP_KEY);
@@ -2705,11 +2708,6 @@
     const saved = localStorage.getItem('kakaoUser');
     if (saved) updateLoginUI(JSON.parse(saved));
   })();
-
-  const KAKAO_REST_KEY = '314a5f05b1392f959e9c731e1788875a';
-
-  // ★ 테스트 완료 후 false 로 변경
-  const TEST_MODE = true;
 
   function kakaoLogin() {
     if (TEST_MODE) {
