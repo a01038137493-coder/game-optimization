@@ -1061,11 +1061,13 @@
     body.cursor-click #cursor-dot {
       box-shadow: 0 0 20px var(--primary), 0 0 40px rgba(0,240,255,.7);
     }
-    /* 마우스 감지 후 native 커서 숨김 */
-    body.has-cursor * { cursor: none !important; }
-    /* 터치 디바이스에선 커스텀 커서 요소 숨김 */
-    @media (hover: none) {
+    /* 터치/coarse 디바이스에서 커스텀 커서 요소 완전히 제거 */
+    @media (hover: none), (pointer: coarse) {
       #cursor-dot, #cursor-ring, #mouse-glow { display: none !important; }
+    }
+    /* 데스크탑(마우스)에서만 native 커서 숨김 */
+    @media (hover: hover) and (pointer: fine) {
+      * { cursor: none !important; }
     }
 
     /* ══════════════════════════════════════
@@ -3052,27 +3054,25 @@
 
   // ══ CUSTOM CURSOR ══
   (function() {
+    // 데스크탑 마우스 환경이 아니면 스킵
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
     const dot  = document.getElementById('cursor-dot');
     const ring = document.getElementById('cursor-ring');
     const glow = document.getElementById('mouse-glow');
     if (!dot || !ring) return;
 
+    // 초기값: 화면 밖 (CSS에 opacity 없음 → 항상 보임, 그러나 화면 밖에 있어서 안 보임)
     let mx = -200, my = -200, rx = -200, ry = -200;
 
-    // 마우스가 있는 환경에서만 native cursor 숨김 + 커스텀 커서 활성
-    function activate() {
-      document.body.classList.add('has-cursor');
-    }
-
     document.addEventListener('mousemove', e => {
-      if (!document.body.classList.contains('has-cursor')) activate();
       mx = e.clientX; my = e.clientY;
       dot.style.left = mx + 'px';
       dot.style.top  = my + 'px';
       if (glow) { glow.style.left = mx + 'px'; glow.style.top = my + 'px'; }
-    }, { passive: true });
+    });
 
-    // ring은 rAF로 약간 딜레이 (부드러운 트레일)
+    // ring: rAF로 부드러운 트레일
     (function animateRing() {
       rx += (mx - rx) * 0.14;
       ry += (my - ry) * 0.14;
@@ -3091,17 +3091,6 @@
     });
     document.addEventListener('mousedown', () => document.body.classList.add('cursor-click'));
     document.addEventListener('mouseup',   () => document.body.classList.remove('cursor-click'));
-
-    document.addEventListener('mouseleave', () => {
-      dot.style.opacity = '0';
-      ring.style.opacity = '0';
-      if (glow) glow.style.opacity = '0';
-    });
-    document.addEventListener('mouseenter', () => {
-      dot.style.opacity = '';
-      ring.style.opacity = '';
-      if (glow) glow.style.opacity = '';
-    });
   })();
 
   // ══ NAV ACTIVE SECTION HIGHLIGHT ══
