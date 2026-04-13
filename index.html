@@ -1031,11 +1031,10 @@
       border-radius: 50%;
       pointer-events: none;
       z-index: 99999;
-      left: -100px; top: -100px;
+      left: -200px; top: -200px;
       transform: translate(-50%, -50%);
       box-shadow: 0 0 8px var(--primary), 0 0 18px rgba(0,240,255,.5);
-      opacity: 0;
-      transition: opacity .3s, width .2s, height .2s, background .2s, box-shadow .2s;
+      transition: width .2s, height .2s, background .2s, box-shadow .2s, opacity .25s;
     }
     #cursor-ring {
       position: fixed;
@@ -1044,10 +1043,9 @@
       border-radius: 50%;
       pointer-events: none;
       z-index: 99998;
-      left: -100px; top: -100px;
+      left: -200px; top: -200px;
       transform: translate(-50%, -50%);
-      opacity: 0;
-      transition: width .25s ease, height .25s ease, border-color .25s, background .25s, opacity .3s;
+      transition: width .25s ease, height .25s ease, border-color .25s, background .25s, opacity .25s;
     }
     /* hover 위에 있을 때 커서 확대 */
     body.cursor-hover #cursor-ring {
@@ -1063,13 +1061,11 @@
     body.cursor-click #cursor-dot {
       box-shadow: 0 0 20px var(--primary), 0 0 40px rgba(0,240,255,.7);
     }
-    /* 터치 디바이스에선 숨김 */
-    @media (hover: none), (pointer: coarse) {
-      #cursor-dot, #cursor-ring { display: none !important; }
-    }
-    /* 데스크탑에서 기본 커서 숨김 */
-    @media (hover: hover) and (pointer: fine) {
-      * { cursor: none !important; }
+    /* 마우스 감지 후 native 커서 숨김 */
+    body.has-cursor * { cursor: none !important; }
+    /* 터치 디바이스에선 커스텀 커서 요소 숨김 */
+    @media (hover: none) {
+      #cursor-dot, #cursor-ring, #mouse-glow { display: none !important; }
     }
 
     /* ══════════════════════════════════════
@@ -3056,27 +3052,25 @@
 
   // ══ CUSTOM CURSOR ══
   (function() {
-    // 마우스가 없는 디바이스면 스킵
-    if (!window.matchMedia('(pointer: fine)').matches) return;
-
     const dot  = document.getElementById('cursor-dot');
     const ring = document.getElementById('cursor-ring');
     const glow = document.getElementById('mouse-glow');
     if (!dot || !ring) return;
 
-    let mx = 0, my = 0, rx = 0, ry = 0;
+    let mx = -200, my = -200, rx = -200, ry = -200;
 
-    // 즉시 표시 (off-screen에서 시작, 처음 움직일 때 올바른 위치로 이동)
-    dot.style.opacity  = '1';
-    ring.style.opacity = '1';
-    if (glow) glow.style.opacity = '1';
+    // 마우스가 있는 환경에서만 native cursor 숨김 + 커스텀 커서 활성
+    function activate() {
+      document.body.classList.add('has-cursor');
+    }
 
     document.addEventListener('mousemove', e => {
+      if (!document.body.classList.contains('has-cursor')) activate();
       mx = e.clientX; my = e.clientY;
       dot.style.left = mx + 'px';
       dot.style.top  = my + 'px';
       if (glow) { glow.style.left = mx + 'px'; glow.style.top = my + 'px'; }
-    });
+    }, { passive: true });
 
     // ring은 rAF로 약간 딜레이 (부드러운 트레일)
     (function animateRing() {
@@ -3104,9 +3098,9 @@
       if (glow) glow.style.opacity = '0';
     });
     document.addEventListener('mouseenter', () => {
-      dot.style.opacity = '1';
-      ring.style.opacity = '1';
-      if (glow) glow.style.opacity = '1';
+      dot.style.opacity = '';
+      ring.style.opacity = '';
+      if (glow) glow.style.opacity = '';
     });
   })();
 
