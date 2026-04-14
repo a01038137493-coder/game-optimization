@@ -2,8 +2,9 @@
   'use strict';
 
   // ══════════════════════════════════════════════════════
-  // Supabase 설정
+  // 설정
   // ══════════════════════════════════════════════════════
+  const TEST_MODE = true;
   const SUPABASE_URL = 'https://lrdpfqfkieuojloxsdpy.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyZHBmcWZraWV1b2psb3hzZHB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMzgwMjMsImV4cCI6MjA5MTcxNDAyM30.i9RLxqoNkOQOEnWRvqyuxtoFeKnxMMDSn-YV8WCdQIs';
 
@@ -27,6 +28,16 @@
   };
 
   function checkAuth() {
+    // TEST_MODE: 로그인 건너뛰고 바로 대시보드
+    if (TEST_MODE) {
+      currentUser = { email: 'admin@test.com', id: 'test-admin' };
+      updateSidebarUI(true);
+      window.showView('dashboard');
+      loadDashboard();
+      return;
+    }
+
+    // 실제 인증: Supabase 세션 확인
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         currentUser = session.user;
