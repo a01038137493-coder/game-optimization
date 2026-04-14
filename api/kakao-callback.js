@@ -31,7 +31,15 @@ export default async function handler(req, res) {
     });
     const tokenData = await tokenRes.json();
 
+    console.log('[Kakao Token Response]', {
+      status: tokenRes.status,
+      hasAccessToken: !!tokenData.access_token,
+      error: tokenData.error,
+      errorDescription: tokenData.error_description,
+    });
+
     if (!tokenData.access_token) {
+      console.error('[Token Fail Details]', tokenData);
       return res.redirect(`${BASE}/?kakaoError=token_fail`);
     }
 
