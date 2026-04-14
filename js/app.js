@@ -361,6 +361,20 @@ function updateLoginUI(user) {
   }
 }
 
+function toggleProfileDropdown(event) {
+  event.stopPropagation();
+  const profile = document.getElementById('navProfile');
+  profile.classList.toggle('hover-open');
+}
+
+// 다른 곳 클릭 시 드롭다운 닫기
+document.addEventListener('click', function(e) {
+  const profile = document.getElementById('navProfile');
+  if (profile && !profile.contains(e.target)) {
+    profile.classList.remove('hover-open');
+  }
+});
+
 // ══════════════════════════════════════
 // NICEPAY 결제
 // ══════════════════════════════════════

@@ -1290,7 +1290,6 @@ footer {
   cursor: pointer; transition: opacity .2s;
   position: relative;
 }
-.nav-profile:hover { opacity: .7; }
 .nav-profile.visible { display: flex; }
 .nav-profile-img {
   width: 24px; height: 24px; border-radius: 50%;
@@ -1313,10 +1312,7 @@ footer {
   transition-delay: 0s;
   z-index: 200;
 }
-/* 닫힐 때 딜레이 줘서 마우스 이동 시 안 닫힘 */
-.nav-profile:not(:hover) .nav-profile-dropdown { transition-delay: .55s; }
-.nav-profile:hover .nav-profile-dropdown,
-.nav-profile:focus-within .nav-profile-dropdown,
+.nav-profile:not(.hover-open) .nav-profile-dropdown { transition-delay: .1s; }
 .nav-profile.hover-open .nav-profile-dropdown {
   opacity: 1; pointer-events: auto; transform: translateY(0); transition-delay: 0s;
 }
