@@ -336,14 +336,8 @@ function updateLoginUI(user) {
 // ══════════════════════════════════════
 const NICEPAY_CLIENT_ID = 'ea78caffee1443e98f92ef552dacc8ca';
 
-// ── 쿠폰 코드 목록 ──
-const COUPONS = {
-  'GAMEBOOST10': { type: 'percent', value: 10,   label: '10% 할인' },
-  'OPEN5000':    { type: 'fixed',   value: 5000,  label: '₩5,000 할인' },
-  'VIP20':       { type: 'percent', value: 20,   label: '20% 할인' },
-  'FREE10000':   { type: 'fixed',   value: 10000, label: '₩10,000 할인' },
-};
 let _couponDiscount = 0;
+let _couponCode = '';
 
 const PLANS = {
   lite:     { label:'Lite 포맷',        name:'Lite 포맷 서비스',         price:55000, desc:'가볍고 빠른 체감의 윈도우 포맷. 불필요한 요소 없이 깔끔하게 설치합니다.', features:['윈도우 클린 설치','드라이버 기본 세팅','불필요 앱 제거','부팅 속도 개선'] },
@@ -561,6 +555,28 @@ function renderComplete(success, info, orderId, amount) {
     const hist = JSON.parse(localStorage.getItem('payHistory') || '[]');
     hist.unshift({ orderId, planName: info.planName, amount, game: info.game, name: info.name, date: new Date().toLocaleDateString('ko-KR') });
     localStorage.setItem('payHistory', JSON.stringify(hist.slice(0, 30)));
+
+    // DB 저장
+    const kakaoUser = JSON.parse(localStorage.getItem('kakaoUser') || 'null');
+    fetch('/api/save-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId,
+        planKey:        info.planLabel || '',
+        planName:       info.planName,
+        amount,
+        couponCode:     _couponCode || null,
+        couponDiscount: _couponDiscount || 0,
+        buyerName:      info.name || null,
+        buyerContact:   info.contact || null,
+        games:          info.game || null,
+        memo:           info.memo || null,
+        kakaoId:        kakaoUser?.id || null,
+      }),
+    }).catch((err) => {
+      console.error('주문 저장 오류:', err);
+    });
   }
   if (success) {
     el.innerHTML = `
@@ -623,45 +639,65 @@ function closePayHistory() {
   document.body.style.overflow = '';
 }
 
-function applyCoupon() {
+async function applyCoupon() {
   const code = (document.getElementById('fi-coupon').value || '').trim().toUpperCase();
   const msg  = document.getElementById('pmCouponMsg');
-  const coupon = COUPONS[code];
 
-  if (!coupon) {
-    msg.textContent = '유효하지 않은 쿠폰 코드입니다.';
+  if (!code) {
+    msg.textContent = '쿠폰 코드를 입력해주세요.';
     msg.className = 'pm-coupon-msg err';
     return;
   }
+
   if (_couponDiscount > 0) {
     msg.textContent = '이미 쿠폰이 적용되었습니다.';
     msg.className = 'pm-coupon-msg err';
     return;
   }
 
-  const orig     = _plan.price;
-  const discount = coupon.type === 'percent'
-    ? Math.floor(orig * coupon.value / 100)
-    : Math.min(coupon.value, orig);
-  const final    = orig - discount;
-  _couponDiscount = discount;
+  msg.textContent = '확인 중...';
+  msg.className = 'pm-coupon-msg';
 
-  // 원가 취소선 활성화
-  const origEl = document.getElementById('pmOriginalPrice');
-  origEl.textContent = '₩' + orig.toLocaleString();
-  origEl.style.display = '';
-  document.getElementById('pmPriceRow')?.classList.add('coupon-applied');
-  const badge = document.getElementById('pmDiscountBadge');
-  badge.textContent = '-' + coupon.label;
-  badge.style.display = '';
+  try {
+    const res = await fetch(`/api/coupons?code=${encodeURIComponent(code)}`);
+    const result = await res.json();
 
-  // 룰렛 숫자 애니메이션
-  roulettePrice(orig, final);
+    if (!result.valid) {
+      msg.textContent = result.message || '유효하지 않은 쿠폰입니다.';
+      msg.className = 'pm-coupon-msg err';
+      return;
+    }
 
-  msg.textContent = '✅ ' + coupon.label + ' 적용!';
-  msg.className = 'pm-coupon-msg ok';
-  document.getElementById('couponApplyBtn').disabled = true;
-  document.getElementById('fi-coupon').disabled = true;
+    const coupon = result.coupon;
+    const orig   = _plan.price;
+    const discount = coupon.type === 'percent'
+      ? Math.floor(orig * coupon.value / 100)
+      : Math.min(coupon.value, orig);
+    const final = orig - discount;
+    _couponDiscount = discount;
+    _couponCode = code;
+
+    // 원가 취소선 활성화
+    const origEl = document.getElementById('pmOriginalPrice');
+    origEl.textContent = '₩' + orig.toLocaleString();
+    origEl.style.display = '';
+    document.getElementById('pmPriceRow')?.classList.add('coupon-applied');
+    const badge = document.getElementById('pmDiscountBadge');
+    badge.textContent = '-' + coupon.label;
+    badge.style.display = '';
+
+    // 룰렛 숫자 애니메이션
+    roulettePrice(orig, final);
+
+    msg.textContent = '✅ ' + coupon.label + ' 적용!';
+    msg.className = 'pm-coupon-msg ok';
+    document.getElementById('couponApplyBtn').disabled = true;
+    document.getElementById('fi-coupon').disabled = true;
+  } catch (err) {
+    console.error('쿠폰 검증 오류:', err);
+    msg.textContent = '쿠폰 확인 중 오류가 발생했습니다.';
+    msg.className = 'pm-coupon-msg err';
+  }
 }
 
 function roulettePrice(from, to) {
