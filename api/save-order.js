@@ -40,11 +40,13 @@ export default async function handler(req, res) {
 
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    console.log('[save-order] Supabase 연결됨');
 
     let customerId = null;
 
     // 1. customers upsert (kakaoId 있을 때만)
     if (kakaoId) {
+      console.log('[save-order] Customer upsert 시도:', { kakaoId, buyerName, buyerContact });
       const { data: customer, error: custErr } = await supabase
         .from('customers')
         .upsert(
@@ -55,14 +57,16 @@ export default async function handler(req, res) {
         .single();
 
       if (custErr) {
-        console.error('Customer upsert 오류:', custErr);
+        console.error('[save-order] Customer upsert 오류:', custErr);
         // customer 오류가 order 저장을 막지 않음
       } else if (customer) {
         customerId = customer.id;
+        console.log('[save-order] Customer 저장됨:', customerId);
       }
     }
 
     // 2. orders insert
+    console.log('[save-order] Order insert 시도:', { orderId, planName, amount, customerId });
     const { data: order, error: orderErr } = await supabase
       .from('orders')
       .insert({
