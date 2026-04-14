@@ -18,6 +18,32 @@
   테스트 모드
 </div>
 
+<!-- SIGNUP MODAL -->
+<div class="pay-modal-backdrop" id="signupModalBackdrop" style="display:none;" onclick="if(event.target.id==='signupModalBackdrop') closeSignupModal()">
+  <div class="pay-modal" id="signupModal" style="max-width:400px;">
+    <button class="pay-modal-close" onclick="closeSignupModal()">✕</button>
+    <div style="padding:40px;text-align:center;">
+      <h2 style="margin:0 0 10px;font-size:1.3rem;">계정이 없으시네요</h2>
+      <p style="color:var(--text-muted);margin:0 0 30px;font-size:0.95rem;">회원가입을 진행해주세요</p>
+
+      <div style="text-align:left;margin-bottom:25px;">
+        <label style="display:block;font-size:0.9rem;font-weight:500;margin-bottom:8px;color:var(--text);">이름 *</label>
+        <input type="text" id="signupNameInput" placeholder="이름을 입력하세요" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-family:inherit;font-size:0.95rem;box-sizing:border-box;" />
+        <div class="error-msg" id="signupNameError" style="color:#FF6B6B;font-size:0.85rem;margin-top:5px;"></div>
+
+        <label style="display:block;font-size:0.9rem;font-weight:500;margin-bottom:8px;margin-top:18px;color:var(--text);">전화번호 *</label>
+        <input type="tel" id="signupPhoneInput" placeholder="010-1234-5678" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-family:inherit;font-size:0.95rem;box-sizing:border-box;" />
+        <div class="error-msg" id="signupPhoneError" style="color:#FF6B6B;font-size:0.85rem;margin-top:5px;"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:30px;">
+        <button onclick="closeSignupModal()" style="flex:1;padding:13px;border:none;border-radius:10px;background:var(--bg-card2);color:var(--text);font-weight:600;cursor:pointer;transition:all .2s;">취소</button>
+        <button onclick="saveSignupInfo()" style="flex:1;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,#00D4FF,#7C3AED);color:white;font-weight:600;cursor:pointer;transition:all .2s;">계속하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- PAYMENT MODAL -->
 <div class="pay-modal-backdrop" id="payModalBackdrop">
   <div class="pay-modal" id="payModal">

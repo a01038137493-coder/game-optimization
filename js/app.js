@@ -214,8 +214,16 @@ const TEST_MODE = false;
     try {
       const user = JSON.parse(atob(decodeURIComponent(encoded)));
       localStorage.setItem('kakaoUser', JSON.stringify(user));
-      updateLoginUI(user);
-      showToast('✅ ' + user.nickname + '님, 카카오 로그인 완료!');
+
+      // nickname이 없으면 회원정보 입력 모달 띄우기
+      if (!user.nickname) {
+        document.getElementById('signupModalBackdrop').style.display = 'flex';
+        document.getElementById('signupNameInput').value = '';
+        document.getElementById('signupPhoneInput').value = '';
+      } else {
+        updateLoginUI(user);
+        showToast('✅ ' + user.nickname + '님, 카카오 로그인 완료!');
+      }
     } catch(e) { console.error(e); }
     history.replaceState({}, '', location.pathname);
     return;
@@ -262,6 +270,55 @@ const TEST_MODE = false;
 function kakaoLogin() {
   const redirectUri = location.origin + '/api/kakao-callback';
   location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_APP_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
+}
+
+function closeSignupModal() {
+  document.getElementById('signupModalBackdrop').style.display = 'none';
+  document.getElementById('signupNameError').textContent = '';
+  document.getElementById('signupPhoneError').textContent = '';
+}
+
+function saveSignupInfo() {
+  const nameInput = document.getElementById('signupNameInput');
+  const phoneInput = document.getElementById('signupPhoneInput');
+  let valid = true;
+
+  document.getElementById('signupNameError').textContent = '';
+  document.getElementById('signupPhoneError').textContent = '';
+
+  if (!nameInput.value.trim()) {
+    document.getElementById('signupNameError').textContent = '이름을 입력하세요';
+    valid = false;
+  }
+  if (!phoneInput.value.trim()) {
+    document.getElementById('signupPhoneError').textContent = '전화번호를 입력하세요';
+    valid = false;
+  }
+
+  if (!valid) return;
+
+  const kakaoUser = JSON.parse(localStorage.getItem('kakaoUser'));
+  if (kakaoUser) {
+    kakaoUser.nickname = nameInput.value;
+    kakaoUser.phone = phoneInput.value;
+    localStorage.setItem('kakaoUser', JSON.stringify(kakaoUser));
+
+    // Supabase에 저장 (선택)
+    fetch('/api/save-customer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        kakaoId: kakaoUser.id,
+        nickname: nameInput.value,
+        phone: phoneInput.value,
+        email: kakaoUser.email || '',
+      })
+    }).catch(err => console.error('Save error:', err));
+
+    updateLoginUI(kakaoUser);
+    closeSignupModal();
+    showToast('✅ 회원가입 완료! 이제 결제할 수 있습니다.');
+  }
 }
 
 function kakaoLogout() {
