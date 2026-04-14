@@ -4,8 +4,7 @@
   "description": "GameBoost Pro - 게임 최적화 서비스",
   "main": "index.html",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "vercel build"
+    "dev": "vercel dev"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.38.0"
