@@ -232,16 +232,28 @@ const TEST_MODE = true;
   const saved = localStorage.getItem('kakaoUser');
   if (saved) updateLoginUI(JSON.parse(saved));
 
-  // TEST_MODE: 로그인 버튼에 테스트용 handler 추가
+  // TEST_MODE: 상단 배너 표시 및 클릭 핸들러
   if (TEST_MODE) {
-    const lb = document.getElementById('navKakaoLoginBtn');
-    if (lb) {
-      lb.addEventListener('click', (e) => {
-        e.preventDefault();
-        testModeLogin();
+    const banner = document.getElementById('testModeBanner');
+    if (banner) {
+      banner.style.display = 'block';
+      banner.addEventListener('click', () => {
+        if (currentTestAction === 'login') {
+          testModeLogin();
+          currentTestAction = 'pay';
+          banner.textContent = '🔧 테스트 모드 | 결제 완료 처리 클릭';
+        } else {
+          adminTestPay();
+          currentTestAction = 'login';
+          banner.textContent = '🔧 테스트 모드 | 로그인 / 결제 완료 처리 클릭';
+        }
       });
     }
   }
+})();
+
+// TEST_MODE 상태 관리
+let currentTestAction = 'login';
 })();
 
 function testModeLogin() {
@@ -259,7 +271,7 @@ function testModeLogin() {
 
 function kakaoLogin() {
   const redirectUri = location.origin + '/api/kakao-callback';
-  location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=talk_message`;
+  location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_APP_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=talk_message`;
 }
 
 function kakaoLogout() {
