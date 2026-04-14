@@ -262,7 +262,15 @@ const TEST_MODE = false;
   // 저장된 유저 복원
   const saved = localStorage.getItem('kakaoUser');
   if (saved) {
-    updateLoginUI(JSON.parse(saved));
+    const user = JSON.parse(saved);
+    if (!user.nickname) {
+      // nickname이 없으면 회원정보 입력 모달 띄우기
+      document.getElementById('signupModalBackdrop').style.display = 'flex';
+      document.getElementById('signupNameInput').value = '';
+      document.getElementById('signupPhoneInput').value = '';
+    } else {
+      updateLoginUI(user);
+    }
   }
 
 })();
