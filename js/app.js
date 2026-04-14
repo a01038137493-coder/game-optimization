@@ -255,46 +255,9 @@ const TEST_MODE = false;
   const saved = localStorage.getItem('kakaoUser');
   if (saved) {
     updateLoginUI(JSON.parse(saved));
-  } else if (TEST_MODE) {
-    // TEST_MODE: 로그인 없으면 자동 로그인
-    testModeLogin();
   }
 
-  // TEST_MODE: 상단 배너 표시 및 클릭 핸들러
-  if (TEST_MODE) {
-    const banner = document.getElementById('testModeBanner');
-    if (banner) {
-      banner.style.display = 'block';
-      banner.addEventListener('click', () => {
-        if (currentTestAction === 'login') {
-          testModeLogin();
-          currentTestAction = 'pay';
-          banner.textContent = '🔧 테스트 모드 | 결제 완료 처리 클릭';
-        } else {
-          adminTestPay();
-          currentTestAction = 'login';
-          banner.textContent = '🔧 테스트 모드 | 로그인 / 결제 완료 처리 클릭';
-        }
-      });
-    }
-  }
 })();
-
-// TEST_MODE 상태 관리
-let currentTestAction = 'login';
-
-function testModeLogin() {
-  const mockUser = {
-    id: 'test_001',
-    nickname: '테스트유저',
-    profileImage: '',
-    email: 'test@gameboost.kr',
-    phone: '010-1234-5678',
-  };
-  localStorage.setItem('kakaoUser', JSON.stringify(mockUser));
-  updateLoginUI(mockUser);
-  showToast('✅ [테스트] 카카오 로그인 완료!');
-}
 
 function kakaoLogin() {
   const redirectUri = location.origin + '/api/kakao-callback';
