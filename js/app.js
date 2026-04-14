@@ -618,11 +618,15 @@ function renderComplete(success, info, orderId, amount) {
       }),
     })
     .then(res => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        return res.json().then(errData => {
+          throw new Error(`HTTP ${res.status}: ${errData.error || ''} ${errData.details || ''}`);
+        }).catch(() => { throw new Error(`HTTP ${res.status}`); });
+      }
       return res.json();
     })
     .then(data => console.log('✅ 주문 저장 성공:', data))
-    .catch(err => console.error('❌ 주문 저장 오류:', err));
+    .catch(err => console.error('❌ 주문 저장 오류:', err.message));
   }
   if (success) {
     el.innerHTML = `
