@@ -1,8 +1,8 @@
 // ══════════════════════════════════════════════════════
 // Supabase 설정
 // ══════════════════════════════════════════════════════
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://lrdpfqfkieuojloxsdpy.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyZHBmcWZraWV1b2psb3hzZHB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMzgwMjMsImV4cCI6MjA5MTcxNDAyM30.i9RLxqoNkOQOEnWRvqyuxtoFeKnxMMDSn-YV8WCdQIs';
 
 const { createClient } = window.supabase;
 let supabase = null;
