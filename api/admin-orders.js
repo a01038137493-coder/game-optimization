@@ -6,13 +6,33 @@ export default async function handler(req, res) {
 
   try {
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-    const { data: orders } = await supabase
+    const { data: orders, error } = await supabase
       .from('orders')
-      .select('id, order_id, buyer_name, plan_name, amount, status, created_at')
+      .select('*')
       .order('created_at', { ascending: false });
 
-    res.status(200).json({ orders: orders || [] });
+    if (error) {
+      console.error('[admin-orders] Supabase error:', error);
+      return res.status(500).json({ error: 'Failed to load orders', details: error.message });
+    }
+
+    console.log('[admin-orders] Orders loaded:', orders?.length || 0);
+
+    // 컬럼명 정규화 (서로 다른 컬럼명 통일)
+    const normalizedOrders = (orders || []).map(o => ({
+      ...o,
+      buyer_name: o.buyer_name || o.name || '',
+      buyer_phone: o.buyer_phone || o.phone || o.buyer_contact || o.contact || '',
+      buyer_contact: o.buyer_contact || o.contact || o.phone || '',
+      games: o.games || '',
+      memo: o.memo || o.memo || '',
+      status: o.status || 'pending',
+      created_at: o.created_at || new Date().toISOString()
+    }));
+
+    res.status(200).json({ orders: normalizedOrders });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to load orders' });
+    console.error('[admin-orders] Error:', err.message);
+    res.status(500).json({ error: 'Failed to load orders', details: err.message });
   }
 }

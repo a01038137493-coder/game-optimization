@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>관리자 로그인 - GameBoost Pro</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+      color: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .login-container {
+      background: rgba(20, 20, 30, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 16px;
+      padding: 48px;
+      width: 100%;
+      max-width: 380px;
+      backdrop-filter: blur(10px);
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .login-header h1 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, #00f0ff, #7b2fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .login-header p {
+      color: #999;
+      font-size: 0.9rem;
+    }
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #e0e0e0;
+    }
+    input {
+      padding: 12px 14px;
+      background: rgba(10, 10, 15, 0.8);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 10px;
+      color: #e0e0e0;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+    input:focus {
+      border-color: #00f0ff;
+      background: rgba(0, 240, 255, 0.05);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.1);
+    }
+    button {
+      padding: 14px;
+      background: linear-gradient(135deg, #00f0ff, #7b2fff);
+      border: none;
+      border-radius: 10px;
+      color: #000;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 240, 255, 0.3);
+    }
+    .error {
+      color: #ff6b6b;
+      font-size: 0.85rem;
+      text-align: center;
+      display: none;
+    }
+    .info {
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.8rem;
+      color: #00f0ff;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <form class="login-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="email">관리자 이메일</label>
+        <input type="email" id="email" placeholder="이메일 입력" required autofocus />
+      </div>
+
+      <div class="form-group">
+        <label for="password">비밀번호</label>
+        <input type="password" id="password" placeholder="비밀번호 입력" required />
+      </div>
+
+      <div class="error" id="errorMsg"></div>
+
+      <button type="submit">로그인</button>
+    </form>
+
+    <div class="info">
+      관리자 계정으로만 접근 가능합니다.
+    </div>
+  </div>
+
+  <script>
+    const TEST_MODE = false;
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorMsg = document.getElementById('errorMsg');
+
+      try {
+        const res = await fetch('/api/admin-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem('adminToken', data.token);
+          localStorage.setItem('adminEmail', email);
+          location.href = '/admin.html';
+        } else {
+          errorMsg.style.display = 'block';
+          errorMsg.textContent = data.message || '로그인에 실패했습니다.';
+        }
+      } catch (err) {
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = '로그인 실패. 다시 시도하세요.';
+        console.error(err);
+      }
+    }
+
+    // 이미 로그인했으면 대시보드로 이동
+    if (localStorage.getItem('adminToken')) {
+      location.href = '/admin.html';
+    }
+
+    // TEST_MODE: 페이지 로드 시 자동 로그인
+    if (TEST_MODE) {
+      window.addEventListener('load', () => {
+        // 테스트용 토큰 생성
+        const testToken = 'test-token-' + Date.now();
+        localStorage.setItem('adminToken', testToken);
+        localStorage.setItem('adminEmail', 'admin@test.com');
+        location.href = '/admin.html';
+      });
+    }
+  </script>
+</body>
+</html>

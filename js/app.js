@@ -213,17 +213,51 @@ const TEST_MODE = false;
   if (encoded) {
     try {
       const user = JSON.parse(atob(decodeURIComponent(encoded)));
-      localStorage.setItem('kakaoUser', JSON.stringify(user));
 
-      // nickname이 없으면 회원정보 입력 모달 띄우기
-      if (!user.nickname) {
-        document.getElementById('signupModalBackdrop').style.display = 'flex';
-        document.getElementById('signupNameInput').value = '';
-        document.getElementById('signupPhoneInput').value = '';
-      } else {
-        updateLoginUI(user);
-        showToast('✅ ' + user.nickname + '님, 카카오 로그인 완료!');
-      }
+      // Supabase에서 고객 정보 조회
+      fetch(`/api/get-customer?kakaoId=${user.id}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.customer) {
+            // Supabase에서 조회된 정보 병합
+            if (data.customer.nickname) user.nickname = data.customer.nickname;
+            if (data.customer.phone) user.phone = data.customer.phone;
+            if (data.customer.email) user.email = data.customer.email;
+          }
+
+          localStorage.setItem('kakaoUser', JSON.stringify(user));
+
+          // nickname이 없으면 회원정보 입력 모달 띄우기
+          if (!user.nickname) {
+            const backdrop = document.getElementById('signupModalBackdrop');
+            backdrop.classList.add('open');
+            document.getElementById('signupNameInput').value = user.nickname || '';
+            document.getElementById('signupPhoneInput').value = user.phone || '';
+            document.getElementById('signupEmailInput').value = user.email || '';
+          } else {
+            localStorage.setItem('signupCompleted', 'true');
+            updateLoginUI(user);
+            showToast('✅ ' + user.nickname + '님, 카카오 로그인 완료!');
+          }
+        })
+        .catch(err => {
+          console.error('[get-customer] 조회 실패:', err);
+          // 오류나도 localStorage의 기존 정보로 진행
+          const saved = JSON.parse(localStorage.getItem('kakaoUser') || '{}');
+          if (saved.nickname) user.nickname = saved.nickname;
+          if (saved.phone) user.phone = saved.phone;
+          localStorage.setItem('kakaoUser', JSON.stringify(user));
+          if (!user.nickname) {
+            const backdrop = document.getElementById('signupModalBackdrop');
+            backdrop.classList.add('open');
+            document.getElementById('signupNameInput').value = user.nickname || '';
+            document.getElementById('signupPhoneInput').value = user.phone || '';
+            document.getElementById('signupEmailInput').value = user.email || '';
+          } else {
+            updateLoginUI(user);
+            showToast('✅ ' + user.nickname + '님, 카카오 로그인 완료!');
+          }
+        });
     } catch(e) { console.error(e); }
     history.replaceState({}, '', location.pathname);
     return;
@@ -263,16 +297,43 @@ const TEST_MODE = false;
   const saved = localStorage.getItem('kakaoUser');
   if (saved) {
     const user = JSON.parse(saved);
-    const signupCompleted = localStorage.getItem('signupCompleted');
 
-    if (!signupCompleted) {
-      // 회원가입 미완료면 모달 띄우기
-      document.getElementById('signupModalBackdrop').style.display = 'flex';
-      document.getElementById('signupNameInput').value = '';
-      document.getElementById('signupPhoneInput').value = '';
-    } else {
-      updateLoginUI(user);
-    }
+    // Supabase에서 최신 정보 조회
+    fetch(`/api/get-customer?kakaoId=${user.id}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.customer) {
+          // Supabase의 정보로 업데이트
+          if (data.customer.nickname) user.nickname = data.customer.nickname;
+          if (data.customer.phone) user.phone = data.customer.phone;
+          if (data.customer.email) user.email = data.customer.email;
+        }
+
+        if (!user.nickname) {
+          // 회원가입 미완료면 모달 띄우기
+          const backdrop = document.getElementById('signupModalBackdrop');
+          backdrop.classList.add('open');
+          document.getElementById('signupNameInput').value = user.nickname || '';
+          document.getElementById('signupPhoneInput').value = user.phone || '';
+          document.getElementById('signupEmailInput').value = user.email || '';
+        } else {
+          localStorage.setItem('signupCompleted', 'true');
+          updateLoginUI(user);
+        }
+      })
+      .catch(err => {
+        console.error('[get-customer] 조회 실패:', err);
+        // 오류나도 localStorage 정보로 진행
+        if (!user.nickname) {
+          const backdrop = document.getElementById('signupModalBackdrop');
+          backdrop.classList.add('open');
+          document.getElementById('signupNameInput').value = user.nickname || '';
+          document.getElementById('signupPhoneInput').value = user.phone || '';
+          document.getElementById('signupEmailInput').value = user.email || '';
+        } else {
+          updateLoginUI(user);
+        }
+      });
   }
 
 })();
@@ -283,18 +344,26 @@ function kakaoLogin() {
 }
 
 function closeSignupModal() {
-  document.getElementById('signupModalBackdrop').style.display = 'none';
+  const backdrop = document.getElementById('signupModalBackdrop');
+  backdrop.classList.remove('open');
   document.getElementById('signupNameError').textContent = '';
   document.getElementById('signupPhoneError').textContent = '';
+  document.getElementById('signupEmailError').textContent = '';
+  document.getElementById('signupTermsError').textContent = '';
+  document.getElementById('signupTermsCheckbox').checked = false;
 }
 
 function saveSignupInfo() {
   const nameInput = document.getElementById('signupNameInput');
   const phoneInput = document.getElementById('signupPhoneInput');
+  const emailInput = document.getElementById('signupEmailInput');
+  const termsCheckbox = document.getElementById('signupTermsCheckbox');
   let valid = true;
 
   document.getElementById('signupNameError').textContent = '';
   document.getElementById('signupPhoneError').textContent = '';
+  document.getElementById('signupEmailError').textContent = '';
+  document.getElementById('signupTermsError').textContent = '';
 
   if (!nameInput.value.trim()) {
     document.getElementById('signupNameError').textContent = '이름을 입력하세요';
@@ -304,6 +373,17 @@ function saveSignupInfo() {
     document.getElementById('signupPhoneError').textContent = '전화번호를 입력하세요';
     valid = false;
   }
+  if (emailInput.value.trim()) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailInput.value.trim())) {
+      document.getElementById('signupEmailError').textContent = '올바른 이메일 형식을 입력하세요';
+      valid = false;
+    }
+  }
+  if (!termsCheckbox.checked) {
+    document.getElementById('signupTermsError').textContent = '이용약관에 동의해야 합니다';
+    valid = false;
+  }
 
   if (!valid) return;
 
@@ -311,6 +391,7 @@ function saveSignupInfo() {
   if (kakaoUser) {
     kakaoUser.nickname = nameInput.value;
     kakaoUser.phone = phoneInput.value;
+    kakaoUser.email = emailInput.value;
     localStorage.setItem('kakaoUser', JSON.stringify(kakaoUser));
     localStorage.setItem('signupCompleted', 'true');
 
@@ -518,8 +599,8 @@ function setPayLock(locked) {
     fields.forEach(id => { const el = document.getElementById(id); if(el) el.disabled = false; });
     document.querySelectorAll('#gameDropdownMenu input').forEach(c => c.disabled = false);
     const gdd2 = document.getElementById('gameDropdown'); if (gdd2) gdd2.dataset.disabled = '0';
-    // 테스트 모드일 때만 어드민 버튼 표시
-    if (adminBtn) adminBtn.style.display = TEST_MODE ? '' : 'none';
+    // 테스트 결제 완료 버튼 표시 (항상 활성화)
+    if (adminBtn) adminBtn.style.display = '';
   }
 }
 
@@ -544,7 +625,37 @@ function adminTestPay() {
   const testOrderId = 'TEST-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 
   try {
-    renderComplete(true, info, testOrderId, finalAmt);
+    // DB에 주문 저장
+    const kakaoUser = JSON.parse(localStorage.getItem('kakaoUser') || 'null');
+    fetch('/api/save-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId: testOrderId,
+        planKey:        info.planLabel || '',
+        planName:       info.planName,
+        amount:         finalAmt,
+        couponCode:     _couponCode || null,
+        couponDiscount: _couponDiscount || 0,
+        buyerName:      info.name || null,
+        buyerContact:   info.contact || null,
+        games:          info.game || null,
+        memo:           info.memo || null,
+        kakaoId:        kakaoUser?.id || null,
+      }),
+    })
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      console.log('[TEST] ✅ 주문 DB 저장 성공:', data);
+      renderComplete(true, info, testOrderId, finalAmt);
+    })
+    .catch(err => {
+      console.error('[TEST] ❌ DB 저장 실패:', err.message);
+      renderComplete(true, info, testOrderId, finalAmt);
+    });
   } catch(e) {
     console.error('[TEST] 테스트 결제 중 에러:', e);
     showToast('테스트 결제 처리 중 오류가 발생했습니다.', 'error');
@@ -632,9 +743,13 @@ function kakaoNotify(orderInfo) {
 
 // ── 결제 완료 화면 렌더 ──
 function renderComplete(success, info, orderId, amount) {
+  console.log('[RENDER_COMPLETE] 시작:', { success, info, orderId, amount });
   setStep(3);
-  document.getElementById('payStepForm').style.display = 'none';
-  document.getElementById('payStepComplete').style.display = '';
+  const payStepForm = document.getElementById('payStepForm');
+  const payStepComplete = document.getElementById('payStepComplete');
+  console.log('[RENDER_COMPLETE] 엘리먼트:', { payStepForm, payStepComplete });
+  if (payStepForm) payStepForm.style.display = 'none';
+  if (payStepComplete) payStepComplete.style.display = '';
 
   const el = document.getElementById('payCompleteInner');
   if (success && info) {
@@ -689,10 +804,24 @@ function renderComplete(success, info, orderId, amount) {
       </div>
       <div class="pay-complete-next">
         <strong>📌 다음 단계</strong>
-        <p><strong style="color:var(--primary)">10분 이내</strong> 카카오 채널로 문자가 발송됩니다. 순번에 맞춰 작업을 진행하며, 평균 <strong style="color:var(--text)">30~90분</strong> 내 완료됩니다.</p>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,.1);margin:8px 0;">
+        <p style="margin:0;line-height:1.6;font-size:.9rem;">
+          카카오톡에서 10분 이내 결제 완료 메시지를 받으실 수 있습니다.
+        </p>
       </div>
+
+      <div class="pay-complete-next" style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);">
+        <strong style="color:#a855f7;">📋 환불정책</strong>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,.1);margin:8px 0;">
+        <p style="margin:0;line-height:1.6;font-size:.9rem;color:var(--text-muted);">
+          🕐 3시간 이내: 전액 환불 가능<br/>
+          📊 작업 진행 중: 진행률에 따라 환불<br/>
+          ✔️ 작업 완료 후: 환불 불가능
+        </p>
+      </div>
+
       <div class="pay-complete-btns">
-        <button class="btn-kakao-link" onclick="window.open('https://pf.kakao.com','_blank')">카카오 채널로 문의하기</button>
+        <button class="btn-kakao-link" onclick="window.open('https://pf.kakao.com','_blank')">📱 카카오 채널로 확인하기</button>
         <button class="btn-close-link" onclick="closePayModal()">닫기</button>
       </div>`;
   } else {
@@ -707,14 +836,53 @@ function renderComplete(success, info, orderId, amount) {
   }
 }
 
+// 결제내역 폴링 인터벌 ID
+let payHistoryPollInterval = null;
+
+// 주문 상태 라벨 변환
+function getStatusLabel(status) {
+  switch(status) {
+    case 'completed': return '완료';
+    case 'cancelled': return '취소';
+    case 'pending':
+    default: return '진행중';
+  }
+}
+
 function showPayHistory() {
-  const hist = JSON.parse(localStorage.getItem('payHistory') || '[]');
+  console.log('[PAY_HISTORY] 결제내역 표시 시작');
+  const backdrop = document.getElementById('payHistBackdrop');
   const body = document.getElementById('payHistBody');
+
+  if (!backdrop || !body) {
+    console.error('[PAY_HISTORY] 모달 요소를 찾을 수 없습니다', {backdrop, body});
+    return;
+  }
+
+  const hist = JSON.parse(localStorage.getItem('payHistory') || '[]');
+  console.log('[PAY_HISTORY] 저장된 결제내역:', hist);
+
   if (!hist.length) {
+    console.log('[PAY_HISTORY] 결제내역이 없습니다');
     body.innerHTML = '<div class="pay-hist-empty">결제내역이 없습니다.</div>';
   } else {
-    body.innerHTML = hist.map(h => `
-      <div class="pay-hist-item">
+    updatePayHistoryDisplay(hist);
+    // 폴링 시작: 3초마다 최신 상태 확인
+    if (payHistoryPollInterval) clearInterval(payHistoryPollInterval);
+    payHistoryPollInterval = setInterval(() => refreshPayHistoryStatus(), 3000);
+  }
+
+  backdrop.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function updatePayHistoryDisplay(hist) {
+  const body = document.getElementById('payHistBody');
+  body.innerHTML = hist.map((h, idx) => {
+    const statusLabel = getStatusLabel(h.status || 'pending');
+    const statusColor = h.status === 'completed' ? 'var(--primary)' : h.status === 'cancelled' ? '#ff6464' : '#ffa500';
+    return `
+      <div class="pay-hist-item" onclick="replayPaymentResult(${idx})" style="cursor:pointer;">
         <div class="pay-hist-top">
           <span class="pay-hist-plan">${h.planName || ''}</span>
           <span class="pay-hist-amount">₩${Number(h.amount||0).toLocaleString('ko-KR')}</span>
@@ -723,16 +891,82 @@ function showPayHistory() {
           ${h.name ? `이름: ${h.name}` : ''}${h.game ? ` &nbsp;·&nbsp; 게임: ${h.game}` : ''}
           ${h.date ? `<br/>${h.date}` : ''}
         </div>
-        <div class="pay-hist-order">주문번호: ${h.orderId || ''}</div>
-      </div>`).join('');
+        <div class="pay-hist-order">
+          주문번호: ${h.orderId || ''}
+          <span style="margin-left:8px;color:${statusColor};font-weight:600;font-size:.8rem;">${statusLabel}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function refreshPayHistoryStatus() {
+  const hist = JSON.parse(localStorage.getItem('payHistory') || '[]');
+  if (!hist.length) return;
+
+  // admin-orders API에서 최신 상태 조회
+  fetch('/api/admin-orders')
+    .then(res => res.json())
+    .then(data => {
+      const orders = data.orders || [];
+      const updated = hist.map(h => {
+        const order = orders.find(o => o.order_id === h.orderId);
+        if (order) {
+          return { ...h, status: order.status };
+        }
+        return h;
+      });
+      localStorage.setItem('payHistory', JSON.stringify(updated));
+      updatePayHistoryDisplay(updated);
+    })
+    .catch(err => console.error('[PAY_HISTORY] 상태 갱신 실패:', err));
+}
+
+// 결제내역 재생 (결제완료창 다시 표시)
+function replayPaymentResult(historyIndex) {
+  const hist = JSON.parse(localStorage.getItem('payHistory') || '[]');
+  const h = hist[historyIndex];
+  console.log('[REPLAY] 결제내역:', h, '인덱스:', historyIndex);
+  if (!h) {
+    console.error('[REPLAY] 결제내역이 없습니다');
+    return;
   }
-  document.getElementById('payHistBackdrop').classList.add('open');
-  document.body.style.overflow = 'hidden';
+
+  // 결제내역 모달 닫기
+  closePayHistory();
+
+  // 결제 정보 복원
+  const info = {
+    planName: h.planName,
+    planLabel: h.planLabel,
+    amount: h.amount,
+    name: h.name,
+    contact: h.contact,
+    game: h.game,
+    memo: h.memo,
+    orderId: h.orderId,
+  };
+
+  console.log('[REPLAY] renderComplete 호출:', info);
+
+  // 결제 모달 열기
+  const payBackdrop = document.getElementById('payModalBackdrop');
+  if (payBackdrop) {
+    payBackdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  // 결제완료 페이지 표시
+  renderComplete(true, info, h.orderId, h.amount);
 }
 
 function closePayHistory() {
   document.getElementById('payHistBackdrop').classList.remove('open');
   document.body.style.overflow = '';
+  // 폴링 중단
+  if (payHistoryPollInterval) {
+    clearInterval(payHistoryPollInterval);
+    payHistoryPollInterval = null;
+  }
 }
 
 async function applyCoupon() {
@@ -828,6 +1062,13 @@ function onGameChange(isEtc) {
   const tags = document.getElementById('gameSelectedTags');
   const sel = getSelectedGames();
   tags.innerHTML = sel.map(g => `<span class="game-tag">${g}<button type="button" onclick="removeGameTag(this,'${g.replace(/'/g,"\\'")}')">✕</button></span>`).join('');
+
+  // 게임 선택 후 드롭다운 자동 닫기
+  if (sel.length > 0) {
+    setTimeout(() => {
+      document.getElementById('gameDropdown')?.classList.remove('open');
+    }, 100);
+  }
   // 트리거 라벨
   const lbl = document.getElementById('gameDropdownLabel');
   lbl.textContent = sel.length ? sel.join(', ') : '게임을 선택하세요';
