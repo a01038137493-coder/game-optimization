@@ -28,7 +28,10 @@
     <main class="admin-main">
       <!-- DASHBOARD TAB -->
       <section id="dashboard-tab" class="admin-tab active">
-        <h1>대시보드</h1>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;">
+          <h1 style="margin:0;">대시보드</h1>
+          <div style="font-size:.9rem;color:var(--text-muted);">최근 업데이트: <span id="currentTime">--:--:--</span></div>
+        </div>
         <div class="admin-stats">
           <div class="stat-card">
             <div class="stat-label">총 매출</div>

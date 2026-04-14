@@ -190,5 +190,17 @@ function showError(msg) {
   alert(msg);
 }
 
+// 시간 업데이트
+function updateTime() {
+  const now = new Date();
+  const time = now.toLocaleTimeString('ko-KR');
+  const timeEl = document.getElementById('currentTime');
+  if (timeEl) timeEl.textContent = time;
+}
+
+// 매초 시간 업데이트
+setInterval(updateTime, 1000);
+updateTime();
+
 // 초기 로드
 window.addEventListener('load', loadDashboard);
