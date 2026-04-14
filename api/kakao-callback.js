@@ -42,7 +42,11 @@ export default async function handler(req, res) {
 
     if (!tokenData.access_token) {
       console.error('[Token Fail Details]', tokenData);
-      return res.redirect(`${BASE}/?kakaoError=token_fail`);
+      const errorDetail = encodeURIComponent(JSON.stringify({
+        error: tokenData.error,
+        errorDescription: tokenData.error_description,
+      }));
+      return res.redirect(`${BASE}/?kakaoError=token_fail&detail=${errorDetail}`);
     }
 
     // 2. 유저 정보 조회

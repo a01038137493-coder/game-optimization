@@ -226,14 +226,26 @@ const TEST_MODE = false;
   if (kakaoError) {
     const errorMap = {
       'no_code': '인가 코드 없음',
-      'token_fail': '토큰 교환 실패 (REST_KEY 확인)',
+      'token_fail': '토큰 교환 실패',
       'user_info_fail': '유저 정보 조회 실패',
       'server_config': '서버 설정 오류 (환경변수)',
       'server_error': '서버 오류',
     };
     const desc = errorMap[kakaoError] || kakaoError;
-    const msg = `카카오 로그인 실패\n[${kakaoError}] ${desc}`;
-    console.error('[Kakao Error]', kakaoError, desc);
+    let msg = `카카오 로그인 실패\n[${kakaoError}] ${desc}`;
+
+    const detail = p.get('detail');
+    if (detail) {
+      try {
+        const detailObj = JSON.parse(decodeURIComponent(detail));
+        if (detailObj.error) {
+          msg += `\nKakao API Error: ${detailObj.error}`;
+          if (detailObj.errorDescription) msg += `\n${detailObj.errorDescription}`;
+        }
+      } catch(e) {}
+    }
+
+    console.error('[Kakao Error]', kakaoError, detail);
     showToast('🔴 ' + msg, 'error');
     history.replaceState({}, '', location.pathname);
     return;
