@@ -201,7 +201,7 @@ setInterval(() => {
 const KAKAO_APP_KEY  = '941344d67c71122caf7d6a9480fccd54';
 const KAKAO_REST_KEY = '314a5f05b1392f959e9c731e1788875a';
 // ★ 테스트 완료 후 false 로 변경
-const TEST_MODE = false;
+const TEST_MODE = true;
 
 (function initKakao() {
   if (window.Kakao && !Kakao.isInitialized()) Kakao.init(KAKAO_APP_KEY);
@@ -833,47 +833,6 @@ function showToast(msg, type='') {
   clearTimeout(t._timer);
   t._timer = setTimeout(() => t.className = '', 3500);
 }
-
-// ══ CUSTOM CURSOR ══
-(function() {
-  // 데스크탑 마우스 환경이 아니면 스킵
-  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-
-  const dot  = document.getElementById('cursor-dot');
-  const ring = document.getElementById('cursor-ring');
-  const glow = document.getElementById('mouse-glow');
-  if (!dot || !ring) return;
-
-  // 초기값: 화면 밖 (CSS에 opacity 없음 → 항상 보임, 그러나 화면 밖에 있어서 안 보임)
-  let mx = -200, my = -200, rx = -200, ry = -200;
-
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    dot.style.left = mx + 'px';
-    dot.style.top  = my + 'px';
-    if (glow) { glow.style.left = mx + 'px'; glow.style.top = my + 'px'; }
-  });
-
-  // ring: rAF로 부드러운 트레일
-  (function animateRing() {
-    rx += (mx - rx) * 0.14;
-    ry += (my - ry) * 0.14;
-    ring.style.left = rx + 'px';
-    ring.style.top  = ry + 'px';
-    requestAnimationFrame(animateRing);
-  })();
-
-  // 인터랙티브 요소 위에서 링 확대
-  document.addEventListener('mouseover', e => {
-    if (e.target.closest('a, button, .service-card, .game-card, .price-card, .faq-q, .slider-arrow, .kakao-btn')) {
-      document.body.classList.add('cursor-hover');
-    } else {
-      document.body.classList.remove('cursor-hover');
-    }
-  });
-  document.addEventListener('mousedown', () => document.body.classList.add('cursor-click'));
-  document.addEventListener('mouseup',   () => document.body.classList.remove('cursor-click'));
-})();
 
 // ══ NAV ACTIVE SECTION HIGHLIGHT ══
 (function() {
