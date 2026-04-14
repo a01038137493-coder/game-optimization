@@ -1078,8 +1078,10 @@ body.cursor-click #cursor-dot  {
 @media (hover: none), (pointer: coarse) {
   #cursor-dot, #cursor-ring, #mouse-glow { display: none !important; }
 }
-/* 기본 마우스 포인터 사용 */
-/* 커스텀 커서 비활성화됨 */
+/* 커스텀 커서 활성화 */
+@media (hover: hover) and (pointer: fine) {
+  * { cursor: none !important; }
+}
 
 /* ══════════════════════════════════════
    PAYMENT MODAL
