@@ -616,9 +616,13 @@ function renderComplete(success, info, orderId, amount) {
         memo:           info.memo || null,
         kakaoId:        kakaoUser?.id || null,
       }),
-    }).catch((err) => {
-      console.error('주문 저장 오류:', err);
-    });
+    })
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(data => console.log('✅ 주문 저장 성공:', data))
+    .catch(err => console.error('❌ 주문 저장 오류:', err));
   }
   if (success) {
     el.innerHTML = `
