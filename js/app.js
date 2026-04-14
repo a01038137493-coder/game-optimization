@@ -222,8 +222,18 @@ const TEST_MODE = false;
   }
 
   // 카카오 로그인 에러
-  if (p.get('kakaoError')) {
-    showToast('카카오 로그인에 실패했습니다.', 'error');
+  const kakaoError = p.get('kakaoError');
+  if (kakaoError) {
+    const errorMap = {
+      'no_code': '인가 코드 없음',
+      'token_fail': '토큰 교환 실패 (REST_KEY 확인)',
+      'user_info_fail': '유저 정보 조회 실패',
+      'server_config': '서버 설정 오류 (환경변수)',
+      'server_error': '서버 오류',
+    };
+    const msg = errorMap[kakaoError] || kakaoError;
+    console.error('[Kakao Error]', kakaoError, msg);
+    showToast('🔴 ' + msg, 'error');
     history.replaceState({}, '', location.pathname);
     return;
   }
@@ -270,7 +280,7 @@ function testModeLogin() {
 
 function kakaoLogin() {
   const redirectUri = location.origin + '/api/kakao-callback';
-  location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_APP_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=talk_message`;
+  location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_APP_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
 }
 
 function kakaoLogout() {
