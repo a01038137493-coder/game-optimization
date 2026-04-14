@@ -168,6 +168,24 @@
   <!-- 토스트 알림 -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="/admin/js/admin.js"></script>
+  <script>
+    // Supabase 로드 대기 후 admin.js 로드
+    function waitForSupabase(callback, attempts = 0) {
+      if (window.supabase) {
+        callback();
+      } else if (attempts < 50) {
+        setTimeout(() => waitForSupabase(callback, attempts + 1), 100);
+      } else {
+        console.error('Supabase 로드 타임아웃');
+        callback();
+      }
+    }
+
+    waitForSupabase(() => {
+      const script = document.createElement('script');
+      script.src = '/admin/js/admin.js';
+      document.body.appendChild(script);
+    });
+  </script>
 </body>
 </html>
