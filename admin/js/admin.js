@@ -30,26 +30,38 @@
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         currentUser = session.user;
+        updateSidebarUI(true);
         window.showView('dashboard');
         loadDashboard();
       } else {
+        updateSidebarUI(false);
         window.showView('login');
       }
     }).catch(err => {
       console.error('세션 확인 에러:', err);
+      updateSidebarUI(false);
       window.showView('login');
     });
 
     supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         currentUser = session.user;
+        updateSidebarUI(true);
         window.showView('dashboard');
         loadDashboard();
       } else {
         currentUser = null;
+        updateSidebarUI(false);
         window.showView('login');
       }
     });
+  }
+
+  function updateSidebarUI(isLoggedIn) {
+    const sidebarFooter = document.getElementById('sidebarFooter');
+    if (sidebarFooter) {
+      sidebarFooter.style.display = isLoggedIn ? 'block' : 'none';
+    }
   }
 
   window.showView = function(viewName) {

@@ -28,7 +28,7 @@
           👥 고객조회
         </button>
       </nav>
-      <div class="sidebar-footer">
+      <div class="sidebar-footer" id="sidebarFooter" style="display: none;">
         <button class="btn-logout" onclick="handleLogout()">로그아웃</button>
       </div>
     </aside>
@@ -184,6 +184,10 @@
     waitForSupabase(() => {
       const script = document.createElement('script');
       script.src = '/admin/js/admin.js';
+      script.onload = () => {
+        console.log('admin.js 로드됨, initSupabase 호출...');
+        setTimeout(() => window.initSupabase?.(), 100);
+      };
       document.body.appendChild(script);
     });
   </script>

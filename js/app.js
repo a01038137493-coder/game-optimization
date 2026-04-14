@@ -232,41 +232,32 @@ const TEST_MODE = true;
   const saved = localStorage.getItem('kakaoUser');
   if (saved) updateLoginUI(JSON.parse(saved));
 
-  // TEST_MODE: 로그인 버튼 hover → 즉시 로그인 + 드롭다운 강제 오픈
+  // TEST_MODE: 로그인 버튼에 테스트용 handler 추가
   if (TEST_MODE) {
     const lb = document.getElementById('navKakaoLoginBtn');
     if (lb) {
-      lb.onclick = null;
-      lb.addEventListener('mouseenter', () => {
-        kakaoLogin();
-        // 마우스 이동 없이 나타난 profile엔 :hover가 안 붙으므로 JS로 강제 오픈
-        const profile = document.getElementById('navProfile');
-        if (profile) {
-          profile.classList.add('hover-open');
-          profile.addEventListener('mouseleave', () => {
-            profile.classList.remove('hover-open');
-          }, { once: true });
-        }
+      lb.addEventListener('click', (e) => {
+        e.preventDefault();
+        testModeLogin();
       });
     }
   }
 })();
 
+function testModeLogin() {
+  const mockUser = {
+    id: 'test_001',
+    nickname: '테스트유저',
+    profileImage: '',
+    email: 'test@gameboost.kr',
+    phone: '010-1234-5678',
+  };
+  localStorage.setItem('kakaoUser', JSON.stringify(mockUser));
+  updateLoginUI(mockUser);
+  showToast('✅ [테스트] 카카오 로그인 완료!');
+}
+
 function kakaoLogin() {
-  if (TEST_MODE) {
-    // 테스트: 즉시 mock 로그인
-    const mockUser = {
-      id: 'test_001',
-      nickname: '테스트유저',
-      profileImage: '',
-      email: 'test@gameboost.kr',
-      phone: '010-1234-5678',
-    };
-    localStorage.setItem('kakaoUser', JSON.stringify(mockUser));
-    updateLoginUI(mockUser);
-    showToast('✅ [테스트] 카카오 로그인 완료!');
-    return;
-  }
   const redirectUri = location.origin + '/api/kakao-callback';
   location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=talk_message`;
 }
@@ -334,7 +325,7 @@ function updateLoginUI(user) {
 // ══════════════════════════════════════
 // NICEPAY 결제
 // ══════════════════════════════════════
-const NICEPAY_CLIENT_ID = 'ea78caffee1443e98f92ef552dacc8ca';
+const NICEPAY_CLIENT_ID = 'R2_55ad2b13ccc5462d8d10b6324c708864';
 
 let _couponDiscount = 0;
 let _couponCode = '';
@@ -448,19 +439,31 @@ function setPayLock(locked) {
 }
 
 function adminTestPay() {
-  if (!_plan) return;
-  // 폼 검증 없이 바로 완료 화면
-  const finalAmt = _plan.price - _couponDiscount;
+  // plan이 없으면 lite으로 기본값 사용
+  const plan = _plan || PLANS.lite;
+  const finalAmt = plan.price - (_couponDiscount || 0);
+
   const info = {
-    planName: _plan.name,
-    planLabel: _plan.label,
+    planName: plan.name,
+    planLabel: plan.label,
     amount:   finalAmt,
     name:     document.getElementById('fi-name')?.value    || '테스트유저',
     contact:  document.getElementById('fi-contact')?.value || '010-1234-5678',
-    game:     getSelectedGames().join(', ') || '',
+    game:     getSelectedGames().join(', ') || '테스트게임',
+    memo:     document.getElementById('fi-memo')?.value || '',
   };
-  const testOrderId = 'TEST-' + genOrderId();
-  renderComplete(true, info, testOrderId, finalAmt);
+
+  console.log('[TEST] 테스트 결제 시뮬레이션:', info);
+
+  // 테스트 주문 ID 생성
+  const testOrderId = 'TEST-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+  try {
+    renderComplete(true, info, testOrderId, finalAmt);
+  } catch(e) {
+    console.error('[TEST] 테스트 결제 중 에러:', e);
+    showToast('테스트 결제 처리 중 오류가 발생했습니다.', 'error');
+  }
 }
 
 function getSelectedGames() {
