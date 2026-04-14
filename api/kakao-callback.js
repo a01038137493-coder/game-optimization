@@ -71,7 +71,7 @@ export default async function handler(req, res) {
     const profile = userData.kakao_account?.profile || {};
     const user = {
       id:           userData.id,
-      nickname:     userData.properties?.nickname || profile.nickname || '카카오 유저',
+      nickname:     '',
       profileImage: profile.profile_image_url || userData.properties?.profile_image || '',
       email:        userData.kakao_account?.email || '',
       phone:        userData.kakao_account?.phone_number || '',
