@@ -18,6 +18,11 @@ export default async function handler(req, res) {
     return res.redirect(`${BASE}/?kakaoError=server_config`);
   }
 
+  // 디버그: 환경변수 값 확인 (마지막 4자리만 표시)
+  const restKeyHidden = REST_KEY.substring(REST_KEY.length - 4);
+  const secretHidden = CLIENT_SECRET.substring(CLIENT_SECRET.length - 4);
+  console.log('[Env Check] REST_KEY ends with:', restKeyHidden, '| SECRET ends with:', secretHidden);
+
   try {
     // 1. 인가 코드 → 액세스 토큰
     const tokenRes = await fetch('https://kauth.kakao.com/oauth/token', {
