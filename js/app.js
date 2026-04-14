@@ -201,7 +201,7 @@ setInterval(() => {
 const KAKAO_APP_KEY  = '941344d67c71122caf7d6a9480fccd54';
 const KAKAO_REST_KEY = '314a5f05b1392f959e9c731e1788875a';
 // ★ 테스트 완료 후 false 로 변경
-const TEST_MODE = true;
+const TEST_MODE = false;
 
 (function initKakao() {
   if (window.Kakao && !Kakao.isInitialized()) Kakao.init(KAKAO_APP_KEY);
