@@ -4,7 +4,6 @@
 const SUPABASE_URL = 'https://lrdpfqfkieuojloxsdpy.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyZHBmcWZraWV1b2psb3hzZHB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMzgwMjMsImV4cCI6MjA5MTcxNDAyM30.i9RLxqoNkOQOEnWRvqyuxtoFeKnxMMDSn-YV8WCdQIs';
 
-const { createClient } = window.supabase;
 let supabase = null;
 let currentUser = null;
 
@@ -12,6 +11,7 @@ let currentUser = null;
 // 초기화
 // ══════════════════════════════════════════════════════
 function initSupabase() {
+  const { createClient } = window.supabase;
   supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   checkAuth();
 }
@@ -25,6 +25,9 @@ function checkAuth() {
     } else {
       showView('login');
     }
+  }).catch(err => {
+    console.error('세션 확인 에러:', err);
+    showView('login');
   });
 
   // 세션 변경 감지
@@ -65,12 +68,14 @@ async function handleLogin(event) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       errorEl.textContent = error.message || '로그인에 실패했습니다.';
+      console.error('로그인 에러:', error);
     } else {
       errorEl.textContent = '';
       showToast('로그인 성공!', 'success');
     }
   } catch (err) {
     errorEl.textContent = err.message || '로그인 중 오류가 발생했습니다.';
+    console.error('로그인 예외:', err);
   }
 }
 
@@ -90,25 +95,30 @@ async function loadDashboard() {
 }
 
 async function loadStats() {
-  const { data: orders, error } = await supabase
-    .from('orders')
-    .select('amount, status', { count: 'exact' });
+  try {
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('amount, status', { count: 'exact' });
 
-  if (error) {
-    console.error('통계 로드 오류:', error);
+    if (error) {
+      console.error('통계 로드 에러:', error);
+      return { totalRevenue: 0, totalOrders: 0, pending: 0, done: 0 };
+    }
+
+    const totalRevenue = orders.reduce((sum, o) => sum + (o.amount || 0), 0);
+    const pending = orders.filter(o => o.status === 'pending').length;
+    const done = orders.filter(o => o.status === 'done').length;
+
+    return {
+      totalRevenue,
+      totalOrders: orders.length,
+      pending,
+      done,
+    };
+  } catch (err) {
+    console.error('통계 조회 예외:', err);
     return { totalRevenue: 0, totalOrders: 0, pending: 0, done: 0 };
   }
-
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.amount || 0), 0);
-  const pending = orders.filter(o => o.status === 'pending').length;
-  const done = orders.filter(o => o.status === 'done').length;
-
-  return {
-    totalRevenue,
-    totalOrders: orders.length,
-    pending,
-    done,
-  };
 }
 
 function renderDashboard(stats) {
@@ -121,65 +131,73 @@ function renderDashboard(stats) {
 }
 
 async function loadRecentOrders() {
-  const { data: orders, error } = await supabase
-    .from('orders')
-    .select('id, order_id, buyer_name, amount, status, created_at')
-    .order('created_at', { ascending: false })
-    .limit(5);
+  try {
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('id, order_id, buyer_name, amount, status, created_at')
+      .order('created_at', { ascending: false })
+      .limit(5);
 
-  if (error) {
-    console.error('최근 주문 로드 오류:', error);
-    return;
+    if (error) {
+      console.error('최근 주문 로드 에러:', error);
+      return;
+    }
+
+    const html = orders.map(o => `
+      <div class="order-item" onclick="openOrderDetail('${o.id}')">
+        <div class="order-item-row">
+          <span class="order-item-name">${o.buyer_name || '(이름없음)'}</span>
+          <span class="order-item-amount">₩${(o.amount || 0).toLocaleString('ko-KR')}</span>
+        </div>
+        <div style="margin-top: 8px; font-size: 0.8rem; color: var(--text-secondary);">
+          ${formatDate(o.created_at)} · <span class="badge ${statusBadgeClass(o.status)}">${statusLabel(o.status)}</span>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('recentOrdersList').innerHTML = html || '<p>주문이 없습니다.</p>';
+  } catch (err) {
+    console.error('최근 주문 조회 예외:', err);
   }
-
-  const html = orders.map(o => `
-    <div class="order-item" onclick="openOrderDetail('${o.id}')">
-      <div class="order-item-row">
-        <span class="order-item-name">${o.buyer_name || '(이름없음)'}</span>
-        <span class="order-item-amount">₩${(o.amount || 0).toLocaleString('ko-KR')}</span>
-      </div>
-      <div style="margin-top: 8px; font-size: 0.8rem; color: var(--text-secondary);">
-        ${formatDate(o.created_at)} · <span class="badge ${statusBadgeClass(o.status)}">${statusLabel(o.status)}</span>
-      </div>
-    </div>
-  `).join('');
-
-  document.getElementById('recentOrdersList').innerHTML = html || '<p>주문이 없습니다.</p>';
 }
 
 // ══════════════════════════════════════════════════════
 // 주문관리
 // ══════════════════════════════════════════════════════
 async function loadOrders() {
-  const status = document.getElementById('orderStatusFilter').value;
-  const search = document.getElementById('orderSearchInput').value.toLowerCase();
+  try {
+    const status = document.getElementById('orderStatusFilter').value;
+    const search = document.getElementById('orderSearchInput').value.toLowerCase();
 
-  let query = supabase
-    .from('orders')
-    .select('id, order_id, buyer_name, buyer_contact, amount, status, created_at')
-    .order('created_at', { ascending: false });
+    let query = supabase
+      .from('orders')
+      .select('id, order_id, buyer_name, buyer_contact, amount, status, created_at')
+      .order('created_at', { ascending: false });
 
-  if (status) {
-    query = query.eq('status', status);
+    if (status) {
+      query = query.eq('status', status);
+    }
+
+    const { data: orders, error } = await query;
+
+    if (error) {
+      console.error('주문 로드 에러:', error);
+      showToast('주문 로드 실패', 'error');
+      return;
+    }
+
+    // 클라이언트 필터링
+    const filtered = orders.filter(o =>
+      !search ||
+      (o.buyer_name || '').toLowerCase().includes(search) ||
+      (o.buyer_contact || '').toLowerCase().includes(search) ||
+      (o.order_id || '').toLowerCase().includes(search)
+    );
+
+    renderOrderTable(filtered);
+  } catch (err) {
+    console.error('주문 조회 예외:', err);
   }
-
-  const { data: orders, error } = await query;
-
-  if (error) {
-    console.error('주문 로드 오류:', error);
-    showToast('주문 로드 실패', 'error');
-    return;
-  }
-
-  // 클라이언트 필터링
-  const filtered = orders.filter(o =>
-    !search ||
-    (o.buyer_name || '').toLowerCase().includes(search) ||
-    (o.buyer_contact || '').toLowerCase().includes(search) ||
-    (o.order_id || '').toLowerCase().includes(search)
-  );
-
-  renderOrderTable(filtered);
 }
 
 function renderOrderTable(orders) {
@@ -218,93 +236,105 @@ function renderOrderTable(orders) {
 }
 
 async function openOrderDetail(orderId) {
-  const { data: order, error } = await supabase
-    .from('orders')
-    .select('*')
-    .eq('id', orderId)
-    .single();
+  try {
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .single();
 
-  if (error || !order) {
-    showToast('주문 로드 실패', 'error');
-    return;
+    if (error || !order) {
+      showToast('주문 로드 실패', 'error');
+      return;
+    }
+
+    const statusOptions = ['pending', 'working', 'done', 'refunded', 'cancelled'];
+    const html = `
+      <div style="display: grid; gap: 15px;">
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 8px;">주문번호</label>
+          <input type="text" value="${order.order_id || ''}" readonly style="background: var(--bg-main);">
+        </div>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 8px;">고객명</label>
+          <input type="text" value="${order.buyer_name || ''}" readonly style="background: var(--bg-main);">
+        </div>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 8px;">연락처</label>
+          <input type="text" value="${order.buyer_contact || ''}" readonly style="background: var(--bg-main);">
+        </div>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 8px;">서비스</label>
+          <input type="text" value="${order.plan_name || ''}" readonly style="background: var(--bg-main);">
+        </div>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 8px;">금액</label>
+          <input type="text" value="₩${(order.amount || 0).toLocaleString('ko-KR')}" readonly style="background: var(--bg-main);">
+        </div>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 8px;">게임</label>
+          <input type="text" value="${order.games || ''}" readonly style="background: var(--bg-main);">
+        </div>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 8px;">고객 메모</label>
+          <textarea readonly style="background: var(--bg-main); resize: none; height: 80px;">${order.memo || ''}</textarea>
+        </div>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 8px;">상태</label>
+          <select id="detailStatus" onchange="updateOrderStatus('${order.id}', this.value)">
+            ${statusOptions.map(s => `
+              <option value="${s}" ${order.status === s ? 'selected' : ''}>${statusLabel(s)}</option>
+            `).join('')}
+          </select>
+        </div>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 8px;">관리자 메모</label>
+          <textarea id="detailAdminMemo" placeholder="메모를 입력하세요...">${order.admin_memo || ''}</textarea>
+        </div>
+        <button class="btn-primary" onclick="saveAdminMemo('${order.id}')">메모 저장</button>
+      </div>
+    `;
+
+    document.getElementById('orderDetailBody').innerHTML = html;
+    document.getElementById('orderDetailModal').style.display = 'flex';
+  } catch (err) {
+    console.error('주문 상세 조회 예외:', err);
   }
-
-  const statusOptions = ['pending', 'working', 'done', 'refunded', 'cancelled'];
-  const html = `
-    <div style="display: grid; gap: 15px;">
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 8px;">주문번호</label>
-        <input type="text" value="${order.order_id || ''}" readonly style="background: var(--bg-main);">
-      </div>
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 8px;">고객명</label>
-        <input type="text" value="${order.buyer_name || ''}" readonly style="background: var(--bg-main);">
-      </div>
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 8px;">연락처</label>
-        <input type="text" value="${order.buyer_contact || ''}" readonly style="background: var(--bg-main);">
-      </div>
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 8px;">서비스</label>
-        <input type="text" value="${order.plan_name || ''}" readonly style="background: var(--bg-main);">
-      </div>
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 8px;">금액</label>
-        <input type="text" value="₩${(order.amount || 0).toLocaleString('ko-KR')}" readonly style="background: var(--bg-main);">
-      </div>
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 8px;">게임</label>
-        <input type="text" value="${order.games || ''}" readonly style="background: var(--bg-main);">
-      </div>
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 8px;">고객 메모</label>
-        <textarea readonly style="background: var(--bg-main); resize: none; height: 80px;">${order.memo || ''}</textarea>
-      </div>
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 8px;">상태</label>
-        <select id="detailStatus" onchange="updateOrderStatus('${order.id}', this.value)">
-          ${statusOptions.map(s => `
-            <option value="${s}" ${order.status === s ? 'selected' : ''}>${statusLabel(s)}</option>
-          `).join('')}
-        </select>
-      </div>
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 8px;">관리자 메모</label>
-        <textarea id="detailAdminMemo" placeholder="메모를 입력하세요...">${order.admin_memo || ''}</textarea>
-      </div>
-      <button class="btn-primary" onclick="saveAdminMemo('${order.id}')">메모 저장</button>
-    </div>
-  `;
-
-  document.getElementById('orderDetailBody').innerHTML = html;
-  document.getElementById('orderDetailModal').style.display = 'flex';
 }
 
 async function updateOrderStatus(orderId, status) {
-  const { error } = await supabase
-    .from('orders')
-    .update({ status })
-    .eq('id', orderId);
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .update({ status })
+      .eq('id', orderId);
 
-  if (error) {
-    showToast('상태 변경 실패', 'error');
-  } else {
-    showToast('상태 변경 완료', 'success');
-    loadOrders();
+    if (error) {
+      showToast('상태 변경 실패', 'error');
+    } else {
+      showToast('상태 변경 완료', 'success');
+      loadOrders();
+    }
+  } catch (err) {
+    console.error('상태 변경 예외:', err);
   }
 }
 
 async function saveAdminMemo(orderId) {
-  const memo = document.getElementById('detailAdminMemo').value;
-  const { error } = await supabase
-    .from('orders')
-    .update({ admin_memo: memo })
-    .eq('id', orderId);
+  try {
+    const memo = document.getElementById('detailAdminMemo').value;
+    const { error } = await supabase
+      .from('orders')
+      .update({ admin_memo: memo })
+      .eq('id', orderId);
 
-  if (error) {
-    showToast('메모 저장 실패', 'error');
-  } else {
-    showToast('메모 저장 완료', 'success');
+    if (error) {
+      showToast('메모 저장 실패', 'error');
+    } else {
+      showToast('메모 저장 완료', 'success');
+    }
+  } catch (err) {
+    console.error('메모 저장 예외:', err);
   }
 }
 
@@ -312,17 +342,21 @@ async function saveAdminMemo(orderId) {
 // 쿠폰관리
 // ══════════════════════════════════════════════════════
 async function loadCoupons() {
-  const { data: coupons, error } = await supabase
-    .from('coupons')
-    .select('*')
-    .order('created_at', { ascending: false });
+  try {
+    const { data: coupons, error } = await supabase
+      .from('coupons')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('쿠폰 로드 오류:', error);
-    return;
+    if (error) {
+      console.error('쿠폰 로드 에러:', error);
+      return;
+    }
+
+    renderCouponTable(coupons);
+  } catch (err) {
+    console.error('쿠폰 조회 예외:', err);
   }
-
-  renderCouponTable(coupons);
 }
 
 function renderCouponTable(coupons) {
@@ -382,27 +416,31 @@ function openCouponModal(couponId = null) {
 }
 
 async function loadCouponForEdit(couponId) {
-  const { data: coupon, error } = await supabase
-    .from('coupons')
-    .select('*')
-    .eq('id', couponId)
-    .single();
+  try {
+    const { data: coupon, error } = await supabase
+      .from('coupons')
+      .select('*')
+      .eq('id', couponId)
+      .single();
 
-  if (error || !coupon) {
-    showToast('쿠폰 로드 실패', 'error');
-    return;
+    if (error || !coupon) {
+      showToast('쿠폰 로드 실패', 'error');
+      return;
+    }
+
+    const form = document.getElementById('couponForm');
+    form.dataset.couponId = couponId;
+    document.getElementById('couponCode').value = coupon.code;
+    document.getElementById('couponType').value = coupon.type;
+    document.getElementById('couponValue').value = coupon.value;
+    document.getElementById('couponLabel').value = coupon.label;
+    document.getElementById('couponMaxUses').value = coupon.max_uses || '';
+    document.getElementById('couponExpires').value = coupon.expires_at ? coupon.expires_at.split('T')[0] : '';
+
+    toggleCouponValue();
+  } catch (err) {
+    console.error('쿠폰 편집 로드 예외:', err);
   }
-
-  const form = document.getElementById('couponForm');
-  form.dataset.couponId = couponId;
-  document.getElementById('couponCode').value = coupon.code;
-  document.getElementById('couponType').value = coupon.type;
-  document.getElementById('couponValue').value = coupon.value;
-  document.getElementById('couponLabel').value = coupon.label;
-  document.getElementById('couponMaxUses').value = coupon.max_uses || '';
-  document.getElementById('couponExpires').value = coupon.expires_at ? coupon.expires_at.split('T')[0] : '';
-
-  toggleCouponValue();
 }
 
 function toggleCouponValue() {
@@ -413,64 +451,76 @@ function toggleCouponValue() {
 
 async function saveCoupon(event) {
   event.preventDefault();
-  const couponId = document.getElementById('couponForm').dataset.couponId;
-  const data = {
-    code: document.getElementById('couponCode').value.toUpperCase(),
-    type: document.getElementById('couponType').value,
-    value: parseInt(document.getElementById('couponValue').value),
-    label: document.getElementById('couponLabel').value,
-    max_uses: document.getElementById('couponMaxUses').value ? parseInt(document.getElementById('couponMaxUses').value) : null,
-    expires_at: document.getElementById('couponExpires').value || null,
-  };
+  try {
+    const couponId = document.getElementById('couponForm').dataset.couponId;
+    const data = {
+      code: document.getElementById('couponCode').value.toUpperCase(),
+      type: document.getElementById('couponType').value,
+      value: parseInt(document.getElementById('couponValue').value),
+      label: document.getElementById('couponLabel').value,
+      max_uses: document.getElementById('couponMaxUses').value ? parseInt(document.getElementById('couponMaxUses').value) : null,
+      expires_at: document.getElementById('couponExpires').value || null,
+    };
 
-  let error;
-  if (couponId) {
-    ({ error } = await supabase
-      .from('coupons')
-      .update(data)
-      .eq('id', couponId));
-  } else {
-    ({ error } = await supabase
-      .from('coupons')
-      .insert([data]));
-  }
+    let error;
+    if (couponId) {
+      ({ error } = await supabase
+        .from('coupons')
+        .update(data)
+        .eq('id', couponId));
+    } else {
+      ({ error } = await supabase
+        .from('coupons')
+        .insert([data]));
+    }
 
-  if (error) {
-    showToast('쿠폰 저장 실패: ' + error.message, 'error');
-  } else {
-    showToast('쿠폰 저장 완료', 'success');
-    document.getElementById('couponModal').style.display = 'none';
-    loadCoupons();
+    if (error) {
+      showToast('쿠폰 저장 실패: ' + error.message, 'error');
+    } else {
+      showToast('쿠폰 저장 완료', 'success');
+      document.getElementById('couponModal').style.display = 'none';
+      loadCoupons();
+    }
+  } catch (err) {
+    console.error('쿠폰 저장 예외:', err);
   }
 }
 
 async function toggleCoupon(couponId, isActive) {
-  const { error } = await supabase
-    .from('coupons')
-    .update({ is_active: isActive })
-    .eq('id', couponId);
+  try {
+    const { error } = await supabase
+      .from('coupons')
+      .update({ is_active: isActive })
+      .eq('id', couponId);
 
-  if (error) {
-    showToast('상태 변경 실패', 'error');
-  } else {
-    showToast('상태 변경 완료', 'success');
-    loadCoupons();
+    if (error) {
+      showToast('상태 변경 실패', 'error');
+    } else {
+      showToast('상태 변경 완료', 'success');
+      loadCoupons();
+    }
+  } catch (err) {
+    console.error('쿠폰 토글 예외:', err);
   }
 }
 
 async function deleteCoupon(couponId) {
   if (!confirm('이 쿠폰을 삭제하시겠습니까?')) return;
 
-  const { error } = await supabase
-    .from('coupons')
-    .delete()
-    .eq('id', couponId);
+  try {
+    const { error } = await supabase
+      .from('coupons')
+      .delete()
+      .eq('id', couponId);
 
-  if (error) {
-    showToast('쿠폰 삭제 실패', 'error');
-  } else {
-    showToast('쿠폰 삭제 완료', 'success');
-    loadCoupons();
+    if (error) {
+      showToast('쿠폰 삭제 실패', 'error');
+    } else {
+      showToast('쿠폰 삭제 완료', 'success');
+      loadCoupons();
+    }
+  } catch (err) {
+    console.error('쿠폰 삭제 예외:', err);
   }
 }
 
@@ -478,25 +528,29 @@ async function deleteCoupon(couponId) {
 // 고객조회
 // ══════════════════════════════════════════════════════
 async function loadCustomers() {
-  const search = document.getElementById('customerSearchInput').value.toLowerCase();
+  try {
+    const search = document.getElementById('customerSearchInput').value.toLowerCase();
 
-  const { data: customers, error } = await supabase
-    .from('customers')
-    .select('id, kakao_id, nickname, email, phone, created_at')
-    .order('created_at', { ascending: false });
+    const { data: customers, error } = await supabase
+      .from('customers')
+      .select('id, kakao_id, nickname, email, phone, created_at')
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('고객 로드 오류:', error);
-    return;
+    if (error) {
+      console.error('고객 로드 에러:', error);
+      return;
+    }
+
+    const filtered = customers.filter(c =>
+      !search ||
+      (c.nickname || '').toLowerCase().includes(search) ||
+      (c.kakao_id || '').toLowerCase().includes(search)
+    );
+
+    renderCustomerList(filtered);
+  } catch (err) {
+    console.error('고객 조회 예외:', err);
   }
-
-  const filtered = customers.filter(c =>
-    !search ||
-    (c.nickname || '').toLowerCase().includes(search) ||
-    (c.kakao_id || '').toLowerCase().includes(search)
-  );
-
-  renderCustomerList(filtered);
 }
 
 function renderCustomerList(customers) {
@@ -533,64 +587,68 @@ function renderCustomerList(customers) {
 }
 
 async function openCustomerDetail(customerId) {
-  const { data: customer } = await supabase
-    .from('customers')
-    .select('*')
-    .eq('id', customerId)
-    .single();
+  try {
+    const { data: customer } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('id', customerId)
+      .single();
 
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('order_id, plan_name, amount, status, created_at')
-    .eq('customer_id', customerId)
-    .order('created_at', { ascending: false });
+    const { data: orders } = await supabase
+      .from('orders')
+      .select('order_id, plan_name, amount, status, created_at')
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false });
 
-  const html = `
-    <div style="display: grid; gap: 15px;">
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 8px;">이름</label>
-        <input type="text" value="${customer?.nickname || ''}" readonly style="background: var(--bg-main);">
-      </div>
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 8px;">카카오ID</label>
-        <input type="text" value="${customer?.kakao_id || ''}" readonly style="background: var(--bg-main);">
-      </div>
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 8px;">이메일</label>
-        <input type="text" value="${customer?.email || ''}" readonly style="background: var(--bg-main);">
-      </div>
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 8px;">주문이력</label>
-        ${orders && orders.length > 0 ? `
-          <table class="admin-table" style="margin-top: 10px;">
-            <thead>
-              <tr>
-                <th>주문번호</th>
-                <th>서비스</th>
-                <th>금액</th>
-                <th>상태</th>
-                <th>날짜</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${orders.map(o => `
+    const html = `
+      <div style="display: grid; gap: 15px;">
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 8px;">이름</label>
+          <input type="text" value="${customer?.nickname || ''}" readonly style="background: var(--bg-main);">
+        </div>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 8px;">카카오ID</label>
+          <input type="text" value="${customer?.kakao_id || ''}" readonly style="background: var(--bg-main);">
+        </div>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 8px;">이메일</label>
+          <input type="text" value="${customer?.email || ''}" readonly style="background: var(--bg-main);">
+        </div>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 8px;">주문이력</label>
+          ${orders && orders.length > 0 ? `
+            <table class="admin-table" style="margin-top: 10px;">
+              <thead>
                 <tr>
-                  <td><code style="font-size:0.75rem">${o.order_id}</code></td>
-                  <td>${o.plan_name}</td>
-                  <td>₩${(o.amount || 0).toLocaleString('ko-KR')}</td>
-                  <td><span class="badge ${statusBadgeClass(o.status)}">${statusLabel(o.status)}</span></td>
-                  <td>${formatDate(o.created_at)}</td>
+                  <th>주문번호</th>
+                  <th>서비스</th>
+                  <th>금액</th>
+                  <th>상태</th>
+                  <th>날짜</th>
                 </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        ` : '<p>주문이 없습니다.</p>'}
+              </thead>
+              <tbody>
+                ${orders.map(o => `
+                  <tr>
+                    <td><code style="font-size:0.75rem">${o.order_id}</code></td>
+                    <td>${o.plan_name}</td>
+                    <td>₩${(o.amount || 0).toLocaleString('ko-KR')}</td>
+                    <td><span class="badge ${statusBadgeClass(o.status)}">${statusLabel(o.status)}</span></td>
+                    <td>${formatDate(o.created_at)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          ` : '<p>주문이 없습니다.</p>'}
+        </div>
       </div>
-    </div>
-  `;
+    `;
 
-  document.getElementById('orderDetailBody').innerHTML = html;
-  document.getElementById('orderDetailModal').style.display = 'flex';
+    document.getElementById('orderDetailBody').innerHTML = html;
+    document.getElementById('orderDetailModal').style.display = 'flex';
+  } catch (err) {
+    console.error('고객 상세 조회 예외:', err);
+  }
 }
 
 // ══════════════════════════════════════════════════════
