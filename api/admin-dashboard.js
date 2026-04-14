@@ -7,9 +7,14 @@ export default async function handler(req, res) {
 
   try {
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+    console.log('[admin-dashboard] Supabase connected');
 
     // 총 매출
-    const { data: orders } = await supabase.from('orders').select('amount');
+    const { data: orders, error: ordersError } = await supabase.from('orders').select('amount');
+    if (ordersError) {
+      console.error('[admin-dashboard] Orders query error:', ordersError);
+      throw ordersError;
+    }
     const totalRevenue = (orders || []).reduce((sum, o) => sum + (o.amount || 0), 0);
 
     // 통계
