@@ -201,7 +201,7 @@ setInterval(() => {
 const KAKAO_APP_KEY  = '941344d67c71122caf7d6a9480fccd54';
 const KAKAO_REST_KEY = '314a5f05b1392f959e9c731e1788875a';
 // ★ 테스트 완료 후 false 로 변경
-const TEST_MODE = false;
+const TEST_MODE = true;
 
 (function initKakao() {
   if (window.Kakao && !Kakao.isInitialized()) Kakao.init(KAKAO_APP_KEY);
@@ -253,7 +253,12 @@ const TEST_MODE = false;
 
   // 저장된 유저 복원
   const saved = localStorage.getItem('kakaoUser');
-  if (saved) updateLoginUI(JSON.parse(saved));
+  if (saved) {
+    updateLoginUI(JSON.parse(saved));
+  } else if (TEST_MODE) {
+    // TEST_MODE: 로그인 없으면 자동 로그인
+    testModeLogin();
+  }
 
   // TEST_MODE: 상단 배너 표시 및 클릭 핸들러
   if (TEST_MODE) {
