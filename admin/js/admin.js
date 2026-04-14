@@ -14,6 +14,13 @@
   // 초기화
   // ══════════════════════════════════════════════════════
   window.initSupabase = function() {
+    // Supabase 로드 확인
+    if (!window.supabase) {
+      console.warn('Supabase가 아직 로드되지 않았습니다. 대기 중...');
+      setTimeout(window.initSupabase, 200);
+      return;
+    }
+
     const { createClient } = window.supabase;
     supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     checkAuth();
