@@ -78,9 +78,9 @@ export default async function handler(req, res) {
       accessToken:  tokenData.access_token,
     };
 
-    // 3. 메인 페이지로 리다이렉트 (유저 정보 base64 인코딩)
+    // 3. 회원가입 페이지로 리다이렉트 (유저 정보 base64 인코딩)
     const encoded = Buffer.from(JSON.stringify(user)).toString('base64');
-    return res.redirect(`${BASE}/?kakaoUser=${encodeURIComponent(encoded)}`);
+    return res.redirect(`${BASE}/signup.html?kakaoUser=${encodeURIComponent(encoded)}`);
 
   } catch (err) {
     console.error('Kakao callback error:', err);

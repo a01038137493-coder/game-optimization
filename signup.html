@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GameBoost Pro - 회원가입</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .signup-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 40px; max-width: 450px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+    .signup-header { text-align: center; margin-bottom: 30px; }
+    .signup-header h1 { font-size: 1.8rem; margin: 0 0 10px; font-weight: 700; background: linear-gradient(135deg, #00D4FF, #7C3AED); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .profile-info { display: flex; align-items: center; gap: 15px; background: var(--bg-card2); padding: 15px; border-radius: 12px; margin-bottom: 25px; }
+    .profile-img { width: 50px; height: 50px; border-radius: 50%; background: #FEE500; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #3A1D1D; overflow: hidden; flex-shrink: 0; }
+    .profile-img img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-text strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+    .profile-text span { font-size: 0.85rem; color: var(--text-muted); }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 8px; color: var(--text); }
+    .form-group input { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-input); color: var(--text); font-family: inherit; font-size: 0.95rem; transition: border-color .2s; }
+    .form-group input:focus { outline: none; border-color: #00D4FF; }
+    .form-group input::placeholder { color: var(--text-muted); }
+    .form-actions { display: flex; gap: 10px; margin-top: 30px; }
+    .form-actions button { flex: 1; padding: 13px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .btn-cancel { background: var(--bg-card2); color: var(--text); }
+    .btn-cancel:hover { background: var(--border); }
+    .btn-save { background: linear-gradient(135deg, #00D4FF, #7C3AED); color: white; }
+    .btn-save:hover { opacity: 0.9; transform: translateY(-2px); }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+    .error-msg { color: #FF6B6B; font-size: 0.85rem; margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+<div class="signup-container">
+  <div class="signup-header">
+    <h1>🎮 회원가입</h1>
+    <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">추가 정보를 입력해주세요</p>
+  </div>
+
+  <div class="profile-info">
+    <div class="profile-img" id="profileImg"></div>
+    <div class="profile-text">
+      <strong id="profileName"></strong>
+      <span id="profileEmail"></span>
+    </div>
+  </div>
+
+  <form id="signupForm">
+    <div class="form-group">
+      <label for="nameInput">이름 *</label>
+      <input type="text" id="nameInput" placeholder="이름을 입력하세요" required />
+      <div class="error-msg" id="nameError"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="phoneInput">전화번호 *</label>
+      <input type="tel" id="phoneInput" placeholder="010-1234-5678" required />
+      <div class="error-msg" id="phoneError"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="emailInput">이메일</label>
+      <input type="email" id="emailInput" placeholder="example@email.com" />
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" onclick="window.location.href='/'">취소</button>
+      <button type="submit" class="btn-save" id="submitBtn">저장하고 결제하기</button>
+    </div>
+  </form>
+</div>
+
+<script>
+const KAKAO_APP_KEY = '941344d67c71122caf7d6a9480fccd54';
+
+if (window.Kakao && !Kakao.isInitialized()) Kakao.init(KAKAO_APP_KEY);
+
+let kakaoUser = null;
+
+// kakaoUser 파싱
+(function initSignup() {
+  const p = new URLSearchParams(location.search);
+  const encoded = p.get('kakaoUser');
+
+  if (!encoded) {
+    alert('카카오 로그인 정보가 없습니다. 다시 로그인해주세요.');
+    location.href = '/';
+    return;
+  }
+
+  try {
+    kakaoUser = JSON.parse(atob(decodeURIComponent(encoded)));
+    localStorage.setItem('kakaoUser', JSON.stringify(kakaoUser));
+
+    // 프로필 정보 표시
+    const imgHtml = kakaoUser.profileImage
+      ? `<img src="${kakaoUser.profileImage}" alt="프로필" />`
+      : kakaoUser.nickname.charAt(0);
+    document.getElementById('profileImg').innerHTML = imgHtml;
+    document.getElementById('profileName').textContent = kakaoUser.nickname || '카카오 유저';
+    document.getElementById('profileEmail').textContent = kakaoUser.email || '이메일 미제공';
+
+    // 폼 자동 채우기
+    document.getElementById('nameInput').value = kakaoUser.nickname || '';
+    document.getElementById('emailInput').value = kakaoUser.email || '';
+
+    history.replaceState({}, '', location.pathname);
+  } catch(e) {
+    console.error('Kakao user parse error:', e);
+    alert('정보를 불러올 수 없습니다.');
+    location.href = '/';
+  }
+})();
+
+// 폼 제출
+document.getElementById('signupForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const nameInput = document.getElementById('nameInput');
+  const phoneInput = document.getElementById('phoneInput');
+  const emailInput = document.getElementById('emailInput');
+  const submitBtn = document.getElementById('submitBtn');
+
+  // 검증
+  let valid = true;
+
+  if (!nameInput.value.trim()) {
+    document.getElementById('nameError').textContent = '이름을 입력하세요';
+    valid = false;
+  } else {
+    document.getElementById('nameError').textContent = '';
+  }
+
+  if (!phoneInput.value.trim()) {
+    document.getElementById('phoneError').textContent = '전화번호를 입력하세요';
+    valid = false;
+  } else {
+    document.getElementById('phoneError').textContent = '';
+  }
+
+  if (!valid) return;
+
+  // 로컬스토리지에 저장
+  kakaoUser.nickname = nameInput.value;
+  kakaoUser.phone = phoneInput.value;
+  if (emailInput.value) kakaoUser.email = emailInput.value;
+
+  localStorage.setItem('kakaoUser', JSON.stringify(kakaoUser));
+
+  // Supabase에 저장 (선택)
+  try {
+    submitBtn.disabled = true;
+    submitBtn.textContent = '저장 중...';
+
+    const res = await fetch('/api/save-customer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        kakaoId: kakaoUser.id,
+        nickname: nameInput.value,
+        phone: phoneInput.value,
+        email: emailInput.value || kakaoUser.email,
+      })
+    });
+
+    if (!res.ok) throw new Error('Failed to save');
+  } catch(err) {
+    console.error('Save error:', err);
+    // 로컬스토리지에는 저장됐으므로 계속 진행
+  }
+
+  // 결제 페이지로 이동
+  location.href = '/?step=payment';
+});
+</script>
+
+</body>
+</html>
