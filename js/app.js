@@ -231,8 +231,9 @@ const TEST_MODE = false;
       'server_config': '서버 설정 오류 (환경변수)',
       'server_error': '서버 오류',
     };
-    const msg = errorMap[kakaoError] || kakaoError;
-    console.error('[Kakao Error]', kakaoError, msg);
+    const desc = errorMap[kakaoError] || kakaoError;
+    const msg = `카카오 로그인 실패\n[${kakaoError}] ${desc}`;
+    console.error('[Kakao Error]', kakaoError, desc);
     showToast('🔴 ' + msg, 'error');
     history.replaceState({}, '', location.pathname);
     return;
