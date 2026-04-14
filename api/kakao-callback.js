@@ -13,7 +13,8 @@ export default async function handler(req, res) {
   }
 
   const REST_KEY = process.env.KAKAO_REST_API_KEY;
-  if (!REST_KEY) {
+  const CLIENT_SECRET = process.env.KAKAO_CLIENT_SECRET;
+  if (!REST_KEY || !CLIENT_SECRET) {
     return res.redirect(`${BASE}/?kakaoError=server_config`);
   }
 
@@ -25,6 +26,7 @@ export default async function handler(req, res) {
       body: new URLSearchParams({
         grant_type:   'authorization_code',
         client_id:    REST_KEY,
+        client_secret: CLIENT_SECRET,
         redirect_uri: REDIRECT_URI,
         code,
       }),
