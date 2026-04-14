@@ -254,7 +254,6 @@ const TEST_MODE = false;
 
 // TEST_MODE 상태 관리
 let currentTestAction = 'login';
-})();
 
 function testModeLogin() {
   const mockUser = {
