@@ -263,8 +263,10 @@ const TEST_MODE = false;
   const saved = localStorage.getItem('kakaoUser');
   if (saved) {
     const user = JSON.parse(saved);
-    if (!user.nickname) {
-      // nickname이 없으면 회원정보 입력 모달 띄우기
+    const signupCompleted = localStorage.getItem('signupCompleted');
+
+    if (!signupCompleted) {
+      // 회원가입 미완료면 모달 띄우기
       document.getElementById('signupModalBackdrop').style.display = 'flex';
       document.getElementById('signupNameInput').value = '';
       document.getElementById('signupPhoneInput').value = '';
@@ -310,6 +312,7 @@ function saveSignupInfo() {
     kakaoUser.nickname = nameInput.value;
     kakaoUser.phone = phoneInput.value;
     localStorage.setItem('kakaoUser', JSON.stringify(kakaoUser));
+    localStorage.setItem('signupCompleted', 'true');
 
     // Supabase에 저장 (선택)
     fetch('/api/save-customer', {
@@ -331,6 +334,7 @@ function saveSignupInfo() {
 
 function kakaoLogout() {
   localStorage.removeItem('kakaoUser');
+  localStorage.removeItem('signupCompleted');
   if (window.Kakao && Kakao.Auth.getAccessToken()) {
     Kakao.Auth.logout(() => updateLoginUI(null));
   } else {
