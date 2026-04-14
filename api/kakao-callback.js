@@ -60,12 +60,21 @@ export default async function handler(req, res) {
     });
     const userData = await userRes.json();
 
+    console.log('[Kakao User Data]', {
+      id: userData.id,
+      properties: userData.properties,
+      profile: userData.kakao_account?.profile,
+      email: userData.kakao_account?.email,
+      phone: userData.kakao_account?.phone_number,
+    });
+
     const profile = userData.kakao_account?.profile || {};
     const user = {
       id:           userData.id,
-      nickname:     profile.nickname        || '카카오 유저',
-      profileImage: profile.profile_image_url || '',
+      nickname:     userData.properties?.nickname || profile.nickname || '카카오 유저',
+      profileImage: profile.profile_image_url || userData.properties?.profile_image || '',
       email:        userData.kakao_account?.email || '',
+      phone:        userData.kakao_account?.phone_number || '',
       accessToken:  tokenData.access_token,
     };
 
