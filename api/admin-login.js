@@ -56,12 +56,20 @@ export default async function handler(req, res) {
       });
     }
 
+    // 이메일 → 이름 매핑
+    const nameMap = {
+      'a01038137493@gmail.com': '기웅',
+      'rldbf12@gameboostpro.co.kr': '기율',
+    };
+    const adminName = nameMap[data.user.email] || data.user.email;
+
     // Supabase JWT 토큰 반환 (서버에서 검증 가능)
     return res.status(200).json({
       success: true,
       message: '로그인 성공',
       token: data.session.access_token,
-      user: email
+      user: email,
+      name: adminName
     });
   } catch (err) {
     console.error('Admin login error:', err);

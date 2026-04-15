@@ -653,20 +653,15 @@ function initAdmin() {
     nameInput.value = savedName;
   }
 
-  // 관리자 이메일 표시
-  const adminEmail = localStorage.getItem('adminEmail');
+  // 관리자 이름 표시
+  const adminName = localStorage.getItem('adminName') || localStorage.getItem('adminEmail') || '관리자';
+  const greeting = adminName + '님 좋은 하루 보내세요~';
 
-  // 헤더 이메일 표시
   const headerEmailEl = document.getElementById('headerEmail');
-  if (adminEmail && headerEmailEl) {
-    headerEmailEl.textContent = adminEmail;
-  }
+  if (headerEmailEl) headerEmailEl.textContent = greeting;
 
-  // 대시보드 관리자 이메일 표시
   const dashboardAdminEmailEl = document.getElementById('dashboardAdminEmail');
-  if (adminEmail && dashboardAdminEmailEl) {
-    dashboardAdminEmailEl.textContent = adminEmail;
-  }
+  if (dashboardAdminEmailEl) dashboardAdminEmailEl.textContent = greeting;
 
 
   // 대시보드 날짜 범위 초기 표시

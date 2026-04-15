@@ -148,6 +148,7 @@
         if (data.success) {
           localStorage.setItem('adminToken', data.token);
           localStorage.setItem('adminEmail', email);
+          localStorage.setItem('adminName', data.name || email);
           location.href = '/admin.html';
         } else {
           errorMsg.style.display = 'block';
