@@ -438,6 +438,10 @@ function emailLogin() {
   if (!email || !password) { errEl.textContent = '이메일과 비밀번호를 입력해주세요.'; errEl.style.display = ''; return; }
   errEl.style.display = 'none';
 
+  const btn = document.querySelector('#authPanelLogin button[onclick="emailLogin()"]');
+  const origText = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid #000;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;"></span>'; }
+
   fetch('/api/auth-login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -445,6 +449,7 @@ function emailLogin() {
   })
   .then(r => r.json())
   .then(data => {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
     if (!data.success) { errEl.textContent = data.error || '로그인 실패'; errEl.style.display = ''; return; }
     localStorage.setItem('kakaoUser', JSON.stringify({ ...data.user, accessToken: data.token }));
     localStorage.setItem('signupCompleted', 'true');
@@ -452,7 +457,7 @@ function emailLogin() {
     closeAuthModal();
     showToast('환영합니다, ' + data.user.nickname + '님! 🎮');
   })
-  .catch(() => { errEl.textContent = '서버 오류가 발생했습니다.'; errEl.style.display = ''; });
+  .catch(() => { if (btn) { btn.disabled = false; btn.textContent = origText; } errEl.textContent = '서버 오류가 발생했습니다.'; errEl.style.display = ''; });
 }
 
 function emailSignup() {
@@ -469,6 +474,10 @@ function emailSignup() {
   if (!terms) { errEl.textContent = '이용약관에 동의해주세요.'; errEl.style.display = ''; return; }
   errEl.style.display = 'none';
 
+  const btn = document.querySelector('#authPanelSignup button[onclick="emailSignup()"]');
+  const origText = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid #000;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;"></span>'; }
+
   fetch('/api/auth-signup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -476,6 +485,7 @@ function emailSignup() {
   })
   .then(r => r.json())
   .then(data => {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
     if (!data.success) { errEl.textContent = data.error || '회원가입 실패'; errEl.style.display = ''; return; }
     localStorage.setItem('kakaoUser', JSON.stringify({ ...data.user, accessToken: data.token }));
     localStorage.setItem('signupCompleted', 'true');
@@ -483,7 +493,7 @@ function emailSignup() {
     closeAuthModal();
     showToast('환영합니다, ' + data.user.nickname + '님! 🎮');
   })
-  .catch(() => { errEl.textContent = '서버 오류가 발생했습니다.'; errEl.style.display = ''; });
+  .catch(() => { if (btn) { btn.disabled = false; btn.textContent = origText; } errEl.textContent = '서버 오류가 발생했습니다.'; errEl.style.display = ''; });
 }
 
 function kakaoLogin() {
