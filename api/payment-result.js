@@ -16,9 +16,7 @@ export default function handler(req, res) {
   } = params || {};
 
   const success = authResultCode === '0000';
-  const base    = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : 'https://game-optimization.vercel.app';
+  const base = 'https://www.gameboostpro.co.kr';
 
   const query = new URLSearchParams({
     payResult: success ? 'ok' : 'fail',

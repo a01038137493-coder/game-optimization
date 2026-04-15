@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GameBoost Pro - 게임 최적화 서비스</title>
+  <link rel="icon" type="image/png" href="/images/favi.png" />
+  <meta name="description" content="전문가가 직접 원격으로 PC를 세팅해드립니다. 포맷부터 잔렉 제거까지, 빠르고 확실하게 달라집니다." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="GameBoost Pro - 게임 최적화 서비스" />
+  <meta property="og:description" content="전문가가 직접 원격으로 PC를 세팅해드립니다. 포맷부터 잔렉 제거까지, 빠르고 확실하게 달라집니다." />
+  <meta property="og:image" content="https://game-optimization.vercel.app/images/og_img.jpg" />
+  <meta property="og:url" content="https://game-optimization.vercel.app" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://game-optimization.vercel.app/images/og_img.jpg" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <!-- NicePay SDK -->
   <script src="https://pay.nicepay.co.kr/v1/js/"></script>
@@ -195,21 +204,22 @@
 <!-- MOUSE GLOW -->
 <div id="mouse-glow"></div>
 
-<!-- KAKAO FLOAT -->
+<!-- FLOAT BUTTONS -->
 <div class="kakao-float" id="kakaoFloat">
+  <button class="scroll-top-btn" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="맨 위로">
+    ↑
+  </button>
   <button class="kakao-btn" onclick="window.open('https://pf.kakao.com/_xkmvxlX/chat', '_blank')">
     <svg class="kakao-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M12 3C6.477 3 2 6.582 2 11c0 2.857 1.754 5.374 4.408 6.894L5.25 21l4.074-2.16C10.1 18.94 11.034 19 12 19c5.523 0 10-3.582 10-8s-4.477-8-10-8z" fill="#3A1D1D"/>
     </svg>
     <div class="kakao-dot"></div>
-    <div class="kakao-tooltip">카카오 채널 문의하기</div>
   </button>
-  <div class="kakao-label">카카오 문의</div>
 </div>
 
 <!-- NAV -->
 <nav>
-  <div class="logo">⚡ GameBoost Pro</div>
+  <a class="logo" href="/" style="text-decoration:none;color:inherit;cursor:pointer;">⚡ GameBoost Pro</a>
   <ul class="nav-links">
     <li><a href="#services">서비스</a></li>
     <li><a href="#how">이용방법</a></li>
@@ -279,15 +289,16 @@
 </div>
 
 <!-- HERO -->
-<section class="hero">
-  <div class="hero-badge"><span></span> 전문가 1:1 원격 최적화 서비스</div>
-  <h1>게임 성능을<br /><span class="grad">극한까지 끌어올리세요</span></h1>
-  <p>전문가가 직접 원격으로 PC를 세팅해드립니다.<br />포맷부터 잔렉 제거까지, 빠르고 확실하게 달라집니다.</p>
-  <div class="hero-btns">
+<section class="hero" style="position:relative;">
+  <canvas id="heroCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+  <div class="hero-badge" style="position:relative;z-index:1;"><span></span> 전문가 1:1 원격 최적화 서비스</div>
+  <h1 style="position:relative;z-index:1;">게임 성능을<br /><span class="grad">극한까지 끌어올리세요</span></h1>
+  <p style="position:relative;z-index:1;color:#ffffff;">전문가가 직접 원격으로 PC를 세팅해드립니다.<br />포맷부터 잔렉 제거까지, 빠르고 확실하게 달라집니다.</p>
+  <div class="hero-btns" style="position:relative;z-index:1;">
     <button class="btn-primary" onclick="window.open('https://pf.kakao.com/_xkmvxlX/chat','_blank')">카카오로 문의하기 →</button>
     <button class="btn-outline" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">이용방법 보기</button>
   </div>
-  <div class="stats">
+  <div class="stats" style="position:relative;z-index:1;">
     <div class="stat">
       <div class="stat-num">30분~</div>
       <div class="stat-label">평균 작업 완료 시간</div>
@@ -308,14 +319,17 @@
 </section>
 
 <!-- SERVICES -->
-<section id="services">
-  <div class="center fade-up">
+<section id="services" style="position:relative;overflow:hidden;">
+  <div class="section-bg-blur" style="background-image:url('/images/bg/services/Gemini_Generated_Image_r74ldkr74ldkr74l (1).png');background-attachment:fixed;"></div>
+  <div style="position:absolute;inset:0;background:linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.82) 15%, rgba(0,0,0,0.82) 85%, rgba(0,0,0,0.95) 100%);z-index:1;pointer-events:none;"></div>
+  <canvas id="servicesParticles" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
+  <div class="center fade-up" style="position:relative;z-index:2;">
     <div class="section-tag">서비스</div>
     <h2 class="section-title">PC 최적화 전문<br />맞춤 서비스</h2>
     <p class="section-sub">전문가가 원격으로 직접 진행하는 PC 최적화 서비스입니다. 잔렉부터 성능 향상, 사후관리까지 한 번에 해결합니다.</p>
   </div>
 
-  <div class="service-slider-wrap fade-up">
+  <div class="service-slider-wrap fade-up" style="position:relative;z-index:2;">
     <div class="peek-outer" id="svcOuter">
     <div class="peek-track" id="serviceTrack">
 
@@ -422,7 +436,7 @@
 
     </div><!-- /peek-track -->
     </div><!-- /peek-outer -->
-    <div class="slider-controls">
+    <div class="slider-controls" style="position:relative;z-index:3;">
       <button class="slider-arrow" id="svcPrev">&#8592;</button>
       <div class="slider-dots" id="svcDots"></div>
       <span class="slider-counter" id="svcCounter">1 / 9</span>
@@ -431,20 +445,20 @@
   </div>
 
   <!-- 게임별 최적화 -->
-  <div class="center fade-up" style="margin-top:80px;margin-bottom:0;">
+  <div class="center fade-up" style="margin-top:80px;margin-bottom:0;position:relative;z-index:2;">
     <div class="section-tag">게임별 최적화</div>
     <h3 style="font-size:clamp(1.4rem,2.5vw,2rem);font-weight:800;margin-top:8px;">지원 게임 라인업</h3>
   </div>
-  <div class="games-carousel-wrap fade-up">
+  <div class="games-carousel-wrap fade-up" style="position:relative;z-index:2;">
   <div class="peek-outer" id="gameOuter">
   <div class="peek-track" id="gameTrack">
     <!-- 리그 오브 레전드 -->
     <div class="game-card lol">
       <div class="game-thumb-wrap">
         <img class="game-thumb" loading="lazy"
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/League_of_Legends_2019_vector.svg/460px-League_of_Legends_2019_vector.svg.png"
+          src="/images/lol/ChatGPT Image 2026년 4월 16일 오전 12_53_27.png"
           onerror="this.style.display='none'"
-          alt="League of Legends" style="object-fit:contain;padding:20px;" />
+          alt="League of Legends" />
         <div class="game-thumb-overlay">
           <div class="game-icon">⚔️</div>
           <div>
@@ -471,7 +485,7 @@
     <div class="game-card valorant">
       <div class="game-thumb-wrap">
         <img class="game-thumb" loading="lazy"
-          src="https://upload.wikimedia.org/wikipedia/en/thumb/b/ba/Valorant_cover.jpg/460px-Valorant_cover.jpg"
+          src="/images/valorant/ChatGPT Image 2026년 4월 16일 오전 12_55_53.png"
           onerror="this.style.display='none'"
           alt="VALORANT" />
         <div class="game-thumb-overlay">
@@ -500,7 +514,7 @@
     <div class="game-card apex">
       <div class="game-thumb-wrap">
         <img class="game-thumb" loading="lazy"
-          src="https://cdn.cloudflare.steamstatic.com/steam/apps/1172470/header.jpg"
+          src="/images/apex/ChatGPT Image 2026년 4월 16일 오전 12_57_11.png"
           onerror="this.style.display='none'"
           alt="Apex Legends" />
         <div class="game-thumb-overlay">
@@ -529,7 +543,7 @@
     <div class="game-card arc">
       <div class="game-thumb-wrap">
         <img class="game-thumb" loading="lazy"
-          src="https://cdn.cloudflare.steamstatic.com/steam/apps/1808500/header.jpg"
+          src="/images/arc/ChatGPT Image 2026년 4월 16일 오전 12_58_33.png"
           onerror="this.style.display='none'"
           alt="Arc Raiders" />
         <div class="game-thumb-overlay">
@@ -558,7 +572,7 @@
     <div class="game-card ow">
       <div class="game-thumb-wrap">
         <img class="game-thumb" loading="lazy"
-          src="https://cdn.cloudflare.steamstatic.com/steam/apps/2357570/header.jpg"
+          src="/images/overwatch/ChatGPT Image 2026년 4월 16일 오전 12_59_49.png"
           onerror="this.style.display='none'"
           alt="Overwatch 2" />
         <div class="game-thumb-overlay">
@@ -587,7 +601,7 @@
     <div class="game-card tarkov">
       <div class="game-thumb-wrap">
         <img class="game-thumb" loading="lazy"
-          src="https://upload.wikimedia.org/wikipedia/en/thumb/2/20/Escape_from_Tarkov.jpg/460px-Escape_from_Tarkov.jpg"
+          src="/images/tarkov/ChatGPT Image 2026년 4월 16일 오전 01_11_52.png"
           onerror="this.style.display='none'"
           alt="Escape from Tarkov" />
         <div class="game-thumb-overlay">
@@ -616,7 +630,7 @@
     <div class="game-card pubg">
       <div class="game-thumb-wrap">
         <img class="game-thumb" loading="lazy"
-          src="https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg"
+          src="/images/pubg/Gemini_Generated_Image_1mb0y1mb0y1mb0y1.png"
           onerror="this.style.display='none'"
           alt="PUBG" />
         <div class="game-thumb-overlay">
@@ -645,7 +659,7 @@
     <div class="game-card rust">
       <div class="game-thumb-wrap">
         <img class="game-thumb" loading="lazy"
-          src="https://cdn.cloudflare.steamstatic.com/steam/apps/252490/header.jpg"
+          src="/images/rust/ChatGPT Image 2026년 4월 16일 오전 01_14_42.png"
           onerror="this.style.display='none'"
           alt="Rust" />
         <div class="game-thumb-overlay">
@@ -671,7 +685,7 @@
     </div>
   </div><!-- /peek-track -->
   </div><!-- /peek-outer -->
-  <div class="slider-controls">
+  <div class="slider-controls" style="position:relative;z-index:3;">
     <button class="slider-arrow" id="gamePrev">&#8592;</button>
     <div class="slider-dots" id="gameDots"></div>
     <span class="slider-counter" id="gameCounter">1 / 8</span>
@@ -681,13 +695,14 @@
 </section>
 
 <!-- HOW IT WORKS -->
-<section id="how">
-  <div class="center fade-up">
+<section id="how" style="position:relative;">
+  <canvas id="howCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+  <div class="center fade-up" style="position:relative;z-index:1;">
     <div class="section-tag">이용방법</div>
     <h2 class="section-title">전문가가 직접 1:1 원격으로<br />진행해드립니다</h2>
     <p class="section-sub">자동화 프로그램이 아닌, 전문가가 고객 PC에 직접 원격 접속해 한 명 한 명 맞춤 최적화를 진행합니다.</p>
   </div>
-  <div class="how-remote-wrap fade-up">
+  <div class="how-remote-wrap fade-up" style="position:relative;z-index:1;">
     <div class="remote-highlight">
       <div class="remote-icon">🖥️↔️👨‍💻</div>
       <div class="remote-title">100% 1:1 전문가 직접 원격 진행</div>
@@ -723,8 +738,9 @@
 </section>
 
 <!-- FEATURES -->
-<section id="features">
-  <div class="features-wrap">
+<section id="features" style="position:relative;">
+  <canvas id="featuresCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+  <div class="features-wrap" style="position:relative;z-index:1;">
     <div>
       <div class="section-tag fade-up">핵심 작업 방식</div>
       <h2 class="section-title fade-up">전문가가 직접<br />손으로 세팅합니다</h2>
@@ -819,13 +835,27 @@
 </section>
 
 <!-- PRICING -->
-<section id="pricing">
-  <div class="center fade-up">
+<section id="pricing" style="position:relative;">
+  <canvas id="pricingCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+  <div class="center fade-up" style="position:relative;z-index:1;">
     <div class="section-tag">가격 안내</div>
     <h2 class="section-title">전문가 원격 작업<br />단 1회 결제</h2>
     <p class="section-sub">월정액 없이 필요한 서비스만 한 번 결제. 카카오톡으로 문의 후 원격 진행합니다.</p>
   </div>
   <div class="pricing-grid">
+
+    <!-- 테스트 결제 -->
+    <div class="price-card fade-up" style="border-color:rgba(255,160,0,.4);background:rgba(255,160,0,.04);">
+      <div class="plan-icon">⚙️</div>
+      <div class="plan-name" style="color:#ffa500;">테스트 결제</div>
+      <div class="plan-price">₩1,000<span></span></div>
+      <div class="plan-desc">결제 테스트용 상품입니다. 실제 서비스가 아닙니다.</div>
+      <ul class="plan-features">
+        <li>결제 플로우 테스트</li>
+        <li>주문 DB 저장 확인</li>
+      </ul>
+      <button class="btn-plan btn-plan-outline" style="border-color:#ffa500;color:#ffa500;" onclick="openPayModal('test')">테스트 결제</button>
+    </div>
 
     <!-- Lite 포맷 -->
     <div class="price-card fade-up">
@@ -906,7 +936,7 @@
       <div class="launch-badge">
         <span class="viewer-dot"></span> 오픈 기념 한정 이벤트
       </div>
-      <h2 class="launch-title">지금 첫 문의하면<br /><span>₩10,000 할인</span></h2>
+      <h2 class="launch-title">오픈 기념<br /><span>₩10,000 할인</span></h2>
       <p class="launch-desc">런칭 기념으로 선착순 <strong>20명</strong>에게 모든 서비스 1만원 할인을 드립니다.<br />카카오 채널로 문의 시 자동 적용됩니다.</p>
       <div class="launch-slots">
         <div class="slot-bar-wrap">
@@ -956,8 +986,9 @@
 </section>
 
 <!-- FAQ -->
-<section id="faq" class="faq-section">
-  <div class="center fade-up">
+<section id="faq" class="faq-section" style="position:relative;">
+  <canvas id="faqCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+  <div class="center fade-up" style="position:relative;z-index:1;">
     <div class="section-tag">FAQ</div>
     <h2 class="section-title">자주 묻는 질문</h2>
     <p class="section-sub">궁금한 점이 해결되지 않으면 카카오 채널로 문의해주세요.</p>
@@ -1090,5 +1121,67 @@
 </footer>
 
 <script src="/js/app.js"></script>
+<script>
+(function() {
+  const canvas = document.getElementById('heroCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, t = 0, last = 0, visible = true;
+  let textures = [];
+  const startTime = performance.now();
+
+  const layers = [
+    { yBase: 0.44, amp: 0.06, freq: 1.2, speed: 0.000008, width: 0.13, colors: ['#00e87a','#00b85e'], offset: 0   },  // 녹색
+    { yBase: 0.38, amp: 0.08, freq: 0.9, speed: 0.000006, width: 0.10, colors: ['#ff4466','#cc1133'], offset: 2.1 },  // 빨간
+    { yBase: 0.50, amp: 0.05, freq: 1.5, speed: 0.00001,  width: 0.09, colors: ['#a855f7','#7c3aed'], offset: 4.3 },  // 보라
+    { yBase: 0.34, amp: 0.04, freq: 2.0, speed: 0.000012, width: 0.07, colors: ['#00aaff','#0066dd'], offset: 1.0 },  // 푸른
+    { yBase: 0.46, amp: 0.07, freq: 0.7, speed: 0.000005, width: 0.08, colors: ['#ffcc33','#ff9900'], offset: 3.5 },  // 황색
+  ];
+
+  function resize() {
+    const hero = canvas.parentElement;
+    W = hero.offsetWidth;
+    H = hero.offsetHeight || 600;
+    canvas.width  = W;
+    canvas.height = H;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const io = new IntersectionObserver(entries => { visible = entries[0].isIntersecting; });
+  io.observe(canvas);
+
+  function drawLayer(layer) {
+    const elapsed = (performance.now() - startTime) / 1000;
+    const scale = Math.min(1, elapsed / 2.5); // 2.5초 동안 0→1
+    const ease = scale * scale * (3 - 2 * scale); // smoothstep
+    const steps = Math.ceil(W / 3);
+    const bandH = layer.width * H * ease;
+    for (let xi = 0; xi <= steps; xi++) {
+      const nx = xi / steps;
+      const x  = nx * W;
+      const cy = (layer.yBase + Math.sin(nx * Math.PI * layer.freq + t * layer.speed * 1000 + layer.offset) * layer.amp) * H;
+      const grad = ctx.createLinearGradient(x, cy - bandH, x, cy + bandH);
+      grad.addColorStop(0,   'transparent');
+      grad.addColorStop(0.2, layer.colors[0] + '22');
+      grad.addColorStop(0.5, layer.colors[0] + '55');
+      grad.addColorStop(0.7, layer.colors[1] + '33');
+      grad.addColorStop(1,   'transparent');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, cy - bandH, W / steps + 1, bandH * 2);
+    }
+  }
+
+  function draw(now) {
+    requestAnimationFrame(draw);
+    if (!visible || now - last < 50) return;
+    last = now;
+    t++;
+    ctx.clearRect(0, 0, W, H);
+    layers.forEach(drawLayer);
+  }
+  requestAnimationFrame(draw);
+})();
+</script>
 </body>
 </html>

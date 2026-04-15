@@ -5,7 +5,7 @@
  */
 export default async function handler(req, res) {
   const { code, error } = req.query;
-  const BASE = 'https://game-optimization.vercel.app';
+  const BASE = 'https://www.gameboostpro.co.kr';
   const REDIRECT_URI = `${BASE}/api/kakao-callback`;
 
   if (error || !code) {

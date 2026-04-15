@@ -63,7 +63,7 @@ export default async function handler(req, res) {
       object_type: 'text',
       text: `GameBoost Pro 주문 알림\n\n주문번호: ${orderId}\n상태: ${status}\n\n${message}`,
       link: {
-        web_url: 'https://game-optimization.vercel.app'
+        web_url: 'https://www.gameboostpro.co.kr'
       }
     };
 

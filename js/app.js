@@ -1,16 +1,21 @@
+window.onerror = function(msg, src, line, col, err) {
+  console.error('[JS ERROR]', msg, 'at', src, line + ':' + col, err);
+};
+
 // 햄버거 메뉴
 const hamburger = document.getElementById('hamburger');
 const mobileNav = document.getElementById('mobileNav');
-hamburger.addEventListener('click', () => {
-  hamburger.classList.toggle('open');
-  mobileNav.classList.toggle('open');
-});
-function closeMenu() {
-  hamburger.classList.remove('open');
-  mobileNav.classList.remove('open');
+if (hamburger && mobileNav) {
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileNav.classList.toggle('open');
+  });
+  window.addEventListener('scroll', () => { if (mobileNav.classList.contains('open')) closeMenu(); });
 }
-// 스크롤 시 모바일 메뉴 닫기
-window.addEventListener('scroll', () => { if (mobileNav.classList.contains('open')) closeMenu(); });
+function closeMenu() {
+  if (hamburger) hamburger.classList.remove('open');
+  if (mobileNav) mobileNav.classList.remove('open');
+}
 
 // Intersection Observer for fade-up
 const observer = new IntersectionObserver((entries) => {
@@ -298,19 +303,22 @@ const TEST_MODE = false;
   if (saved) {
     const user = JSON.parse(saved);
 
-    // Supabase에서 최신 정보 조회
+    // localStorage 데이터로 즉시 UI 업데이트 (깜빡임 방지)
+    if (user.nickname) {
+      updateLoginUI(user);
+    }
+
+    // Supabase에서 최신 정보 조회 후 갱신
     fetch(`/api/get-customer?kakaoId=${user.id}`)
       .then(r => r.json())
       .then(data => {
         if (data.customer) {
-          // Supabase의 정보로 업데이트
           if (data.customer.nickname) user.nickname = data.customer.nickname;
           if (data.customer.phone) user.phone = data.customer.phone;
           if (data.customer.email) user.email = data.customer.email;
         }
 
         if (!user.nickname) {
-          // 회원가입 미완료면 모달 띄우기
           const backdrop = document.getElementById('signupModalBackdrop');
           backdrop.classList.add('open');
           document.getElementById('signupNameInput').value = user.nickname || '';
@@ -323,7 +331,6 @@ const TEST_MODE = false;
       })
       .catch(err => {
         console.error('[get-customer] 조회 실패:', err);
-        // 오류나도 localStorage 정보로 진행
         if (!user.nickname) {
           const backdrop = document.getElementById('signupModalBackdrop');
           backdrop.classList.add('open');
@@ -339,7 +346,7 @@ const TEST_MODE = false;
 })();
 
 function kakaoLogin() {
-  const redirectUri = location.origin + '/api/kakao-callback';
+  const redirectUri = 'https://www.gameboostpro.co.kr/api/kakao-callback';
   location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_APP_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
 }
 
@@ -497,6 +504,7 @@ let _couponDiscount = 0;
 let _couponCode = '';
 
 const PLANS = {
+  test:     { label:'테스트 결제',       name:'테스트 결제 상품',             price:1000,  desc:'결제 테스트용 상품입니다.', features:['결제 플로우 테스트','주문 DB 저장 확인'] },
   lite:     { label:'Lite 포맷',        name:'Lite 포맷 서비스',         price:55000, desc:'가볍고 빠른 체감의 윈도우 포맷. 불필요한 요소 없이 깔끔하게 설치합니다.', features:['윈도우 클린 설치','드라이버 기본 세팅','불필요 앱 제거','부팅 속도 개선'] },
   optimize: { label:'Windows 최적화',   name:'Windows 최적화 서비스',    price:55000, desc:'자체 개발 프로그램으로 윈도우 셋팅을 최적화합니다. 포맷 없이 진행 가능.', features:['자체 개발 툴 적용','키보드 레지스트리 설정','불필요 서비스·파일 제거','잔렉·스터터링 제거','게임별 맞춤 세팅'] },
   bundle:   { label:'포맷 + 최적화',    name:'포맷 + 최적화 서비스',     price:89000, desc:'클린 포맷 후 자체 프로그램으로 최적화까지. 가장 확실한 성능 향상.', features:['Lite 포맷 전체 포함','Windows 최적화 전체 포함','자체 개발 툴 심층 적용','게임·업무 환경 최적화','사후관리 1회 포함'] },
@@ -571,6 +579,7 @@ function closePayModal() {
   document.getElementById('payModalBackdrop').classList.remove('open');
   document.body.style.overflow = '';
   _plan = null; _orderId = null;
+  if (location.pathname === '/payment-complete') history.replaceState({}, '', '/');
 }
 
 document.getElementById('payModalBackdrop').addEventListener('click', function(e) {
@@ -624,42 +633,7 @@ function adminTestPay() {
   // 테스트 주문 ID 생성
   const testOrderId = 'TEST-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 
-  try {
-    // DB에 주문 저장
-    const kakaoUser = JSON.parse(localStorage.getItem('kakaoUser') || 'null');
-    fetch('/api/save-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        orderId: testOrderId,
-        planKey:        info.planLabel || '',
-        planName:       info.planName,
-        amount:         finalAmt,
-        couponCode:     _couponCode || null,
-        couponDiscount: _couponDiscount || 0,
-        buyerName:      info.name || null,
-        buyerContact:   info.contact || null,
-        games:          info.game || null,
-        memo:           info.memo || null,
-        kakaoId:        kakaoUser?.id || null,
-      }),
-    })
-    .then(res => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
-    })
-    .then(data => {
-      console.log('[TEST] ✅ 주문 DB 저장 성공:', data);
-      renderComplete(true, info, testOrderId, finalAmt);
-    })
-    .catch(err => {
-      console.error('[TEST] ❌ DB 저장 실패:', err.message);
-      renderComplete(true, info, testOrderId, finalAmt);
-    });
-  } catch(e) {
-    console.error('[TEST] 테스트 결제 중 에러:', e);
-    showToast('테스트 결제 처리 중 오류가 발생했습니다.', 'error');
-  }
+  renderComplete(true, info, testOrderId, finalAmt);
 }
 
 function getSelectedGames() {
@@ -744,6 +718,7 @@ function kakaoNotify(orderInfo) {
 // ── 결제 완료 화면 렌더 ──
 function renderComplete(success, info, orderId, amount) {
   console.log('[RENDER_COMPLETE] 시작:', { success, info, orderId, amount });
+  if (success) history.pushState({}, '', '/payment-complete');
   setStep(3);
   const payStepForm = document.getElementById('payStepForm');
   const payStepComplete = document.getElementById('payStepComplete');
@@ -850,14 +825,24 @@ function getStatusLabel(status) {
 }
 
 function showPayHistory() {
+  try {
   console.log('[PAY_HISTORY] 결제내역 표시 시작');
   const backdrop = document.getElementById('payHistBackdrop');
   const body = document.getElementById('payHistBody');
 
   if (!backdrop || !body) {
-    console.error('[PAY_HISTORY] 모달 요소를 찾을 수 없습니다');
+    console.error('[PAY_HISTORY] 모달 요소를 찾을 수 없습니다', { backdrop, body });
+    alert('결제내역 모달 요소를 찾을 수 없습니다. 페이지를 새로고침 해주세요.');
     return;
   }
+  backdrop.style.display = 'flex';
+
+  // 로딩 표시
+  body.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 0;gap:16px;">
+      <div style="width:36px;height:36px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;"></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.9rem;">결제내역 불러오는 중...</div>
+    </div>`;
 
   // 즉시 조회 함수
   const loadPayHistory = () => {
@@ -892,9 +877,16 @@ function showPayHistory() {
 
   backdrop.classList.add('open');
   document.body.style.overflow = 'hidden';
+  } catch(e) {
+    console.error('[PAY_HISTORY] 오류:', e);
+    alert('결제내역 오류: ' + e.message);
+  }
 }
 
+let _payHistOrders = [];
+
 function updatePayHistoryDisplay(orders) {
+  _payHistOrders = orders;
   const body = document.getElementById('payHistBody');
   body.innerHTML = orders.map((o, idx) => {
     const statusLabel = getStatusLabel(o.status || 'pending');
@@ -908,7 +900,7 @@ function updatePayHistoryDisplay(orders) {
     const buyerName = o.buyer_name || '';
 
     return `
-      <div class="pay-hist-item" style="cursor:pointer;">
+      <div class="pay-hist-item" style="cursor:pointer;" onclick="replayFromHistory(${idx})">
         <div class="pay-hist-top">
           <span class="pay-hist-plan">${o.plan_name || ''}</span>
           <span class="pay-hist-amount">₩${Number(o.amount||0).toLocaleString('ko-KR')}</span>
@@ -923,6 +915,32 @@ function updatePayHistoryDisplay(orders) {
         </div>
       </div>`;
   }).join('');
+}
+
+function replayFromHistory(idx) {
+  const o = _payHistOrders[idx];
+  if (!o) { console.error('[REPLAY] 주문 없음:', idx); return; }
+
+  closePayHistory();
+
+  const info = {
+    planName: o.plan_name || o.planName || '',
+    planLabel: o.plan_name || o.planLabel || '',
+    amount: o.amount,
+    name: o.buyer_name || o.name || '',
+    contact: o.buyer_contact || o.buyer_phone || o.contact || '',
+    game: o.games || o.game || '',
+    memo: o.memo || '',
+    orderId: o.order_id || o.orderId || '',
+  };
+
+  const payBackdrop = document.getElementById('payModalBackdrop');
+  if (payBackdrop) {
+    payBackdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  renderComplete(true, info, info.orderId, info.amount);
 }
 
 function refreshPayHistoryStatus() {
@@ -1024,7 +1042,9 @@ function replayPaymentResult(historyIndex) {
 }
 
 function closePayHistory() {
-  document.getElementById('payHistBackdrop').classList.remove('open');
+  const backdrop = document.getElementById('payHistBackdrop');
+  backdrop.classList.remove('open');
+  backdrop.style.display = '';
   document.body.style.overflow = '';
   // 폴링 중단
   if (payHistoryPollInterval) {
@@ -1222,3 +1242,273 @@ function showToast(msg, type='') {
     if (el) sectionObserver.observe(el);
   });
 })();
+
+
+// ── Canvas Effect Helper ──
+function initCanvas(id) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return null;
+  const ctx = canvas.getContext('2d');
+  let visible = false;
+  function resize() {
+    const r = canvas.parentElement.getBoundingClientRect();
+    canvas.width = r.width; canvas.height = r.height;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  // 화면에 보일 때만 애니메이션 실행
+  const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0 });
+  io.observe(canvas.parentElement);
+  return { canvas, ctx, get W() { return canvas.width; }, get H() { return canvas.height; }, get visible() { return visible; } };
+}
+
+// ── Services Section Particles ──
+(function() {
+  const canvas = document.getElementById('servicesParticles');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const COLORS = ['#00f0ff','#a855f7','#22d3ee','#818cf8','#ffffff'];
+  const PARTICLE_COUNT = 60;
+  let particles = [];
+  let W, H;
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    W = canvas.width  = rect.width;
+    H = canvas.height = rect.height;
+  }
+
+  function rand(min, max) { return Math.random() * (max - min) + min; }
+
+  function createParticle() {
+    return {
+      x: rand(0, W),
+      y: rand(0, H),
+      r: rand(1, 3),
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      alpha: rand(0.1, 0.6),
+      vx: rand(-0.3, 0.3),
+      vy: rand(-0.6, -0.15),
+      pulse: rand(0, Math.PI * 2),
+      pulseSpeed: rand(0.01, 0.03)
+    };
+  }
+
+  function init() {
+    resize();
+    particles = Array.from({ length: PARTICLE_COUNT }, createParticle);
+  }
+
+  let svcLast = 0;
+  function draw(now) {
+    requestAnimationFrame(draw);
+    if (now - svcLast < 32) return;
+    svcLast = now;
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.pulse += p.pulseSpeed;
+      const a = p.alpha * (0.6 + 0.4 * Math.sin(p.pulse));
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = p.color;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.y < -10 || p.x < -10 || p.x > W + 10) {
+        Object.assign(p, createParticle(), { y: H + 5, x: rand(0, W) });
+      }
+    });
+  }
+
+  window.addEventListener('resize', () => { resize(); });
+  init();
+  requestAnimationFrame(draw);
+})();
+
+// ── HOW: 흐르는 네트워크 연결선 ──
+(function() {
+  const c = initCanvas('howCanvas');
+  if (!c) return;
+  const { ctx } = c;
+  const nodes = [];
+  const NODE_COUNT = 40;
+  function rand(a, b) { return Math.random() * (b - a) + a; }
+  function makeNode() {
+    return { x: rand(0, c.W), y: rand(0, c.H), vx: rand(-0.3, 0.3), vy: rand(-0.2, 0.2) };
+  }
+  for (let i = 0; i < NODE_COUNT; i++) nodes.push(makeNode());
+  let _howLast = 0;
+  function draw(now) {
+    requestAnimationFrame(draw);
+    if (!c.visible || now - _howLast < 32) return;
+    _howLast = now;
+    ctx.clearRect(0, 0, c.W, c.H);
+    nodes.forEach(n => {
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > c.W) n.vx *= -1;
+      if (n.y < 0 || n.y > c.H) n.vy *= -1;
+    });
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 130) {
+          ctx.save();
+          ctx.globalAlpha = (1 - dist / 130) * 0.25;
+          ctx.strokeStyle = '#00f0ff';
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+      ctx.save();
+      ctx.globalAlpha = 0.4;
+      ctx.fillStyle = '#00f0ff';
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = '#00f0ff';
+      ctx.beginPath();
+      ctx.arc(nodes[i].x, nodes[i].y, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── FEATURES: 떠다니는 육각형 ──
+(function() {
+  const c = initCanvas('featuresCanvas');
+  if (!c) return;
+  const { ctx } = c;
+  const hexagons = [];
+  function rand(a, b) { return Math.random() * (b - a) + a; }
+  for (let i = 0; i < 18; i++) {
+    hexagons.push({
+      x: rand(0, c.W), y: rand(0, c.H),
+      r: rand(20, 55), vx: rand(-0.2, 0.2), vy: rand(-0.15, 0.15),
+      rot: rand(0, Math.PI), rotV: rand(-0.003, 0.003),
+      alpha: rand(0.03, 0.1),
+      color: Math.random() > 0.5 ? '#a855f7' : '#00f0ff'
+    });
+  }
+  function hexPath(x, y, r, rot) {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = rot + (Math.PI / 3) * i;
+      i === 0 ? ctx.moveTo(x + r * Math.cos(a), y + r * Math.sin(a))
+              : ctx.lineTo(x + r * Math.cos(a), y + r * Math.sin(a));
+    }
+    ctx.closePath();
+  }
+  let _featLast = 0;
+  function draw(now) {
+    requestAnimationFrame(draw);
+    if (!c.visible || now - _featLast < 32) return;
+    _featLast = now;
+    ctx.clearRect(0, 0, c.W, c.H);
+    hexagons.forEach(h => {
+      h.x += h.vx; h.y += h.vy; h.rot += h.rotV;
+      if (h.x < -h.r) h.x = c.W + h.r;
+      if (h.x > c.W + h.r) h.x = -h.r;
+      if (h.y < -h.r) h.y = c.H + h.r;
+      if (h.y > c.H + h.r) h.y = -h.r;
+      ctx.save();
+      ctx.globalAlpha = h.alpha;
+      ctx.strokeStyle = h.color;
+      ctx.lineWidth = 1;
+      hexPath(h.x, h.y, h.r, h.rot);
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+  requestAnimationFrame(draw);
+})();
+
+// ── PRICING: 펄스 링 ──
+(function() {
+  const c = initCanvas('pricingCanvas');
+  if (!c) return;
+  const { ctx } = c;
+  const rings = [];
+  function spawnRing() {
+    rings.push({ x: c.W / 2, y: c.H / 2, r: 0, maxR: Math.max(c.W, c.H) * 0.7, alpha: 0.15, speed: 0.7});
+  }
+  spawnRing();
+  setInterval(spawnRing, 8000);
+  let _priceLast = 0;
+  function draw(now) {
+    requestAnimationFrame(draw);
+    if (!c.visible || now - _priceLast < 32) return;
+    _priceLast = now;
+    ctx.clearRect(0, 0, c.W, c.H);
+    for (let i = rings.length - 1; i >= 0; i--) {
+      const ring = rings[i];
+      ring.r += ring.speed;
+      ring.alpha = 0.15 * (1 - ring.r / ring.maxR);
+      if (ring.r > ring.maxR) { rings.splice(i, 1); continue; }
+      ctx.save();
+      ctx.globalAlpha = ring.alpha;
+      ctx.strokeStyle = '#a855f7';
+      ctx.lineWidth = 1.5;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#a855f7';
+      ctx.beginPath();
+      ctx.arc(ring.x, ring.y, ring.r, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+  requestAnimationFrame(draw);
+})();
+
+
+// ── FAQ: 오로라 웨이브 ──
+(function() {
+  const c = initCanvas('faqCanvas');
+  if (!c) return;
+  const { ctx } = c;
+  let t = 0;
+  let _faqLast = 0;
+  function draw(now) {
+    requestAnimationFrame(draw);
+    if (!c.visible || now - _faqLast < 32) return;
+    _faqLast = now;
+    ctx.clearRect(0, 0, c.W, c.H);
+    for (let i = 0; i < 3; i++) {
+      const grad = ctx.createLinearGradient(0, 0, c.W, 0);
+      grad.addColorStop(0, 'transparent');
+      grad.addColorStop(0.3 + i * 0.1, `hsla(${180 + i * 40},80%,60%,0.07)`);
+      grad.addColorStop(0.7 - i * 0.1, `hsla(${260 + i * 30},70%,55%,0.06)`);
+      grad.addColorStop(1, 'transparent');
+      ctx.save();
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(0, c.H / 2);
+      for (let x = 0; x <= c.W; x += 4) {
+        const y = c.H / 2
+          + Math.sin((x / c.W) * Math.PI * 2 + t * 0.003 + i) * (40 + i * 20)
+          + Math.sin((x / c.W) * Math.PI * 4 + t * 0.002) * 20;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(c.W, c.H); ctx.lineTo(0, c.H); ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    t++;
+  }
+  requestAnimationFrame(draw);
+})();
+

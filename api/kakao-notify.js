@@ -40,8 +40,8 @@ export default async function handler(req, res) {
       '순번에 맞춰 원격 작업 일정을 안내드립니다!',
     ].join('\n'),
     link: {
-      web_url:        'https://game-optimization.vercel.app',
-      mobile_web_url: 'https://game-optimization.vercel.app',
+      web_url:        'https://www.gameboostpro.co.kr',
+      mobile_web_url: 'https://www.gameboostpro.co.kr',
     },
   };
 
