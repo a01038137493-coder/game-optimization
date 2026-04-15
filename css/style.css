@@ -763,11 +763,14 @@ footer {
   /* 모바일 오로라 깜빡임 방지 */
   .hero::before { animation: none; }
 
+  /* 한국어 줄바꿈 최적화 */
+  * { word-break: keep-all; overflow-wrap: break-word; }
+
   /* ── 기본 ── */
   body { padding-bottom: 80px; }
   section { padding: 72px 0; }
-  .section-title { font-size: 1.65rem; line-height: 1.2; }
-  .section-sub { font-size: .9rem; }
+  .section-title { font-size: 1.65rem; line-height: 1.25; }
+  .section-sub { font-size: .9rem; line-height: 1.65; }
   .center { padding: 0 20px; }
   .fade-up { opacity: 1 !important; transform: none !important; }
 
