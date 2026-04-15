@@ -899,7 +899,8 @@ footer {
   }
   .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; margin-top: 12px; color: #fff; }
   .step p { font-size: .85rem; color: rgba(255,255,255,.75); line-height: 1.65; }
-  .remote-notice { margin: 24px 20px 0; font-size: .8rem; padding: 12px 16px; border-radius: 10px; }
+  .remote-notice { margin: 24px 20px 0; font-size: .82rem; padding: 14px 16px; border-radius: 10px; gap: 8px; }
+  .remote-notice span[style] { display: none; }
 
   /* ── FEATURES ── */
   #features { padding: 52px 0; background: var(--bg-card); }
