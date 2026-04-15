@@ -633,6 +633,13 @@ function saveAdminName() {
 
 // 초기화: 저장된 설정 복원
 function initAdmin() {
+  // 관리자 토큰 없으면 로그인 페이지로
+  const token = localStorage.getItem('adminToken');
+  if (!token) {
+    location.href = '/admin-login.html';
+    return;
+  }
+
   // 모드 복원
   const savedMode = localStorage.getItem('adminMode');
   if (savedMode === 'light') {
