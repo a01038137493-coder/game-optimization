@@ -151,6 +151,14 @@ h1 .grad {
   line-height: 1.7; margin-bottom: 40px;
 }
 .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.hero-trust { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 28px; }
+.hero-trust-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border-radius: 999px;
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+  font-size: .83rem; color: rgba(255,255,255,.85); font-weight: 500;
+  backdrop-filter: blur(8px);
+}
 .btn-primary {
   padding: 14px 36px; border-radius: 10px; border: none; cursor: pointer;
   font-weight: 700; font-size: 1rem;
@@ -809,6 +817,8 @@ footer {
   .hero-btns { flex-direction: column; width: 100%; gap: 10px; }
   .hero-btns .btn-primary { width: 100%; padding: 17px; font-size: 1rem; border-radius: 14px; }
   .hero-btns .btn-outline { width: 100%; padding: 17px; font-size: 1rem; border-radius: 14px; }
+  .hero-trust { gap: 8px; margin-top: 20px; justify-content: flex-start; }
+  .hero-trust-item { font-size: .78rem; padding: 7px 13px; }
 
   /* hero 통계 — 수평 스크롤 pill */
   .stats {
