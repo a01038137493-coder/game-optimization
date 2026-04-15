@@ -185,7 +185,7 @@ window.addEventListener('scroll', () => {
 
 // FPS counter flicker animation
 const fpsEl = document.getElementById('fps-counter');
-setInterval(() => {
+if (fpsEl) setInterval(() => {
   const base = 240;
   const jitter = Math.floor(Math.random() * 12) - 4;
   fpsEl.textContent = base + jitter;
