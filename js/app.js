@@ -496,6 +496,18 @@ function emailSignup() {
   .catch(() => { if (btn) { btn.disabled = false; btn.textContent = origText; } errEl.textContent = '서버 오류가 발생했습니다.'; errEl.style.display = ''; });
 }
 
+function openTermsModal() {
+  document.getElementById('termsModalBackdrop').classList.add('open');
+}
+function closeTermsModal() {
+  document.getElementById('termsModalBackdrop').classList.remove('open');
+}
+function agreeTermsAndClose() {
+  const cb = document.getElementById('signupTerms2');
+  if (cb) cb.checked = true;
+  closeTermsModal();
+}
+
 function kakaoLogin() {
   closeAuthModal();
   const redirectUri = 'https://www.gameboostpro.co.kr/api/kakao-callback';
