@@ -48,8 +48,8 @@ export default async function handler(req, res) {
     }
 
     // 관리자 이메일 검증
-    const adminEmail = (process.env.ADMIN_EMAIL || '').trim();
-    if (adminEmail && data.user.email !== adminEmail) {
+    const adminEmails = (process.env.ADMIN_EMAIL || '').split(',').map(e => e.trim()).filter(Boolean);
+    if (adminEmails.length > 0 && !adminEmails.includes(data.user.email)) {
       return res.status(403).json({
         success: false,
         message: '관리자 권한이 없습니다.'
