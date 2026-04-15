@@ -108,6 +108,7 @@ nav {
   pointer-events: none;
   z-index: 0;
   animation: auroraFloat 22s ease-in-out infinite;
+  will-change: transform;
 }
 .hero::after {
   content: '';
@@ -759,6 +760,9 @@ footer {
 ══════════════════════════════════════ */
 @media (max-width: 600px) {
 
+  /* 모바일 오로라 깜빡임 방지 */
+  .hero::before { animation: none; }
+
   /* ── 기본 ── */
   body { padding-bottom: 80px; }
   section { padding: 72px 0; }
@@ -815,11 +819,11 @@ footer {
     flex-shrink: 0;
     background: rgba(255,255,255,.05);
     border: 1px solid var(--border);
-    border-radius: 14px; padding: 14px 16px;
-    min-width: 110px; text-align: center;
+    border-radius: 12px; padding: 10px 12px;
+    min-width: 88px; text-align: center;
   }
-  .stat-num { font-size: 1.6rem; }
-  .stat-label { font-size: .72rem; margin-top: 2px; }
+  .stat-num { font-size: 1.25rem; }
+  .stat-label { font-size: .65rem; margin-top: 2px; }
 
   /* ── SERVICES SLIDER — 모바일 ── */
   #services > .center { padding: 0 20px; }
@@ -1347,8 +1351,19 @@ footer {
 #toast.error { border-color: rgba(255,60,110,.4); }
 
 /* ══════════════════════════════════════
-   KAKAO LOGIN
+   NAV LOGIN BUTTON
 ══════════════════════════════════════ */
+.nav-login-btn {
+  padding: 8px 18px; border-radius: 8px; cursor: pointer;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.25);
+  color: var(--text);
+  font-family: 'Pretendard', sans-serif; font-size: .88rem; font-weight: 600;
+  transition: border-color .2s, background .2s;
+  white-space: nowrap;
+}
+.nav-login-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(0,232,122,.06); }
+
 .kakao-login-btn {
   display: flex; align-items: center; gap: 7px;
   padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
@@ -1543,6 +1558,7 @@ footer {
 
 @media (max-width: 600px) {
   .kakao-login-btn { display: none; }
+  .nav-login-btn { display: none; }
 }
 
 /* ── 마우스 그로우 (배경 빛) ── */
