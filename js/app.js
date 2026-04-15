@@ -345,7 +345,149 @@ const TEST_MODE = false;
 
 })();
 
+function openAuthModal(tab = 'login') {
+  const backdrop = document.getElementById('authModalBackdrop');
+  if (backdrop) { backdrop.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  switchAuthTab(tab);
+}
+
+function closeAuthModal() {
+  const backdrop = document.getElementById('authModalBackdrop');
+  if (backdrop) { backdrop.classList.remove('open'); document.body.style.overflow = ''; }
+}
+
+function switchAuthTab(tab) {
+  const panels = { login: 'authPanelLogin', signup: 'authPanelSignup', find: 'authPanelFind' };
+  Object.values(panels).forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  const active = document.getElementById(panels[tab]);
+  if (active) active.style.display = '';
+
+  const tabLogin  = document.getElementById('authTabLogin');
+  const tabSignup = document.getElementById('authTabSignup');
+  [tabLogin, tabSignup].forEach(btn => {
+    if (!btn) return;
+    btn.style.color = 'var(--text-muted)';
+    btn.style.borderBottom = '2px solid transparent';
+    btn.style.fontWeight = '600';
+  });
+  if (tab === 'login' && tabLogin) {
+    tabLogin.style.color = 'var(--primary)'; tabLogin.style.borderBottom = '2px solid var(--primary)'; tabLogin.style.fontWeight = '700';
+  } else if (tab === 'signup' && tabSignup) {
+    tabSignup.style.color = 'var(--primary)'; tabSignup.style.borderBottom = '2px solid var(--primary)'; tabSignup.style.fontWeight = '700';
+  }
+}
+
+function switchFindTab(tab) {
+  const isPw = tab === 'pw';
+  document.getElementById('findPanelId').style.display = isPw ? 'none' : '';
+  document.getElementById('findPanelPw').style.display = isPw ? '' : 'none';
+  const btnId = document.getElementById('findTabId');
+  const btnPw = document.getElementById('findTabPw');
+  btnId.style.background = isPw ? 'transparent' : 'var(--primary)';
+  btnId.style.color = isPw ? 'var(--text-muted)' : '#000';
+  btnId.style.borderColor = isPw ? 'var(--border)' : 'var(--primary)';
+  btnPw.style.background = isPw ? 'var(--primary)' : 'transparent';
+  btnPw.style.color = isPw ? '#000' : 'var(--text-muted)';
+  btnPw.style.borderColor = isPw ? 'var(--primary)' : 'var(--border)';
+}
+
+function findEmailByPhone() {
+  const phone = document.getElementById('findPhone')?.value.trim();
+  const errEl = document.getElementById('findIdError');
+  const resEl = document.getElementById('findIdResult');
+  errEl.style.display = 'none'; resEl.style.display = 'none';
+  if (!phone) { errEl.textContent = '전화번호를 입력해주세요.'; errEl.style.display = ''; return; }
+
+  fetch('/api/find-email', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone }),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.success) { errEl.textContent = data.error; errEl.style.display = ''; return; }
+    resEl.textContent = '가입된 이메일: ' + data.email;
+    resEl.style.display = '';
+  })
+  .catch(() => { errEl.textContent = '서버 오류가 발생했습니다.'; errEl.style.display = ''; });
+}
+
+function sendPasswordReset() {
+  const email = document.getElementById('findPwEmail')?.value.trim();
+  const errEl = document.getElementById('findPwError');
+  const resEl = document.getElementById('findPwResult');
+  errEl.style.display = 'none'; resEl.style.display = 'none';
+  if (!email) { errEl.textContent = '이메일을 입력해주세요.'; errEl.style.display = ''; return; }
+
+  fetch('/api/reset-password', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.success) { errEl.textContent = data.error; errEl.style.display = ''; return; }
+    resEl.textContent = '재설정 링크를 이메일로 발송했습니다. 메일함을 확인해주세요.';
+    resEl.style.display = '';
+  })
+  .catch(() => { errEl.textContent = '서버 오류가 발생했습니다.'; errEl.style.display = ''; });
+}
+
+function emailLogin() {
+  const email    = document.getElementById('loginEmail')?.value.trim();
+  const password = document.getElementById('loginPassword')?.value;
+  const errEl    = document.getElementById('loginError');
+  if (!email || !password) { errEl.textContent = '이메일과 비밀번호를 입력해주세요.'; errEl.style.display = ''; return; }
+  errEl.style.display = 'none';
+
+  fetch('/api/auth-login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.success) { errEl.textContent = data.error || '로그인 실패'; errEl.style.display = ''; return; }
+    localStorage.setItem('kakaoUser', JSON.stringify({ ...data.user, accessToken: data.token }));
+    localStorage.setItem('signupCompleted', 'true');
+    updateLoginUI(data.user);
+    closeAuthModal();
+    showToast('환영합니다, ' + data.user.nickname + '님! 🎮');
+  })
+  .catch(() => { errEl.textContent = '서버 오류가 발생했습니다.'; errEl.style.display = ''; });
+}
+
+function emailSignup() {
+  const name     = document.getElementById('signupName2')?.value.trim();
+  const email    = document.getElementById('signupEmail2')?.value.trim();
+  const phone    = document.getElementById('signupPhone2')?.value.trim();
+  const password = document.getElementById('signupPassword2')?.value;
+  const terms    = document.getElementById('signupTerms2')?.checked;
+  const errEl    = document.getElementById('signupError2');
+
+  if (!name || !email || !phone || !password) { errEl.textContent = '이름, 이메일, 전화번호, 비밀번호는 필수입니다.'; errEl.style.display = ''; return; }
+  if (!/^01[0-9]\d{8,9}$/.test(phone)) { errEl.textContent = '전화번호를 다시 확인해주세요. (예: 01012345678)'; errEl.style.display = ''; return; }
+  if (password.length < 6) { errEl.textContent = '비밀번호는 6자 이상이어야 합니다.'; errEl.style.display = ''; return; }
+  if (!terms) { errEl.textContent = '이용약관에 동의해주세요.'; errEl.style.display = ''; return; }
+  errEl.style.display = 'none';
+
+  fetch('/api/auth-signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, phone, password }),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.success) { errEl.textContent = data.error || '회원가입 실패'; errEl.style.display = ''; return; }
+    localStorage.setItem('kakaoUser', JSON.stringify({ ...data.user, accessToken: data.token }));
+    localStorage.setItem('signupCompleted', 'true');
+    updateLoginUI(data.user);
+    closeAuthModal();
+    showToast('환영합니다, ' + data.user.nickname + '님! 🎮');
+  })
+  .catch(() => { errEl.textContent = '서버 오류가 발생했습니다.'; errEl.style.display = ''; });
+}
+
 function kakaoLogin() {
+  closeAuthModal();
   const redirectUri = 'https://www.gameboostpro.co.kr/api/kakao-callback';
   location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_APP_KEY}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
 }
@@ -416,7 +558,7 @@ function saveSignupInfo() {
 
     updateLoginUI(kakaoUser);
     closeSignupModal();
-    showToast('✅ 회원가입 완료! 이제 결제할 수 있습니다.');
+    showToast('환영합니다, ' + nameInput.value + '님! 🎮');
   }
 }
 
@@ -716,9 +858,9 @@ function kakaoNotify(orderInfo) {
 }
 
 // ── 결제 완료 화면 렌더 ──
-function renderComplete(success, info, orderId, amount) {
+function renderComplete(success, info, orderId, amount, isReplay = false) {
   console.log('[RENDER_COMPLETE] 시작:', { success, info, orderId, amount });
-  if (success) history.pushState({}, '', '/payment-complete');
+  if (success && !isReplay) history.pushState({}, '', '/payment-complete');
   setStep(3);
   const payStepForm = document.getElementById('payStepForm');
   const payStepComplete = document.getElementById('payStepComplete');
@@ -940,7 +1082,7 @@ function replayFromHistory(idx) {
     document.body.style.overflow = 'hidden';
   }
 
-  renderComplete(true, info, info.orderId, info.amount);
+  renderComplete(true, info, info.orderId, info.amount, true);
 }
 
 function refreshPayHistoryStatus() {
@@ -1038,7 +1180,7 @@ function replayPaymentResult(historyIndex) {
   }
 
   // 결제완료 페이지 표시
-  renderComplete(true, info, h.orderId, h.amount);
+  renderComplete(true, info, h.orderId, h.amount, true);
 }
 
 function closePayHistory() {

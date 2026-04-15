@@ -84,7 +84,7 @@
         <div id="findPanelId">
           <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 14px;">가입 시 등록한 전화번호를 입력하세요.</p>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <input id="findPhone" type="tel" placeholder="010-1234-5678" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-family:inherit;font-size:.9rem;box-sizing:border-box;" onkeydown="if(event.key==='Enter')findEmailByPhone()" />
+            <input id="findPhone" type="tel" placeholder="01012345678" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-family:inherit;font-size:.9rem;box-sizing:border-box;" onkeydown="if(event.key==='Enter')findEmailByPhone()" />
             <div id="findIdResult" style="font-size:.85rem;display:none;padding:10px 14px;border-radius:8px;background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.2);color:var(--primary);"></div>
             <div id="findIdError" style="color:#ff6464;font-size:.82rem;display:none;"></div>
             <button onclick="findEmailByPhone()" style="width:100%;padding:12px;border:none;border-radius:10px;background:var(--primary);color:#000;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;">확인</button>
@@ -113,7 +113,7 @@
         <div style="display:flex;flex-direction:column;gap:10px;">
           <input id="signupName2" type="text" placeholder="이름 *" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-family:inherit;font-size:.9rem;box-sizing:border-box;" />
           <input id="signupEmail2" type="email" placeholder="이메일 *" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-family:inherit;font-size:.9rem;box-sizing:border-box;" />
-          <input id="signupPhone2" type="tel" placeholder="전화번호 *" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-family:inherit;font-size:.9rem;box-sizing:border-box;" />
+          <input id="signupPhone2" type="tel" placeholder="전화번호 * (01012345678)" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-family:inherit;font-size:.9rem;box-sizing:border-box;" />
           <input id="signupPassword2" type="password" placeholder="비밀번호 (6자 이상) *" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-family:inherit;font-size:.9rem;box-sizing:border-box;" onkeydown="if(event.key==='Enter')emailSignup()" />
           <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.85rem;color:var(--text-muted);margin-top:6px;margin-bottom:4px;">
             <input type="checkbox" id="signupTerms2" style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary);flex-shrink:0;" />
@@ -153,7 +153,7 @@
         <div class="error-msg" id="signupNameError" style="color:#FF6B6B;font-size:0.85rem;margin-top:5px;"></div>
 
         <label style="display:block;font-size:0.9rem;font-weight:500;margin-bottom:8px;margin-top:18px;color:var(--text);">전화번호 *</label>
-        <input type="tel" id="signupPhoneInput" placeholder="010-1234-5678" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-family:inherit;font-size:0.95rem;box-sizing:border-box;" />
+        <input type="tel" id="signupPhoneInput" placeholder="01012345678" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-input);color:var(--text);font-family:inherit;font-size:0.95rem;box-sizing:border-box;" />
         <div class="error-msg" id="signupPhoneError" style="color:#FF6B6B;font-size:0.85rem;margin-top:5px;"></div>
 
         <label style="display:block;font-size:0.9rem;font-weight:500;margin-bottom:8px;margin-top:18px;color:var(--text);">이메일</label>
