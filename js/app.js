@@ -847,7 +847,7 @@ function getStatusLabel(status) {
 }
 
 function showPayHistory() {
-  console.log('[PAY_HISTORY] 결제내역 조회 중...');
+  console.log('[PAY_HISTORY] 결제내역 표시 시작');
   const backdrop = document.getElementById('payHistBackdrop');
   const body = document.getElementById('payHistBody');
 
@@ -856,32 +856,39 @@ function showPayHistory() {
     return;
   }
 
-  // Supabase에서 직접 조회
-  fetch('/api/admin-orders')
-    .then(res => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
-    })
-    .then(data => {
-      const orders = data.orders || [];
-      console.log('[PAY_HISTORY] Supabase 조회 완료:', orders.length + '개');
+  // 즉시 조회 함수
+  const loadPayHistory = () => {
+    fetch('/api/admin-orders')
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        const orders = data.orders || [];
+        console.log('[PAY_HISTORY] 📊 조회:', orders.length + '개');
 
-      if (orders.length === 0) {
-        body.innerHTML = '<div class="pay-hist-empty">결제내역이 없습니다.</div>';
-      } else {
-        updatePayHistoryDisplay(orders);
-        console.log('[PAY_HISTORY] UI 업데이트 완료');
-      }
+        if (orders.length === 0) {
+          body.innerHTML = '<div class="pay-hist-empty">결제내역이 없습니다.</div>';
+        } else {
+          updatePayHistoryDisplay(orders);
+        }
+      })
+      .catch(err => {
+        console.error('[PAY_HISTORY] ❌ 조회 실패:', err);
+        body.innerHTML = '<div class="pay-hist-empty">결제내역 로드 실패</div>';
+      });
+  };
 
-      backdrop.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    })
-    .catch(err => {
-      console.error('[PAY_HISTORY] 조회 실패:', err);
-      body.innerHTML = '<div class="pay-hist-empty">결제내역 로드 실패</div>';
-      backdrop.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    });
+  // 즉시 로드
+  loadPayHistory();
+
+  // 3초마다 자동 새로고침
+  if (payHistoryPollInterval) clearInterval(payHistoryPollInterval);
+  console.log('[PAY_HISTORY] 🔄 폴링 시작 (3초마다)');
+  payHistoryPollInterval = setInterval(loadPayHistory, 3000);
+
+  backdrop.classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
 function updatePayHistoryDisplay(orders) {
