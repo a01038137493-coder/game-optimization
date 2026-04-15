@@ -839,10 +839,13 @@ let payHistoryPollInterval = null;
 // 주문 상태 라벨 변환
 function getStatusLabel(status) {
   switch(status) {
+    case 'pending':   return '진행중';
+    case 'working':   return '작업중';
+    case 'done':      return '완료';
     case 'completed': return '완료';
     case 'cancelled': return '취소';
-    case 'pending':
-    default: return '진행중';
+    case 'refunded':  return '환불';
+    default: return status || '진행중';
   }
 }
 
