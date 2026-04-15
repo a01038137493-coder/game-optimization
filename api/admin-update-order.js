@@ -28,20 +28,24 @@ export default async function handler(req, res) {
 
     // Step 1: 해당 주문 존재 여부 확인
     console.log('[admin-update-order] Step 1: 주문 조회 (id = ' + orderIdInt + ')');
-    const { data: existingOrder, error: queryError } = await supabase
+    const { data: orders, error: queryError } = await supabase
       .from('orders')
       .select('id, order_id, status, created_at')
-      .eq('id', orderIdInt)
-      .single();
+      .eq('id', orderIdInt);
 
     if (queryError) {
       console.error('[admin-update-order] 주문 조회 실패:', queryError);
-      return res.status(404).json({ error: 'Order not found', details: queryError.message });
+      return res.status(500).json({ error: 'Database error', details: queryError.message });
     }
 
-    if (!existingOrder) {
+    if (!orders || orders.length === 0) {
       console.warn('[admin-update-order] 주문이 없음 (id=' + orderIdInt + ')');
       return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const existingOrder = orders[0];
+    if (orders.length > 1) {
+      console.warn('[admin-update-order] ⚠️ 경고: 중복된 id가 존재함 (개수=' + orders.length + ')');
     }
 
     console.log('[admin-update-order] ✅ 기존 주문 발견:', {
