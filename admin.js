@@ -222,6 +222,17 @@ async function loadOrders() {
 
     allOrdersData = data.orders || [];
     console.log('[ADMIN] 로드된 주문 수:', allOrdersData.length);
+
+    // 중복 감지
+    const orderIdCounts = {};
+    allOrdersData.forEach(o => {
+      orderIdCounts[o.order_id] = (orderIdCounts[o.order_id] || 0) + 1;
+    });
+    const duplicates = Object.entries(orderIdCounts).filter(([_, count]) => count > 1);
+    if (duplicates.length > 0) {
+      console.warn('[ADMIN] ⚠️ 중복된 order_id 발견:', duplicates.map(([id, count]) => `${id}(${count}개)`).join(', '));
+    }
+
     filterOrders();
     console.log('[ADMIN] 주문 목록 로드 완료');
   } catch (err) {
@@ -254,7 +265,7 @@ function renderAllOrders(orders) {
         <td><span class="status-${o.status}">${getStatusLabel(o.status)}</span></td>
         <td style="display:flex;gap:6px;">
           <button class="admin-btn" onclick="openOrderDetail('${o.id}')">상세</button>
-          <select style="padding:6px 8px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;cursor:pointer;" onchange="if(this.value) updateOrderStatus('${o.id}', this.value);">
+          <select style="padding:6px 8px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;cursor:pointer;" onchange="if(this.value) { updateOrderStatus('${o.id}', this.value); this.value=''; }">
             <option value="">상태</option>
             <option value="pending">진행중</option>
             <option value="working">작업중</option>
@@ -272,16 +283,26 @@ async function updateOrderStatus(orderId, newStatus) {
   if (!newStatus) return;
 
   try {
-    console.log('[ADMIN] 상태 변경 시작:', { orderId, newStatus });
+    // orderId 타입 확인 및 로깅
+    const order = allOrdersData.find(o => o.id == orderId);
+    console.log('[ADMIN] ===== 상태 변경 시작 =====');
+    console.log('[ADMIN] 파라미터:', {
+      orderId,
+      orderId_type: typeof orderId,
+      order_id_found: order?.order_id,
+      current_status: order?.status,
+      new_status: newStatus
+    });
+
     const res = await fetch('/api/admin-update-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderId, status: newStatus })
     });
 
-    console.log('[ADMIN] API 응답 상태:', res.status);
+    console.log('[ADMIN] API HTTP 상태:', res.status);
     const data = await res.json();
-    console.log('[ADMIN] API 응답 데이터:', data);
+    console.log('[ADMIN] API 응답:', data);
 
     if (res.ok) {
       // 성공 메시지 표시
@@ -291,12 +312,18 @@ async function updateOrderStatus(orderId, newStatus) {
       document.body.appendChild(msg);
       setTimeout(() => msg.remove(), 3000);
 
-      loadOrders();
+      console.log('[ADMIN] ✅ 상태 변경 완료, 주문 목록 재로드 중...');
+      const oldCount = allOrdersData.length;
+      await loadOrders();
+      const newCount = allOrdersData.length;
+      console.log('[ADMIN] 재로드 후 주문 수:', { 이전: oldCount, 현재: newCount });
+      console.log('[ADMIN] ===== 상태 변경 완료 =====');
     } else {
+      console.error('[ADMIN] ❌ 상태 변경 실패:', data);
       showError('상태 변경 실패: ' + (data.error || data.details || ''));
     }
   } catch (err) {
-    console.error('[ADMIN] 상태 변경 오류:', err);
+    console.error('[ADMIN] 상태 변경 중 예외 발생:', err);
     showError('상태 변경 실패: ' + err.message);
   }
 }

@@ -30,6 +30,16 @@ export default async function handler(req, res) {
       created_at: o.created_at || new Date().toISOString()
     }));
 
+    // 중복된 order_id 감지
+    const orderIdCounts = {};
+    normalizedOrders.forEach(o => {
+      orderIdCounts[o.order_id] = (orderIdCounts[o.order_id] || 0) + 1;
+    });
+    const duplicates = Object.entries(orderIdCounts).filter(([_, count]) => count > 1);
+    if (duplicates.length > 0) {
+      console.warn('[admin-orders] ⚠️ 중복된 order_id 발견:', duplicates);
+    }
+
     res.status(200).json({ orders: normalizedOrders });
   } catch (err) {
     console.error('[admin-orders] Error:', err.message);

@@ -908,15 +908,36 @@ function refreshPayHistoryStatus() {
     .then(res => res.json())
     .then(data => {
       const orders = data.orders || [];
+      console.log('[PAY_HISTORY] ===== 상태 동기화 =====');
+      console.log('[PAY_HISTORY] Supabase 주문 수:', orders.length);
+      console.log('[PAY_HISTORY] localStorage 주문 수:', hist.length);
+
+      // localStorage의 모든 orderId가 Supabase에 있는지 확인
       const updated = hist.map(h => {
-        const order = orders.find(o => o.order_id === h.orderId);
-        if (order) {
-          return { ...h, status: order.status };
+        const localOrderId = String(h.orderId).trim();
+        const order = orders.find(o => String(o.order_id).trim() === localOrderId);
+
+        if (!order) {
+          console.warn(`[PAY_HISTORY] ⚠️ Supabase에서 찾을 수 없음: "${localOrderId}"`);
+          return null; // Supabase에 없으면 제거
         }
-        return h;
-      });
+
+        // 상태가 다르면 로그
+        if (h.status !== order.status) {
+          console.log(`[PAY_HISTORY] ✅ 상태 업데이트: "${localOrderId}" "${h.status}" → "${order.status}"`);
+        }
+
+        return { ...h, status: order.status };
+      }).filter(item => item !== null); // null 제거 (Supabase에 없는 항목)
+
+      // 개수가 다르면 불일치 로그
+      if (updated.length !== hist.length) {
+        console.warn(`[PAY_HISTORY] ❌ 동기화 불일치: localStorage ${hist.length}개 → Supabase ${updated.length}개`);
+      }
+
       localStorage.setItem('payHistory', JSON.stringify(updated));
       updatePayHistoryDisplay(updated);
+      console.log('[PAY_HISTORY] ===== 동기화 완료 =====');
     })
     .catch(err => console.error('[PAY_HISTORY] 상태 갱신 실패:', err));
 }

@@ -10,34 +10,92 @@ export default async function handler(req, res) {
 
   try {
     const { orderId, status } = req.body;
-    console.log('[admin-update-order] Request:', { orderId, status });
+    console.log('[admin-update-order] ===== UPDATE 시작 =====');
+    console.log('[admin-update-order] 파라미터:', { orderId, type: typeof orderId, status });
 
     if (!orderId || !status) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-
-    // status만 업데이트 (pay_status는 건드리지 않음)
-    const updateData = { status };
-
-    console.log('[admin-update-order] Updating with:', updateData);
-
-    const { error, data } = await supabase
-      .from('orders')
-      .update(updateData)
-      .eq('id', orderId);
-
-    console.log('[admin-update-order] Update result:', { error, data });
-
-    if (error) {
-      console.error('[admin-update-order] Supabase error:', error);
-      throw error;
+    // orderId를 명시적으로 정수 변환
+    const orderIdInt = parseInt(orderId, 10);
+    if (isNaN(orderIdInt)) {
+      console.error('[admin-update-order] orderId는 유효한 정수가 아님:', orderId);
+      return res.status(400).json({ error: 'Invalid orderId format' });
     }
 
-    res.status(200).json({ success: true, message: 'Order status updated' });
+    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+
+    // Step 1: 해당 주문 존재 여부 확인
+    console.log('[admin-update-order] Step 1: 주문 조회 (id = ' + orderIdInt + ')');
+    const { data: existingOrder, error: queryError } = await supabase
+      .from('orders')
+      .select('id, order_id, status, created_at')
+      .eq('id', orderIdInt)
+      .single();
+
+    if (queryError) {
+      console.error('[admin-update-order] 주문 조회 실패:', queryError);
+      return res.status(404).json({ error: 'Order not found', details: queryError.message });
+    }
+
+    if (!existingOrder) {
+      console.warn('[admin-update-order] 주문이 없음 (id=' + orderIdInt + ')');
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    console.log('[admin-update-order] ✅ 기존 주문 발견:', {
+      id: existingOrder.id,
+      order_id: existingOrder.order_id,
+      current_status: existingOrder.status
+    });
+
+    // Step 2: 상태 업데이트
+    const updateData = { status, updated_at: new Date().toISOString() };
+    console.log('[admin-update-order] Step 2: UPDATE 실행');
+    console.log('[admin-update-order] UPDATE 데이터:', updateData);
+
+    const { data: updatedOrders, error: updateError } = await supabase
+      .from('orders')
+      .update(updateData)
+      .eq('id', orderIdInt)
+      .select();
+
+    console.log('[admin-update-order] UPDATE 반환값:', {
+      rows: updatedOrders?.length || 0,
+      error: updateError?.message || 'none'
+    });
+
+    if (updateError) {
+      console.error('[admin-update-order] UPDATE 실패:', updateError);
+      return res.status(500).json({ error: 'Failed to update order', details: updateError.message });
+    }
+
+    if (!updatedOrders || updatedOrders.length === 0) {
+      console.warn('[admin-update-order] ⚠️ 업데이트 결과 없음');
+      return res.status(400).json({ error: 'Update failed', details: 'No rows were updated' });
+    }
+
+    const updated = updatedOrders[0];
+    console.log('[admin-update-order] ✅ UPDATE 성공:', {
+      id: updated.id,
+      order_id: updated.order_id,
+      old_status: existingOrder.status,
+      new_status: updated.status
+    });
+
+    console.log('[admin-update-order] ===== UPDATE 완료 =====');
+
+    res.status(200).json({
+      success: true,
+      message: 'Order status updated successfully',
+      orderId: updated.id,
+      order_id: updated.order_id,
+      status: updated.status
+    });
+
   } catch (err) {
-    console.error('[admin-update-order] Error:', err.message);
-    res.status(500).json({ error: 'Failed to update order', details: err.message });
+    console.error('[admin-update-order] Exception:', err.message);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
   }
 }
