@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     }
 
     // 관리자 이메일 검증
-    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminEmail = (process.env.ADMIN_EMAIL || '').trim();
     if (adminEmail && data.user.email !== adminEmail) {
       return res.status(403).json({
         success: false,
