@@ -765,7 +765,7 @@ function adminTestPay() {
     planLabel: plan.label,
     amount:   finalAmt,
     name:     document.getElementById('fi-name')?.value    || '테스트유저',
-    contact:  document.getElementById('fi-contact')?.value || '010-1234-5678',
+    contact:  document.getElementById('fi-contact')?.value || '01012345678',
     game:     getSelectedGames().join(', ') || '테스트게임',
     memo:     document.getElementById('fi-memo')?.value || '',
   };
