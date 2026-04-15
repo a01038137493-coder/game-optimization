@@ -120,17 +120,10 @@ function makePeekCarousel({ trackId, outerEl, dotsId, counterId, prevId, nextId,
   track.addEventListener('mouseup',    onEnd);
   track.addEventListener('mouseleave', () => { if (dragging) onEnd(); });
 
-  // 자동 로테이션
-  function startAuto() { autoTimer = setInterval(() => go(cur + 1), autoMs); }
-  function resetAuto()  { clearInterval(autoTimer); startAuto(); }
-  outer.addEventListener('mouseenter', () => clearInterval(autoTimer));
-  outer.addEventListener('mouseleave', startAuto);
-
   // 리사이즈 대응
   window.addEventListener('resize', () => go(cur));
 
   go(0);
-  startAuto();
 }
 
 // 서비스 슬라이더 초기화
