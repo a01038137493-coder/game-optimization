@@ -941,7 +941,8 @@ function renderComplete(success, info, orderId, amount, isReplay = false) {
         <strong>📌 다음 단계</strong>
         <hr style="border:none;border-top:1px solid rgba(255,255,255,.1);margin:8px 0;">
         <p style="margin:0;line-height:1.6;font-size:.9rem;">
-          카카오톡에서 10분 이내 결제 완료 메시지를 받으실 수 있습니다.
+          카카오톡에서 10분 이내 결제 완료 메시지를 받으실 수 있습니다.<br><br>
+          ⚠️ <strong>윈도우 재설치 서비스를 신청하신 고객님</strong>께서는 작업 시작 전 중요한 파일(사진, 문서, 즐겨찾기 등)을 외장하드 또는 클라우드에 미리 백업해 주시기 바랍니다.
         </p>
       </div>
 
