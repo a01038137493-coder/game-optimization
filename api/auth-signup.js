@@ -38,10 +38,7 @@ export default async function handler(req, res) {
     const { error: insertError } = await supabase.from('customers').insert({
       nickname: name, phone: phone || null, email
     });
-    if (insertError) {
-      console.error('[auth-signup] customers insert error:', insertError.message, insertError.code, insertError.details);
-      return res.status(500).json({ error: '[DB오류] ' + insertError.message + ' / code: ' + insertError.code });
-    }
+    if (insertError) console.error('[auth-signup] customers insert error:', insertError.message, insertError.code);
 
     // 바로 로그인 (토큰 발급)
     const supabaseAnon = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
