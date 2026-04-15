@@ -22,10 +22,14 @@ export default async function handler(req, res) {
     const { data: customers } = await supabase.from('customers').select('*');
 
     const customersWithStats = await Promise.all((customers || []).map(async (c) => {
-      const { data: orders } = await supabase
-        .from('orders')
-        .select('amount')
-        .eq('customer_id', c.id);
+      // customer_id 또는 전화번호로 주문 매칭
+      let query = supabase.from('orders').select('amount');
+      if (c.phone) {
+        query = query.or(`customer_id.eq.${c.id},buyer_contact.eq.${c.phone}`);
+      } else {
+        query = query.eq('customer_id', c.id);
+      }
+      const { data: orders } = await query;
 
       return {
         ...c,
