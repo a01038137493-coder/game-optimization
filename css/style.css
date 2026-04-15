@@ -783,8 +783,8 @@ footer {
 
   /* ── HERO — 앱 스타일 풀스크린 ── */
   .hero {
-    min-height: 100svh;
-    padding: 80px 20px 100px;
+    min-height: auto;
+    padding: 80px 20px 60px;
     justify-content: flex-start;
     text-align: left;
     align-items: flex-start;
@@ -873,7 +873,7 @@ footer {
   }
   .step {
     display: flex; align-items: flex-start; gap: 16px;
-    padding: 0 0 32px 0; text-align: left;
+    padding: 0 0 24px 0; text-align: left;
     position: relative;
   }
   .step:last-child { padding-bottom: 0; }
@@ -884,8 +884,8 @@ footer {
     display: flex; align-items: center; justify-content: center;
     font-weight: 900; color: #000; position: relative; z-index: 1;
   }
-  .step h3 { font-size: .95rem; font-weight: 700; margin-bottom: 4px; margin-top: 14px; }
-  .step p { font-size: .83rem; color: var(--text-muted); line-height: 1.55; }
+  .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; margin-top: 12px; color: #fff; }
+  .step p { font-size: .85rem; color: rgba(255,255,255,.75); line-height: 1.65; }
   .remote-notice { margin: 24px 20px 0; font-size: .8rem; padding: 12px 16px; border-radius: 10px; }
 
   /* ── FEATURES ── */
