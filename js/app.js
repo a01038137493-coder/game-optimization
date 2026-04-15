@@ -754,10 +754,17 @@ function renderComplete(success, info, orderId, amount) {
   const el = document.getElementById('payCompleteInner');
   if (success && info) {
     kakaoNotify({ planName: info.planName, amount, orderId, games: info.game, name: info.name });
-    // 결제내역 저장
+    // 결제내역 저장 (중복 방지)
     const hist = JSON.parse(localStorage.getItem('payHistory') || '[]');
-    hist.unshift({ orderId, planName: info.planName, amount, game: info.game, name: info.name, date: new Date().toLocaleDateString('ko-KR') });
-    localStorage.setItem('payHistory', JSON.stringify(hist.slice(0, 30)));
+
+    // 같은 orderId가 이미 있으면 제거
+    const filtered = hist.filter(h => h.orderId !== orderId);
+    console.log('[RENDER_COMPLETE] 결제내역 중복 확인:', { 이전: hist.length, 중복제거후: filtered.length, orderId });
+
+    // 새 항목 추가
+    filtered.unshift({ orderId, planName: info.planName, amount, game: info.game, name: info.name, date: new Date().toLocaleDateString('ko-KR') });
+    localStorage.setItem('payHistory', JSON.stringify(filtered.slice(0, 30)));
+    console.log('[RENDER_COMPLETE] 결제내역 저장 완료:', filtered.slice(0, 3));
 
     // DB 저장
     const kakaoUser = JSON.parse(localStorage.getItem('kakaoUser') || 'null');
