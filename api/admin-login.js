@@ -47,13 +47,11 @@ export default async function handler(req, res) {
       });
     }
 
-    // 토큰 생성
-    const token = Buffer.from(`admin:${email}:${Date.now()}`).toString('base64');
-
+    // Supabase JWT 토큰 반환 (서버에서 검증 가능)
     return res.status(200).json({
       success: true,
       message: '로그인 성공',
-      token: token,
+      token: data.session.access_token,
       user: email
     });
   } catch (err) {

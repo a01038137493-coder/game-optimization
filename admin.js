@@ -1,3 +1,9 @@
+// 어드민 인증 헤더 헬퍼
+function adminHeaders(extra = {}) {
+  const token = localStorage.getItem('adminToken') || '';
+  return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...extra };
+}
+
 // 대시보드 필터
 let dashboardFilter = 'today';
 
@@ -80,7 +86,7 @@ function getDateRange(type) {
 async function loadDashboard() {
   try {
     console.log('[ADMIN] 대시보드 데이터 로드 시작');
-    const res = await fetch('/api/admin-orders');
+    const res = await fetch('/api/admin-orders', { headers: adminHeaders() });
     console.log('[ADMIN] API 응답 상태:', res.status, res.ok);
 
     if (!res.ok) throw new Error(`API 오류: ${res.status}`);
@@ -213,7 +219,7 @@ let allOrdersData = [];
 async function loadOrders() {
   try {
     console.log('[ADMIN] 주문 목록 로드 시작');
-    const res = await fetch('/api/admin-orders');
+    const res = await fetch('/api/admin-orders', { headers: adminHeaders() });
     console.log('[ADMIN] API 응답 상태:', res.status, res.ok);
 
     if (!res.ok) throw new Error(`API 오류: ${res.status}`);
@@ -296,7 +302,7 @@ async function updateOrderStatus(orderId, newStatus) {
 
     const res = await fetch('/api/admin-update-order', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: adminHeaders(),
       body: JSON.stringify({ orderId, status: newStatus })
     });
 
@@ -332,7 +338,7 @@ async function updateOrderStatus(orderId, newStatus) {
 async function loadCustomers() {
   try {
     console.log('[ADMIN] 고객 목록 로드 시작');
-    const res = await fetch('/api/admin-customers');
+    const res = await fetch('/api/admin-customers', { headers: adminHeaders() });
     console.log('[ADMIN] API 응답 상태:', res.status, res.ok);
 
     if (!res.ok) throw new Error(`API 오류: ${res.status}`);
@@ -504,7 +510,7 @@ async function sendKakaoNotify() {
   try {
     const res = await fetch('/api/admin-notify', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: adminHeaders(),
       body: JSON.stringify({
         orderId,
         buyerName,
