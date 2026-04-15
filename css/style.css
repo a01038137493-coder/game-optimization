@@ -1118,10 +1118,10 @@ footer {
 .pay-modal::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
 .pay-modal-close {
-  position: absolute; top: 18px; right: 18px; z-index: 2;
-  background: rgba(255,255,255,.06); border: 1px solid var(--border);
-  color: var(--text-muted); width: 34px; height: 34px;
-  border-radius: 50%; cursor: pointer; font-size: .85rem;
+  position: absolute; top: 14px; right: 14px; z-index: 2;
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+  color: #fff; width: 40px; height: 40px;
+  border-radius: 50%; cursor: pointer; font-size: 1rem; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   transition: border-color .2s, color .2s, background .2s;
 }
@@ -1559,6 +1559,13 @@ footer {
 @media (max-width: 600px) {
   .kakao-login-btn { display: none; }
   .nav-login-btn { display: none; }
+  .pay-modal-close {
+    width: 48px; height: 48px;
+    font-size: 1.2rem;
+    top: 10px; right: 10px;
+    background: rgba(255,255,255,.18);
+    border-color: rgba(255,255,255,.3);
+  }
 }
 
 /* ── 마우스 그로우 (배경 빛) ── */
