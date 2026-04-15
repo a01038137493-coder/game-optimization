@@ -18,6 +18,7 @@ function switchTab(tabName) {
   if (tabName === 'dashboard') loadDashboard();
   else if (tabName === 'orders') loadOrders();
   else if (tabName === 'customers') loadCustomers();
+  else if (tabName === 'coupons') loadCoupons();
 }
 
 // 날짜 범위 문자열 포맷
@@ -676,3 +677,109 @@ window.addEventListener('load', () => {
   initAdmin();
   loadDashboard();
 });
+
+// ══════════════════════════════════════
+// 쿠폰 관리
+// ══════════════════════════════════════
+
+async function loadCoupons() {
+  const tbody = document.getElementById('couponsTable');
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);">불러오는 중...</td></tr>';
+  try {
+    const res = await fetch('/api/admin-coupons', { headers: adminHeaders() });
+    const data = await res.json();
+    if (!data.coupons?.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);">쿠폰이 없습니다.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.coupons.map(c => `
+      <tr>
+        <td><strong>${c.code}</strong></td>
+        <td>${c.type === 'fixed' ? '정액' : '정률'}</td>
+        <td>${c.type === 'fixed' ? '₩' + c.value.toLocaleString() : c.value + '%'}</td>
+        <td>${c.used_count || 0}</td>
+        <td>${c.max_uses ?? '무제한'}</td>
+        <td>${c.expires_at ? c.expires_at.slice(0,10) : '없음'}</td>
+        <td><span style="padding:3px 10px;border-radius:999px;font-size:.75rem;font-weight:700;background:${c.is_active ? 'rgba(0,232,122,.15)' : 'rgba(255,100,100,.15)'};color:${c.is_active ? 'var(--primary)' : '#ff6464'};">${c.is_active ? '활성' : '비활성'}</span></td>
+        <td style="display:flex;gap:6px;">
+          <button onclick="editCoupon(${JSON.stringify(c).replace(/"/g,'&quot;')})" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text);font-family:'Pretendard',sans-serif;font-size:.78rem;cursor:pointer;">수정</button>
+          <button onclick="toggleCoupon('${c.id}',${c.is_active})" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;color:${c.is_active ? '#ff6464' : 'var(--primary)'};font-family:'Pretendard',sans-serif;font-size:.78rem;cursor:pointer;">${c.is_active ? '비활성화' : '활성화'}</button>
+          <button onclick="deleteCoupon('${c.id}')" style="padding:5px 10px;border:1px solid rgba(255,100,100,.3);border-radius:6px;background:transparent;color:#ff6464;font-family:'Pretendard',sans-serif;font-size:.78rem;cursor:pointer;">삭제</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#ff6464;">로드 실패</td></tr>';
+  }
+}
+
+function openCouponModal() {
+  document.getElementById('couponEditId').value = '';
+  document.getElementById('couponCode').value = '';
+  document.getElementById('couponLabel').value = '';
+  document.getElementById('couponType').value = 'fixed';
+  document.getElementById('couponValue').value = '';
+  document.getElementById('couponMaxUses').value = '';
+  document.getElementById('couponExpiry').value = '';
+  document.getElementById('couponActive').checked = true;
+  document.getElementById('couponError').style.display = 'none';
+  document.getElementById('couponModalTitle').textContent = '쿠폰 추가';
+  document.getElementById('couponModal').style.display = 'flex';
+}
+
+function closeCouponModal() {
+  document.getElementById('couponModal').style.display = 'none';
+}
+
+function editCoupon(c) {
+  document.getElementById('couponEditId').value = c.id;
+  document.getElementById('couponCode').value = c.code;
+  document.getElementById('couponLabel').value = c.label || '';
+  document.getElementById('couponType').value = c.type;
+  document.getElementById('couponValue').value = c.value;
+  document.getElementById('couponMaxUses').value = c.max_uses || '';
+  document.getElementById('couponExpiry').value = c.expires_at ? c.expires_at.slice(0,10) : '';
+  document.getElementById('couponActive').checked = c.is_active;
+  document.getElementById('couponError').style.display = 'none';
+  document.getElementById('couponModalTitle').textContent = '쿠폰 수정';
+  document.getElementById('couponModal').style.display = 'flex';
+}
+
+async function saveCoupon() {
+  const id = document.getElementById('couponEditId').value;
+  const code = document.getElementById('couponCode').value.trim().toUpperCase();
+  const label = document.getElementById('couponLabel').value.trim();
+  const type = document.getElementById('couponType').value;
+  const value = parseInt(document.getElementById('couponValue').value);
+  const maxUses = document.getElementById('couponMaxUses').value;
+  const expiry = document.getElementById('couponExpiry').value;
+  const isActive = document.getElementById('couponActive').checked;
+  const errEl = document.getElementById('couponError');
+
+  if (!code || !value) { errEl.textContent = '코드와 할인값은 필수입니다.'; errEl.style.display = ''; return; }
+  errEl.style.display = 'none';
+
+  const body = { code, label, type, value, is_active: isActive, max_uses: maxUses ? parseInt(maxUses) : null, expires_at: expiry || null };
+  if (id) body.id = id;
+
+  try {
+    const res = await fetch('/api/admin-coupons', { method: 'POST', headers: adminHeaders(), body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!data.success) { errEl.textContent = data.error || '저장 실패'; errEl.style.display = ''; return; }
+    closeCouponModal();
+    loadCoupons();
+  } catch(e) {
+    errEl.textContent = '서버 오류'; errEl.style.display = '';
+  }
+}
+
+async function toggleCoupon(id, current) {
+  await fetch('/api/admin-coupons', { method: 'POST', headers: adminHeaders(), body: JSON.stringify({ id, is_active: !current, _action: 'toggle' }) });
+  loadCoupons();
+}
+
+async function deleteCoupon(id) {
+  if (!confirm('정말 삭제하시겠습니까?')) return;
+  await fetch('/api/admin-coupons?id=' + id, { method: 'DELETE', headers: adminHeaders() });
+  loadCoupons();
+}
