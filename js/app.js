@@ -867,8 +867,10 @@ function showPayHistory() {
     body.innerHTML = '<div class="pay-hist-empty">결제내역이 없습니다.</div>';
   } else {
     updatePayHistoryDisplay(hist);
-    // 폴링 시작: 3초마다 최신 상태 확인
+    // 폴링 시작: 즉시 실행 후 3초마다 최신 상태 확인
     if (payHistoryPollInterval) clearInterval(payHistoryPollInterval);
+    console.log('[PAY_HISTORY] 폴링 시작 (즉시 + 3초마다)');
+    refreshPayHistoryStatus(); // 즉시 실행
     payHistoryPollInterval = setInterval(() => refreshPayHistoryStatus(), 3000);
   }
 
@@ -901,16 +903,40 @@ function updatePayHistoryDisplay(hist) {
 
 function refreshPayHistoryStatus() {
   const hist = JSON.parse(localStorage.getItem('payHistory') || '[]');
-  if (!hist.length) return;
+  if (!hist.length) {
+    console.log('[PAY_HISTORY] 로컬 결제내역 없음');
+    return;
+  }
+
+  console.log('[PAY_HISTORY] 📡 상태 동기화 중... (로컬: ' + hist.length + '개)');
 
   // admin-orders API에서 최신 상태 조회
   fetch('/api/admin-orders')
-    .then(res => res.json())
+    .then(res => {
+      console.log('[PAY_HISTORY] API 응답 상태:', res.status);
+      return res.json();
+    })
     .then(data => {
       const orders = data.orders || [];
-      console.log('[PAY_HISTORY] ===== 상태 동기화 =====');
-      console.log('[PAY_HISTORY] Supabase 주문 수:', orders.length);
-      console.log('[PAY_HISTORY] localStorage 주문 수:', hist.length);
+      console.log('[PAY_HISTORY] 📊 데이터 비교:');
+      console.log('[PAY_HISTORY]   - Supabase 주문: ' + orders.length + '개');
+      console.log('[PAY_HISTORY]   - localStorage 주문: ' + hist.length + '개');
+
+      // 각 주문별 상세 로그
+      hist.forEach((h, idx) => {
+        const localOrderId = String(h.orderId).trim();
+        const order = orders.find(o => String(o.order_id).trim() === localOrderId);
+
+        if (order) {
+          if (h.status !== order.status) {
+            console.log(`[PAY_HISTORY] ✅ [${idx}] 상태 변경: "${localOrderId}" | "${h.status}" → "${order.status}"`);
+          } else {
+            console.log(`[PAY_HISTORY] 🔄 [${idx}] 상태 동일: "${localOrderId}" | "${h.status}"`);
+          }
+        } else {
+          console.warn(`[PAY_HISTORY] ⚠️ [${idx}] 없음: "${localOrderId}"`);
+        }
+      });
 
       // localStorage의 모든 orderId가 Supabase에 있는지 확인
       const updated = hist.map(h => {
@@ -918,28 +944,21 @@ function refreshPayHistoryStatus() {
         const order = orders.find(o => String(o.order_id).trim() === localOrderId);
 
         if (!order) {
-          console.warn(`[PAY_HISTORY] ⚠️ Supabase에서 찾을 수 없음: "${localOrderId}"`);
           return null; // Supabase에 없으면 제거
         }
 
-        // 상태가 다르면 로그
-        if (h.status !== order.status) {
-          console.log(`[PAY_HISTORY] ✅ 상태 업데이트: "${localOrderId}" "${h.status}" → "${order.status}"`);
-        }
-
         return { ...h, status: order.status };
-      }).filter(item => item !== null); // null 제거 (Supabase에 없는 항목)
+      }).filter(item => item !== null);
 
-      // 개수가 다르면 불일치 로그
       if (updated.length !== hist.length) {
-        console.warn(`[PAY_HISTORY] ❌ 동기화 불일치: localStorage ${hist.length}개 → Supabase ${updated.length}개`);
+        console.warn(`[PAY_HISTORY] ⚠️ 개수 불일치: ${hist.length}개 → ${updated.length}개`);
       }
 
       localStorage.setItem('payHistory', JSON.stringify(updated));
       updatePayHistoryDisplay(updated);
-      console.log('[PAY_HISTORY] ===== 동기화 완료 =====');
+      console.log('[PAY_HISTORY] ✅ 동기화 완료');
     })
-    .catch(err => console.error('[PAY_HISTORY] 상태 갱신 실패:', err));
+    .catch(err => console.error('[PAY_HISTORY] ❌ API 호출 실패:', err));
 }
 
 // 결제내역 재생 (결제완료창 다시 표시)
