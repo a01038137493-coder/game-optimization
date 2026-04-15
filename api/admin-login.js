@@ -47,6 +47,15 @@ export default async function handler(req, res) {
       });
     }
 
+    // 관리자 이메일 검증
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail && data.user.email !== adminEmail) {
+      return res.status(403).json({
+        success: false,
+        message: '관리자 권한이 없습니다.'
+      });
+    }
+
     // Supabase JWT 토큰 반환 (서버에서 검증 가능)
     return res.status(200).json({
       success: true,
