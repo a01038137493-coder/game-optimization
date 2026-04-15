@@ -754,20 +754,10 @@ function renderComplete(success, info, orderId, amount) {
   const el = document.getElementById('payCompleteInner');
   if (success && info) {
     kakaoNotify({ planName: info.planName, amount, orderId, games: info.game, name: info.name });
-    // 결제내역 저장 (중복 방지)
-    const hist = JSON.parse(localStorage.getItem('payHistory') || '[]');
 
-    // 같은 orderId가 이미 있으면 제거
-    const filtered = hist.filter(h => h.orderId !== orderId);
-    console.log('[RENDER_COMPLETE] 결제내역 중복 확인:', { 이전: hist.length, 중복제거후: filtered.length, orderId });
-
-    // 새 항목 추가
-    filtered.unshift({ orderId, planName: info.planName, amount, game: info.game, name: info.name, date: new Date().toLocaleDateString('ko-KR') });
-    localStorage.setItem('payHistory', JSON.stringify(filtered.slice(0, 30)));
-    console.log('[RENDER_COMPLETE] 결제내역 저장 완료:', filtered.slice(0, 3));
-
-    // DB 저장
+    // Supabase에만 저장 (localStorage 제거)
     const kakaoUser = JSON.parse(localStorage.getItem('kakaoUser') || 'null');
+    console.log('[RENDER_COMPLETE] Supabase에 주문 저장 중:', { orderId, planName: info.planName });
     fetch('/api/save-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -857,51 +847,68 @@ function getStatusLabel(status) {
 }
 
 function showPayHistory() {
-  console.log('[PAY_HISTORY] 결제내역 표시 시작');
+  console.log('[PAY_HISTORY] 결제내역 조회 중...');
   const backdrop = document.getElementById('payHistBackdrop');
   const body = document.getElementById('payHistBody');
 
   if (!backdrop || !body) {
-    console.error('[PAY_HISTORY] 모달 요소를 찾을 수 없습니다', {backdrop, body});
+    console.error('[PAY_HISTORY] 모달 요소를 찾을 수 없습니다');
     return;
   }
 
-  const hist = JSON.parse(localStorage.getItem('payHistory') || '[]');
-  console.log('[PAY_HISTORY] 저장된 결제내역:', hist);
+  // Supabase에서 직접 조회
+  fetch('/api/admin-orders')
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      const orders = data.orders || [];
+      console.log('[PAY_HISTORY] Supabase 조회 완료:', orders.length + '개');
 
-  if (!hist.length) {
-    console.log('[PAY_HISTORY] 결제내역이 없습니다');
-    body.innerHTML = '<div class="pay-hist-empty">결제내역이 없습니다.</div>';
-  } else {
-    updatePayHistoryDisplay(hist);
-    // 폴링 시작: 즉시 실행 후 3초마다 최신 상태 확인
-    if (payHistoryPollInterval) clearInterval(payHistoryPollInterval);
-    console.log('[PAY_HISTORY] 폴링 시작 (즉시 + 3초마다)');
-    refreshPayHistoryStatus(); // 즉시 실행
-    payHistoryPollInterval = setInterval(() => refreshPayHistoryStatus(), 3000);
-  }
+      if (orders.length === 0) {
+        body.innerHTML = '<div class="pay-hist-empty">결제내역이 없습니다.</div>';
+      } else {
+        updatePayHistoryDisplay(orders);
+        console.log('[PAY_HISTORY] UI 업데이트 완료');
+      }
 
-  backdrop.classList.add('open');
-  document.body.style.overflow = 'hidden';
+      backdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    })
+    .catch(err => {
+      console.error('[PAY_HISTORY] 조회 실패:', err);
+      body.innerHTML = '<div class="pay-hist-empty">결제내역 로드 실패</div>';
+      backdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
 }
 
-function updatePayHistoryDisplay(hist) {
+function updatePayHistoryDisplay(orders) {
   const body = document.getElementById('payHistBody');
-  body.innerHTML = hist.map((h, idx) => {
-    const statusLabel = getStatusLabel(h.status || 'pending');
-    const statusColor = h.status === 'completed' ? 'var(--primary)' : h.status === 'cancelled' ? '#ff6464' : '#ffa500';
+  body.innerHTML = orders.map((o, idx) => {
+    const statusLabel = getStatusLabel(o.status || 'pending');
+    const statusColor = o.status === 'done' || o.status === 'completed' ? 'var(--primary)' :
+                       o.status === 'cancelled' ? '#ff6464' :
+                       o.status === 'working' ? '#ff9800' : '#ffa500';
+
+    const date = new Date(o.created_at);
+    const dateStr = date.toLocaleDateString('ko-KR');
+    const games = o.games ? o.games.split(',').join(', ') : '';
+    const buyerName = o.buyer_name || '';
+
     return `
-      <div class="pay-hist-item" onclick="replayPaymentResult(${idx})" style="cursor:pointer;">
+      <div class="pay-hist-item" style="cursor:pointer;">
         <div class="pay-hist-top">
-          <span class="pay-hist-plan">${h.planName || ''}</span>
-          <span class="pay-hist-amount">₩${Number(h.amount||0).toLocaleString('ko-KR')}</span>
+          <span class="pay-hist-plan">${o.plan_name || ''}</span>
+          <span class="pay-hist-amount">₩${Number(o.amount||0).toLocaleString('ko-KR')}</span>
         </div>
         <div class="pay-hist-meta">
-          ${h.name ? `이름: ${h.name}` : ''}${h.game ? ` &nbsp;·&nbsp; 게임: ${h.game}` : ''}
-          ${h.date ? `<br/>${h.date}` : ''}
+          ${buyerName ? `이름: ${buyerName}` : ''}${games ? ` &nbsp;·&nbsp; 게임: ${games}` : ''}
+          ${dateStr ? `<br/>${dateStr}` : ''}
         </div>
         <div class="pay-hist-order">
-          주문번호: ${h.orderId || ''}
+          주문번호: ${o.order_id || ''}
           <span style="margin-left:8px;color:${statusColor};font-weight:600;font-size:.8rem;">${statusLabel}</span>
         </div>
       </div>`;
