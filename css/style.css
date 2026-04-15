@@ -964,7 +964,11 @@ footer {
   footer { padding: 36px 20px 28px; }
   .footer-top { grid-template-columns: 1fr; gap: 24px; margin-bottom: 28px; }
   .footer-brand p { max-width: 100%; }
-  .footer-bottom { flex-direction: column; text-align: center; gap: 4px; font-size: .76rem; }
+  .footer-bottom {
+    flex-direction: column; align-items: center; text-align: center;
+    gap: 6px; padding-top: 20px;
+  }
+  .footer-bottom span { font-size: .78rem; line-height: 1.6; }
 }
 
 
