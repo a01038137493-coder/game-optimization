@@ -438,25 +438,11 @@ function nextWeek() {
 function filterOrders() {
   const status = document.getElementById('statusFilter').value;
   const searchText = document.getElementById('searchInput').value.toLowerCase();
-  const dateFrom = document.getElementById('dateFromFilter').value;
-  const dateTo = document.getElementById('dateToFilter').value;
-
   let filtered = allOrdersData;
 
   // 상태 필터
   if (status) {
     filtered = filtered.filter(o => o.status === status);
-  }
-
-  // 날짜 필터
-  if (dateFrom) {
-    const fromDate = new Date(dateFrom);
-    filtered = filtered.filter(o => new Date(o.created_at) >= fromDate);
-  }
-  if (dateTo) {
-    const toDate = new Date(dateTo);
-    toDate.setHours(23, 59, 59);
-    filtered = filtered.filter(o => new Date(o.created_at) <= toDate);
   }
 
   // 검색 필터 (이름, 전화번호, 주문번호)
@@ -675,13 +661,6 @@ function initAdmin() {
     dashboardAdminEmailEl.textContent = adminEmail;
   }
 
-  // 날짜 필터 초기값 설정 (최근 7일)
-  const today = new Date();
-  const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-  document.getElementById('dateFromFilter').value = sevenDaysAgo.toISOString().split('T')[0];
-  document.getElementById('dateToFilter').value = today.toISOString().split('T')[0];
-  updateDateDisplay();
 
   // 대시보드 날짜 범위 초기 표시
   const dateRangeEl = document.getElementById('dateRangeDisplay');
