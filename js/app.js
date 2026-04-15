@@ -576,11 +576,10 @@ function kakaoLogout() {
   localStorage.removeItem('kakaoUser');
   localStorage.removeItem('signupCompleted');
   if (window.Kakao && Kakao.Auth.getAccessToken()) {
-    Kakao.Auth.logout(() => updateLoginUI(null));
+    Kakao.Auth.logout(() => location.reload());
   } else {
-    updateLoginUI(null);
+    location.reload();
   }
-  showToast('로그아웃 되었습니다.');
 }
 
 function updateLoginUI(user) {
