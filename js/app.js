@@ -959,7 +959,7 @@ function renderComplete(success, info, orderId, amount, isReplay = false) {
       </div>
 
       <div class="pay-complete-btns">
-        <button class="btn-kakao-link" onclick="window.open('https://pf.kakao.com','_blank')">📱 카카오 채널로 확인하기</button>
+        <button class="btn-kakao-link" onclick="window.open('http://pf.kakao.com/_xkmvxlX/chat','_blank')">📱 카카오채널로 문의하기</button>
         <button class="btn-close-link" onclick="closePayModal()">닫기</button>
       </div>`;
   } else {
