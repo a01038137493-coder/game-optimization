@@ -858,7 +858,7 @@ function showPayHistory() {
 
   // 즉시 조회 함수
   const loadPayHistory = () => {
-    fetch('/api/admin-orders')
+    fetch('/api/admin-orders', { cache: 'no-store' })
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
