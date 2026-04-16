@@ -29,8 +29,9 @@ body.light {
 body.light { background: #f5f8fc; color: var(--text); }
 body.light ::-webkit-scrollbar-track { background: #e8edf3; }
 
-/* ─ 캔버스 숨김 ─ */
+/* ─ 캔버스 — hero만 유지, 나머지 숨김 ─ */
 body.light canvas { opacity: 0; }
+body.light #heroCanvas { opacity: 0.45; }
 
 /* ─ NAV ─ */
 body.light nav { background: rgba(240,244,248,0.92); box-shadow: 0 1px 0 rgba(0,0,0,0.08); }
