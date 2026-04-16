@@ -662,10 +662,11 @@ let _couponCode = '';
 
 const PLANS = {
   test:     { label:'테스트 결제',       name:'테스트 결제 상품',             price:1000,  desc:'결제 테스트용 상품입니다.', features:['결제 플로우 테스트','주문 DB 저장 확인'] },
-  lite:     { label:'Lite 포맷',        name:'Lite 포맷 서비스',         price:55000, desc:'가볍고 빠른 체감의 윈도우 포맷. 불필요한 요소 없이 깔끔하게 설치합니다.', features:['윈도우 클린 설치','드라이버 기본 세팅','불필요 앱 제거','부팅 속도 개선'] },
+  clean:    { label:'순정 포맷',        name:'순정 포맷 서비스',         price:30000, desc:'마이크로소프트 공식 윈도우 이미지 그대로 설치. 순수한 순정 환경이 필요한 분께 적합합니다.', features:['윈도우 순정 설치','드라이버 기본 세팅'] },
+  lite:     { label:'Lite 포맷',        name:'Lite 포맷 서비스',         price:55000, desc:'불필요한 요소를 제거한 트윅 설치. 순정보다 가볍고 빠른 체감을 원하는 분께 적합합니다.', features:['윈도우 트윅 설치','드라이버 기본 세팅','불필요 앱 제거','부팅 속도 개선'] },
   optimize: { label:'Windows 최적화',   name:'Windows 최적화 서비스',    price:55000, desc:'자체 개발 프로그램으로 윈도우 셋팅을 최적화합니다. 포맷 없이 진행 가능.', features:['자체 개발 툴 적용','키보드 레지스트리 설정','불필요 서비스·파일 제거','잔렉·스터터링 제거','게임별 맞춤 세팅'] },
   bundle:   { label:'포맷 + 최적화',    name:'포맷 + 최적화 서비스',     price:89000, desc:'클린 포맷 후 자체 프로그램으로 최적화까지. 가장 확실한 성능 향상.', features:['Lite 포맷 전체 포함','Windows 최적화 전체 포함','자체 개발 툴 심층 적용','게임·업무 환경 최적화','사후관리 1회 포함'] },
-  dual:     { label:'듀얼부팅',          name:'듀얼부팅 설치 서비스',     price:99000, desc:'게임 공간과 업무 공간을 완전히 분리. 부팅 시 용도에 맞는 윈도우를 선택.', features:['게임 전용 윈도우 구성','업무 전용 윈도우 구성','각 공간 독립 최적화','부팅 선택 메뉴 세팅','사후관리 1회 포함'] },
+  dualopt:  { label:'듀얼부팅 + 최적화', name:'듀얼부팅 + 최적화 서비스', price:149000, desc:'듀얼부팅 구성 후 자체 프로그램으로 최적화까지. 게임·업무 공간을 완전히 분리하고 성능도 극대화합니다.', features:['듀얼부팅 전체 포함','Windows 최적화 전체 포함','자체 개발 툴 심층 적용','게임·업무 완전 분리 + 최적화','사후관리 1회 포함'] },
 };
 
 let _plan = null, _orderId = null;
@@ -1369,6 +1370,32 @@ document.addEventListener('click', e => {
   }
 });
 
+// ── 다크/라이트 모드 토글 ──
+(function initTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') {
+    document.body.classList.add('light');
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) btn.textContent = '☀️';
+  }
+})();
+
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) btn.textContent = isLight ? '☀️' : '🌙';
+}
+
+function slidePricing(dir) {
+  const grid = document.querySelector('.pricing-grid');
+  if (!grid) return;
+  const card = grid.querySelector('.price-card');
+  if (!card) return;
+  const cardW = card.offsetWidth + 20; // width + gap
+  grid.scrollBy({ left: dir * cardW, behavior: 'smooth' });
+}
+
 function retryPayment() {
   const info = JSON.parse(sessionStorage.getItem('payInfo') || '{}');
   if (!info.planLabel) { closePayModal(); return; }
@@ -1666,32 +1693,33 @@ function initCanvas(id) {
 })();
 
 
-// ── FAQ: 오로라 웨이브 ──
+// ── FAQ + CTA: 통합 오로라 웨이브 ──
 (function() {
-  const c = initCanvas('faqCanvas');
+  const c = initCanvas('faqCtaCanvas');
   if (!c) return;
   const { ctx } = c;
   let t = 0;
-  let _faqLast = 0;
+  let _last = 0;
   function draw(now) {
     requestAnimationFrame(draw);
-    if (!c.visible || now - _faqLast < 32) return;
-    _faqLast = now;
+    if (!c.visible || now - _last < 32) return;
+    _last = now;
     ctx.clearRect(0, 0, c.W, c.H);
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 4; i++) {
       const grad = ctx.createLinearGradient(0, 0, c.W, 0);
       grad.addColorStop(0, 'transparent');
-      grad.addColorStop(0.3 + i * 0.1, `hsla(${180 + i * 40},80%,60%,0.07)`);
-      grad.addColorStop(0.7 - i * 0.1, `hsla(${260 + i * 30},70%,55%,0.06)`);
+      grad.addColorStop(0.25 + i * 0.08, `hsla(${180 + i * 35},80%,60%,0.07)`);
+      grad.addColorStop(0.75 - i * 0.08, `hsla(${260 + i * 25},70%,55%,0.06)`);
       grad.addColorStop(1, 'transparent');
       ctx.save();
       ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.moveTo(0, c.H / 2);
+      const baseY = c.H * (0.25 + i * 0.18);
+      ctx.moveTo(0, baseY);
       for (let x = 0; x <= c.W; x += 4) {
-        const y = c.H / 2
-          + Math.sin((x / c.W) * Math.PI * 2 + t * 0.003 + i) * (40 + i * 20)
-          + Math.sin((x / c.W) * Math.PI * 4 + t * 0.002) * 20;
+        const y = baseY
+          + Math.sin((x / c.W) * Math.PI * 2 + t * 0.003 + i) * (50 + i * 20)
+          + Math.sin((x / c.W) * Math.PI * 4 + t * 0.002 + i * 0.5) * 25;
         ctx.lineTo(x, y);
       }
       ctx.lineTo(c.W, c.H); ctx.lineTo(0, c.H); ctx.closePath();

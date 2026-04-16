@@ -387,6 +387,8 @@
     <li><a href="#reviews">이벤트</a></li>
   </ul>
   <div style="display:flex;align-items:center;gap:10px;">
+    <!-- 다크/라이트 모드 토글 -->
+    <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="다크/라이트 모드">🌙</button>
     <!-- 로그인 버튼 (비로그인) -->
     <button class="nav-login-btn" id="navKakaoLoginBtn" onclick="openAuthModal('login')">로그인</button>
 
@@ -849,7 +851,7 @@
     <div class="remote-highlight">
       <div class="remote-icon">🖥️↔️👨‍💻</div>
       <div class="remote-title">100% 1:1 전문가 직접 원격 진행</div>
-      <div class="remote-desc">AnyDesk · TeamViewer · 원격 데스크톱 등 고객이 편한 원격 프로그램으로 연결 후, 전문가가 직접 손으로 최적화합니다.</div>
+      <div class="remote-desc">AnyDesk를 통해 연결 후, 전문가가 직접 손으로 최적화합니다.</div>
     </div>
   </div>
   <div class="steps" style="margin-top:48px;">
@@ -861,7 +863,7 @@
     <div class="step fade-up">
       <div class="step-num">2</div>
       <h3>원격 프로그램 설치</h3>
-      <p>AnyDesk 등 원격 접속 프로그램을 설치하고 접속 코드를 알려주시면 전문가가 바로 연결합니다.</p>
+      <p>AnyDesk를 설치하고 접속 코드를 알려주시면 전문가가 바로 연결합니다.</p>
     </div>
     <div class="step fade-up">
       <div class="step-num">3</div>
@@ -934,18 +936,34 @@
     <h2 class="section-title">전문가 원격 작업<br />단 1회 결제</h2>
     <p class="section-sub">월정액 없이 필요한 서비스만 한 번 결제. 카카오톡으로 문의 후 원격 진행합니다.</p>
   </div>
-  <div class="pricing-grid">
+  <div class="pricing-grid" style="position:relative;z-index:1;">
 
 
+
+    <!-- 순정 포맷 -->
+    <div class="price-card fade-up">
+      <div class="plan-icon">💿</div>
+      <div class="plan-name">순정 포맷</div>
+      <div class="plan-price">₩30,000<span></span></div>
+      <div class="plan-desc">마이크로소프트 공식 윈도우 이미지 그대로 설치. 순수한 순정 환경이 필요한 분께 적합합니다.</div>
+      <ul class="plan-features">
+        <li>윈도우 순정 설치</li>
+        <li>드라이버 기본 세팅</li>
+        <li class="off">불필요 앱 제거</li>
+        <li class="off">최적화 프로그램 적용</li>
+        <li class="off">듀얼부팅 구성</li>
+      </ul>
+      <button class="btn-plan btn-plan-outline" onclick="openPayModal('clean')">구매하기</button>
+    </div>
 
     <!-- Lite 포맷 -->
     <div class="price-card fade-up">
       <div class="plan-icon">🪶</div>
       <div class="plan-name">Lite 포맷</div>
       <div class="plan-price">₩55,000<span></span></div>
-      <div class="plan-desc">가볍고 빠른 체감의 윈도우 포맷. 불필요한 요소 없이 깔끔하게 설치합니다.</div>
+      <div class="plan-desc">불필요한 요소를 제거한 트윅 설치. 순정보다 가볍고 빠른 체감을 원하는 분께 적합합니다.</div>
       <ul class="plan-features">
-        <li>윈도우 클린 설치</li>
+        <li>윈도우 트윅 설치</li>
         <li>드라이버 기본 세팅</li>
         <li>불필요 앱 제거</li>
         <li>부팅 속도 개선</li>
@@ -990,24 +1008,25 @@
       <button class="btn-plan btn-plan-filled" onclick="openPayModal('bundle')">구매하기</button>
     </div>
 
-    <!-- 듀얼부팅 -->
+    <!-- 듀얼부팅 + 최적화 -->
     <div class="price-card fade-up">
-      <div class="plan-icon">🖥️</div>
-      <div class="plan-name">듀얼부팅</div>
-      <div class="plan-price">₩99,000<span></span></div>
-      <div class="plan-desc">게임 공간과 업무 공간을 완전히 분리. 부팅 시 용도에 맞는 윈도우를 선택해 쾌적하게 사용합니다.</div>
+      <div class="plan-icon">🖥️⚡</div>
+      <div class="plan-name">듀얼부팅 + 최적화</div>
+      <div class="plan-price">₩149,000<span></span></div>
+      <div class="plan-desc">듀얼부팅 구성 후 자체 프로그램으로 최적화까지. 게임·업무 공간을 완전히 분리하고 성능도 극대화합니다.</div>
       <ul class="plan-features">
-        <li>게임 전용 윈도우 구성</li>
-        <li>업무 전용 윈도우 구성</li>
-        <li>각 공간 독립 최적화</li>
-        <li>부팅 선택 메뉴 세팅</li>
-        <li>드라이버 · 앱 분리 설치</li>
+        <li>듀얼부팅 전체 포함</li>
+        <li>Windows 최적화 전체 포함</li>
+        <li>자체 개발 툴 심층 적용</li>
+        <li>게임·업무 완전 분리 + 최적화</li>
         <li>사후관리 1회 포함</li>
       </ul>
-      <button class="btn-plan btn-plan-outline" onclick="openPayModal('dual')">구매하기</button>
+      <button class="btn-plan btn-plan-filled" onclick="openPayModal('dualopt')">구매하기</button>
     </div>
 
   </div>
+  </div>
+  <p class="section-sub fade-up" style="margin-top:20px;font-size:.82rem;color:var(--text-muted);">※ 컴퓨터 컨디션(하드웨어 상태)에 따라 개인 체감은 다를 수 있습니다.</p>
 </section>
 
 <!-- LAUNCH EVENT -->
@@ -1066,9 +1085,12 @@
   </div>
 </section>
 
+<!-- FAQ + CTA (공유 캔버스) -->
+<div class="faq-cta-wrap" style="position:relative;background:var(--bg-dark);">
+<canvas id="faqCtaCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+
 <!-- FAQ -->
-<section id="faq" class="faq-section" style="position:relative;">
-  <canvas id="faqCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+<section id="faq" class="faq-section" style="padding-bottom:0;">
   <div class="center fade-up" style="position:relative;z-index:1;">
     <div class="section-tag">FAQ</div>
     <h2 class="section-title">자주 묻는 질문</h2>
@@ -1082,7 +1104,7 @@
         <span class="faq-arrow">﹀</span>
       </button>
       <div class="faq-a">
-        AnyDesk · TeamViewer 등 공인된 원격 프로그램만 사용합니다. 작업 중 파일 열람·복사·전송은 절대 하지 않으며, 작업이 끝나면 즉시 연결을 종료합니다. 고객님이 화면을 직접 보면서 진행되기 때문에 모든 과정을 실시간으로 확인할 수 있습니다.
+        AnyDesk만 사용합니다. 작업 중 파일 열람·복사·전송은 절대 하지 않으며, 작업이 끝나면 즉시 연결을 종료합니다. 고객님이 화면을 직접 보면서 진행되기 때문에 모든 과정을 실시간으로 확인할 수 있습니다.
       </div>
     </div>
 
@@ -1122,7 +1144,7 @@
         <span class="faq-arrow">﹀</span>
       </button>
       <div class="faq-a">
-        주로 <strong>AnyDesk</strong>를 사용합니다. 고객님이 편한 프로그램이 있다면 그걸로도 가능합니다. 설치 방법을 모르셔도 카카오 채널에서 단계별로 안내해드리니 걱정 안 하셔도 됩니다.
+        <strong>AnyDesk</strong>만 이용 가능합니다. 설치 방법을 모르셔도 카카오 채널에서 단계별로 안내해드리니 걱정 안 하셔도 됩니다.
       </div>
     </div>
 
@@ -1150,15 +1172,17 @@
 </section>
 
 <!-- CTA -->
-<section class="cta-section">
-  <div class="section-tag fade-up" style="margin-bottom:16px;">지금 시작하세요</div>
-  <h2 class="fade-up">PC 성능, 이제 제대로<br /><span style="background:linear-gradient(90deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent">느껴보세요</span></h2>
-  <p class="fade-up">전문가 1:1 원격 작업 · 30분이면 달라집니다.</p>
-  <div class="hero-btns fade-up" style="justify-content:center">
+<section class="cta-section" style="padding-top:0;">
+  <div class="section-tag fade-up" style="margin-bottom:16px;position:relative;z-index:1;">지금 시작하세요</div>
+  <h2 class="fade-up" style="position:relative;z-index:1;">PC 성능, 이제 제대로<br /><span style="background:linear-gradient(90deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent">느껴보세요</span></h2>
+  <p class="fade-up" style="position:relative;z-index:1;">전문가 1:1 원격 작업 · 30분이면 달라집니다.</p>
+  <div class="hero-btns fade-up" style="justify-content:center;position:relative;z-index:1;">
     <button class="btn-primary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">가격 보기</button>
     <button class="btn-outline" onclick="window.open('https://pf.kakao.com/_xkmvxlX/chat','_blank')">카톡으로 문의하기</button>
   </div>
 </section>
+
+</div><!-- /faq-cta-wrap -->
 
 <!-- FOOTER -->
 <footer>
