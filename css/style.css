@@ -83,8 +83,9 @@ body.light .slider-dot { background: rgba(0,0,0,0.15); }
 body.light .slider-dot.active { background: var(--primary); }
 
 /* ─ SERVICES ─ */
-body.light #services { background: var(--bg-card); }
-body.light .service-card { background: var(--bg-card2); border-color: rgba(0,0,0,0.08); }
+body.light #services { background: #ffffff; }
+body.light .section-bg-blur { display: none; }
+body.light .service-card { background: #f5f8fc; border-color: rgba(0,0,0,0.08); }
 body.light .service-card.active { box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 0 1.5px var(--sc-color, var(--border)); }
 
 /* ─ GAMES ─ */
