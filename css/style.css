@@ -17,8 +17,8 @@ body.light {
   --bg-dark:   #f0f4f8;
   --bg-card:   #ffffff;
   --bg-card2:  #e8edf3;
-  --text:      #1a1a2e;
-  --text-muted:#5a6070;
+  --text:      #111111;
+  --text-muted:#444444;
   --border:    rgba(100, 80, 220, 0.18);
   --primary:   #0077cc;
   --secondary: #6b21e8;
@@ -34,7 +34,9 @@ body.light canvas { opacity: 0; }
 
 /* ─ NAV ─ */
 body.light nav { background: rgba(240,244,248,0.92); box-shadow: 0 1px 0 rgba(0,0,0,0.08); }
-body.light .nav-links a.active { text-shadow: none; }
+body.light .nav-links a { color: #333333; }
+body.light .nav-links a:hover { color: var(--primary); }
+body.light .nav-links a.active { color: var(--primary); text-shadow: none; }
 body.light .nav-links a::after { box-shadow: none; }
 body.light .viewer-dot { box-shadow: none; }
 
@@ -343,9 +345,10 @@ h1 .grad {
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 .hero p {
-  max-width: 580px; font-size: 1.15rem; color: var(--text-muted);
+  max-width: 580px; font-size: 1.15rem; color: rgba(255,255,255,0.82);
   line-height: 1.7; margin-bottom: 40px;
 }
+body.light .hero p { color: #222222; }
 .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
 .hero-trust { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 28px; }
 .hero-trust-item {
