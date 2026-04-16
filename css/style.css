@@ -86,6 +86,14 @@ body.light .slider-dot.active { background: var(--primary); }
 body.light #services { background: #ffffff; }
 body.light .section-bg-blur { display: none; }
 body.light .services-dark-overlay { display: none; }
+body.light #svcOuter {
+  -webkit-mask-image: linear-gradient(to right, black 70%, transparent 100%);
+  mask-image: linear-gradient(to right, black 70%, transparent 100%);
+}
+body.light #gameOuter {
+  -webkit-mask-image: linear-gradient(to right, black 70%, transparent 100%);
+  mask-image: linear-gradient(to right, black 70%, transparent 100%);
+}
 body.light .service-card { background: #f5f8fc; border-color: rgba(0,0,0,0.08); }
 body.light .service-card.active { box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 0 1.5px var(--sc-color, var(--border)); }
 
