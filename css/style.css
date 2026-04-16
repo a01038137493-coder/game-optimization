@@ -10,27 +10,137 @@
   --border: rgba(0, 240, 255, 0.15);
 }
 
+/* ══════════════════════════════════════
+   LIGHT MODE
+══════════════════════════════════════ */
 body.light {
-  --bg-dark: #f0f4f8;
-  --bg-card: #ffffff;
-  --bg-card2: #e8edf3;
-  --text: #1a1a2e;
-  --text-muted: #5a607a;
-  --border: rgba(100, 80, 220, 0.2);
-  --primary: #007acc;
+  --bg-dark:   #f0f4f8;
+  --bg-card:   #ffffff;
+  --bg-card2:  #e8edf3;
+  --text:      #1a1a2e;
+  --text-muted:#5a6070;
+  --border:    rgba(100, 80, 220, 0.18);
+  --primary:   #0077cc;
   --secondary: #6b21e8;
+  --accent:    #e0174a;
 }
-body.light nav { background: rgba(240,244,248,0.9); }
-body.light .hero { background: linear-gradient(160deg, #e8edf8 0%, #f0f4f8 100%); }
+
+/* ─ 기본 배경 ─ */
+body.light { background: var(--bg-dark); color: var(--text); }
+body.light ::-webkit-scrollbar-track { background: var(--bg-card2); }
+
+/* ─ 캔버스 숨김 ─ */
 body.light canvas { opacity: 0; }
-body.light .price-card { box-shadow: 0 2px 16px rgba(0,0,0,0.08); }
+
+/* ─ NAV ─ */
+body.light nav { background: rgba(240,244,248,0.92); box-shadow: 0 1px 0 rgba(0,0,0,0.08); }
+body.light .nav-links a.active { text-shadow: none; }
+body.light .nav-links a::after { box-shadow: none; }
+body.light .viewer-dot { box-shadow: none; }
+
+/* ─ HERO ─ */
+body.light .hero { background: linear-gradient(160deg, #dce8f8 0%, #eef2fb 50%, #f0f4f8 100%); }
+body.light .hero-badge {
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(0,119,204,0.25);
+  color: var(--primary);
+}
+body.light .hero-badge span { background: var(--primary); }
+body.light .hero-trust-item {
+  background: rgba(255,255,255,0.75);
+  border-color: rgba(0,0,0,0.1);
+  color: var(--text);
+}
+
+/* ─ 버튼 ─ */
+body.light .btn-primary { box-shadow: 0 4px 16px rgba(0,119,204,0.35); color: #fff; }
+body.light .btn-primary:hover { box-shadow: 0 6px 24px rgba(0,119,204,0.45); }
+body.light .btn-outline { border-color: rgba(0,0,0,0.2); color: var(--text); }
+body.light .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ─ 섹션 공통 ─ */
+body.light section { background: var(--bg-dark); }
+body.light .section-tag {
+  background: rgba(107,33,232,0.08);
+  border-color: rgba(107,33,232,0.2);
+}
+body.light .faq-cta-wrap { background: var(--bg-dark); }
+
+/* ─ 슬라이더 ─ */
+body.light .slider-arrow { background: var(--bg-card); border-color: rgba(0,0,0,0.12); color: var(--text); }
+body.light .slider-arrow:hover { background: rgba(0,119,204,0.08); border-color: var(--primary); box-shadow: none; }
+body.light .slider-dot { background: rgba(0,0,0,0.15); }
+body.light .slider-dot.active { background: var(--primary); }
+
+/* ─ SERVICES ─ */
+body.light #services { background: var(--bg-card); }
+body.light .service-card { background: var(--bg-card2); border-color: rgba(0,0,0,0.08); }
+body.light .service-card.active { box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 0 1.5px var(--sc-color, var(--border)); }
+
+/* ─ GAMES ─ */
+body.light .game-card { background: var(--bg-card2); border-color: rgba(0,0,0,0.08); }
+body.light .game-card.active { box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+
+/* ─ HOW IT WORKS ─ */
+body.light #how { background: var(--bg-card2); }
+body.light .remote-highlight {
+  background: linear-gradient(135deg, rgba(107,33,232,0.07), rgba(0,119,204,0.06));
+  border-color: rgba(107,33,232,0.2);
+}
+body.light .remote-notice {
+  background: rgba(0,119,204,0.05);
+  border-color: rgba(0,119,204,0.18);
+}
+
+/* ─ FEATURES ─ */
+body.light #features { background: var(--bg-card); }
+body.light .feature-item:hover { background: rgba(0,119,204,0.05); border-color: rgba(0,119,204,0.18); }
+body.light .feature-icon { background: rgba(0,119,204,0.1); }
+body.light .fps-display {
+  background: var(--bg-card2);
+  border-color: rgba(0,0,0,0.1);
+}
+body.light .fps-display::before { background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,119,204,0.07), transparent); }
+body.light .bar-bg { background: rgba(0,0,0,0.08); }
+
+/* ─ ICON COLORS ─ */
+body.light .icon-cyan   { background: rgba(0,119,204,0.1); }
+body.light .icon-purple { background: rgba(107,33,232,0.1); }
+body.light .icon-pink   { background: rgba(224,23,74,0.1); }
+body.light .icon-green  { background: rgba(0,160,80,0.1); }
+body.light .icon-orange { background: rgba(220,130,0,0.1); }
+body.light .icon-blue   { background: rgba(30,100,220,0.1); }
+
+/* ─ PRICING ─ */
+body.light .price-card { background: var(--bg-card); border-color: rgba(0,0,0,0.1); box-shadow: 0 2px 16px rgba(0,0,0,0.06); }
+body.light .price-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+body.light .price-card.popular { border-color: var(--primary); box-shadow: 0 4px 32px rgba(0,119,204,0.18); }
+body.light .btn-plan-outline { border-color: rgba(0,0,0,0.2); color: var(--text); }
+body.light .btn-plan-outline:hover { border-color: var(--primary); color: var(--primary); }
+body.light .btn-plan-filled { box-shadow: 0 4px 16px rgba(0,119,204,0.3); color: #fff; }
+
+/* ─ REVIEWS ─ */
+body.light #reviews { background: var(--bg-card2); }
+body.light .review-card { background: var(--bg-card); border-color: rgba(0,0,0,0.08); }
+body.light .review-card:hover { border-color: rgba(107,33,232,0.25); }
+
+/* ─ LAUNCH/EVENTS ─ */
+body.light .launch-section { background: var(--bg-dark); }
+body.light .launch-right { background: var(--bg-card); border-color: rgba(0,0,0,0.1); }
+body.light .slot-bar-wrap { background: rgba(0,0,0,0.08); }
+body.light .g-icon { background: rgba(0,119,204,0.08); border-color: rgba(0,119,204,0.15); }
+
+/* ─ FAQ ─ */
 body.light .faq-q { background: none; color: var(--text); }
 body.light .faq-item { border-bottom-color: rgba(0,0,0,0.1); }
 body.light .faq-item:first-child { border-top-color: rgba(0,0,0,0.1); }
-body.light section { background: var(--bg-dark); }
-body.light #how, body.light #reviews { background: var(--bg-card2); }
-body.light ::-webkit-scrollbar-track { background: var(--bg-card2); }
-body.light .faq-cta-wrap { background: var(--bg-dark); }
+
+/* ─ FOOTER ─ */
+body.light footer { background: var(--bg-card); border-top-color: rgba(0,0,0,0.1); }
+
+/* ─ 스크롤 탑 ─ */
+body.light .scroll-top-btn { background: var(--bg-card); border-color: rgba(0,0,0,0.15); color: var(--text); box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+body.light .scroll-top-btn:hover { background: rgba(0,119,204,0.08); border-color: var(--primary); box-shadow: none; }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
