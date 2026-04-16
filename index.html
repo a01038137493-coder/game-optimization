@@ -22,8 +22,8 @@
     gtag('config', 'AW-18079979138');
   </script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-  <!-- NicePay SDK -->
-  <script src="https://pay.nicepay.co.kr/v1/js/"></script>
+  <!-- PortOne V2 SDK -->
+  <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
   <!-- Kakao SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="/css/style.css" />
@@ -175,7 +175,7 @@
       <p style="margin:0 0 8px;"><strong style="color:var(--text);">수집 항목:</strong> 이름, 이메일, 전화번호</p>
       <p style="margin:0 0 8px;"><strong style="color:var(--text);">수집 목적:</strong> 서비스 제공, 결제 처리, 고객 지원, 서비스 안내</p>
       <p style="margin:0 0 8px;"><strong style="color:var(--text);">보유 기간:</strong> 회원 탈퇴 시까지 (관련 법령에 따라 일부 정보는 최대 5년 보관)</p>
-      <p style="margin:0 0 8px;"><strong style="color:var(--text);">제3자 제공:</strong> 결제 처리를 위해 NicePay(나이스페이먼츠)에 필요한 최소한의 정보를 제공합니다.</p>
+      <p style="margin:0 0 8px;"><strong style="color:var(--text);">제3자 제공:</strong> 결제 처리를 위해 PortOne(포트원)에 필요한 최소한의 정보를 제공합니다.</p>
       <p style="margin:0 0 20px;"><strong style="color:var(--text);">문의:</strong> a01038137493@gmail.com</p>
 
       <p style="margin:0;font-size:.8rem;">사업자: 김기웅 · 사업자등록번호: 688-12-02887 · 통신판매업신고: 제2026-대구수성구-0404호</p>
@@ -339,7 +339,7 @@
             <textarea class="pay-form-textarea" id="fi-memo" placeholder="예: 롤 할 때 잔렉이 심해요. 포맷 후 최적화까지 원합니다."></textarea>
           </div>
 
-          <button class="btn-pay" id="payBtn" onclick="triggerNicePay()">카드로 결제하기 →</button>
+          <button class="btn-pay" id="payBtn" onclick="triggerPortOne()">카드로 결제하기 →</button>
           <!-- 어드민 테스트 버튼 (TEST_MODE일 때만 표시) -->
           <button id="adminTestBtn" onclick="adminTestPay()" style="display:none;margin-top:10px;width:100%;padding:11px;border-radius:10px;border:1px dashed rgba(255,160,0,.4);background:rgba(255,160,0,.06);color:#ffa500;font-family:'Pretendard',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:background .2s;">
             ⚙️ [ADMIN] 테스트 결제 완료 처리

@@ -21,8 +21,8 @@ js/app.js           모든 JS (~828줄)
 api/
   kakao-callback.js   GET  /api/kakao-callback  — Kakao OAuth 콜백
   kakao-notify.js     POST /api/kakao-notify    — 결제 후 카카오톡 자동 메시지
-  payment-confirm.js  POST /api/payment-confirm — NicePay 서버 승인
-  payment-result.js   POST /api/payment-result  — NicePay 결과 리다이렉트
+  payment-confirm.js  POST /api/payment-confirm — PortOne V2 서버 검증
+  payment-result.js   GET  /api/payment-result  — PortOne V2 모바일 리다이렉트 처리
 ```
 
 **중요**: `index.html`의 onclick/onchange 인라인 핸들러가 `js/app.js`의 전역 `function` 선언을 참조함. 함수를 IIFE나 모듈로 감싸면 안 됨.
@@ -32,8 +32,7 @@ api/
 | Variable | Used In |
 |---|---|
 | `KAKAO_REST_API_KEY` | `api/kakao-callback.js` |
-| `NICEPAY_CLIENT_ID` | `api/payment-confirm.js` |
-| `NICEPAY_SECRET_KEY` | `api/payment-confirm.js` |
+| `PORTONE_REST_API_SECRET` | `api/payment-confirm.js`, `api/payment-result.js` |
 
 ## Key Frontend Constants
 
@@ -45,12 +44,17 @@ const KAKAO_REST_KEY = '...'; // REST API key (OAuth URL)
 const TEST_MODE = true;       // 운영 전 false로 변경
 ```
 
-## Payment Flow
+## Payment Flow (PortOne V2)
 
-1. `triggerNicePay()` → NicePay JS SDK 호출
-2. NicePay → `/api/payment-result` POST → `/?payResult=ok&orderId=...` 리다이렉트
+1. `triggerPortOne()` → `PortOne.requestPayment()` 팝업 호출
+2. 팝업 결과 수신 → `POST /api/payment-confirm` 서버 검증
 3. `renderComplete()` 결과 표시 + `kakaoNotify()` 카카오톡 자동 발송
 4. 쿠폰 적용 시 `_couponDiscount` 만큼 차감된 금액으로 결제
+5. 모바일: `redirectUrl=/api/payment-result` → PortOne이 리다이렉트, 서버에서 재검증 후 `/?payResult=ok` 리다이렉트
+
+**Frontend 상수** (`js/app.js`):
+- `PORTONE_STORE_ID`: PortOne 스토어 ID
+- `PORTONE_CHANNEL_KEY`: PortOne 채널 키 (대시보드 → 결제연동 → 채널관리)
 
 ## Kakao Login Flow
 

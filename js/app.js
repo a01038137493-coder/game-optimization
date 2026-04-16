@@ -652,9 +652,10 @@ document.addEventListener('click', function(e) {
 });
 
 // ══════════════════════════════════════
-// NICEPAY 결제
+// PORTONE (아임포트) 결제
 // ══════════════════════════════════════
-const NICEPAY_CLIENT_ID = 'R2_55ad2b13ccc5462d8d10b6324c708864';
+const PORTONE_STORE_ID    = 'store-f1358e77-1ff2-4c57-a9a8-0515a6eee134';
+const PORTONE_CHANNEL_KEY = 'channel-key-4ab026fa-618a-415e-a278-e43d151a6707';
 
 let _couponDiscount = 0;
 let _couponCode = '';
@@ -818,7 +819,7 @@ function validateForm() {
   return ok;
 }
 
-function triggerNicePay() {
+async function triggerPortOne() {
   if (!_plan) return;
   if (!validateForm()) return;
 
@@ -826,36 +827,67 @@ function triggerNicePay() {
   const buyerContact = document.getElementById('fi-contact').value.trim();
   const game         = getSelectedGames().join(', ');
   const memo         = document.getElementById('fi-memo').value.trim();
-
-  // 결제 중 상태 저장 (redirect 후 복원)
-  sessionStorage.setItem('payInfo', JSON.stringify({
-    name: buyerName, contact: buyerContact, game, memo,
-    planLabel: _plan.label, planName: _plan.name, amount: _plan.price,
-    orderId: _orderId,
-  }));
+  const finalAmount  = _plan.price - _couponDiscount;
 
   const btn = document.getElementById('payBtn');
   btn.disabled = true;
   btn.textContent = '결제창 여는 중...';
   setStep(2);
 
-  AUTHNICE.requestPay({
-    clientId:  NICEPAY_CLIENT_ID,
-    method:    'card',
-    orderId:   _orderId,
-    amount:    _plan.price - _couponDiscount,
-    goodsName: _plan.name,
-    buyerName,
-    buyerTel:  buyerContact.replace(/\D/g,'').length >= 10 ? buyerContact : '',
-    returnUrl: window.location.origin + '/api/payment-result',
-    fnError: function(result) {
+  const payInfo = {
+    name: buyerName, contact: buyerContact, game, memo,
+    planLabel: _plan.label, planName: _plan.name, amount: _plan.price,
+    orderId: _orderId,
+  };
+  sessionStorage.setItem('payInfo', JSON.stringify(payInfo));
+
+  try {
+    const response = await PortOne.requestPayment({
+      storeId:     PORTONE_STORE_ID,
+      channelKey:  PORTONE_CHANNEL_KEY,
+      paymentId:   _orderId,
+      orderName:   _plan.name,
+      totalAmount: finalAmount,
+      currency:    'CURRENCY_KRW',
+      payMethod:   'CARD',
+      customer: {
+        fullName:    buyerName,
+        phoneNumber: buyerContact.replace(/\D/g, ''),
+      },
+      redirectUrl: window.location.origin + '/api/payment-result',
+    });
+
+    // 결제 실패/취소
+    if (response && response.code !== undefined) {
       btn.disabled = false;
       btn.textContent = '카드로 결제하기 →';
       setStep(1);
-      // 에러 토스트
-      showToast('❌ ' + (result.errorMsg || '결제 중 오류가 발생했습니다.'), 'error');
-    },
-  });
+      showToast('❌ ' + (response.message || '결제가 취소되었습니다.'));
+      return;
+    }
+
+    // 서버 측 결제 검증
+    btn.textContent = '결제 확인 중...';
+    const confirmRes = await fetch('/api/payment-confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentId: _orderId, amount: finalAmount }),
+    });
+    const confirmData = await confirmRes.json();
+
+    if (confirmData.success) {
+      sessionStorage.removeItem('payInfo');
+      renderComplete(true, payInfo, _orderId, finalAmount);
+    } else {
+      renderComplete(false, null, _orderId, finalAmount);
+    }
+  } catch (err) {
+    console.error('[PortOne] 결제 오류:', err);
+    btn.disabled = false;
+    btn.textContent = '카드로 결제하기 →';
+    setStep(1);
+    showToast('❌ 결제 처리 중 오류가 발생했습니다.');
+  }
 }
 
 // ── 카카오 자동 알림 ──
