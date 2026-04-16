@@ -63,7 +63,7 @@ function makePeekCarousel({ trackId, outerEl, dotsId, counterId, prevId, nextId,
   const cards   = Array.from(track.children);
   const total   = cards.length;
   const GAP     = 20;
-  let cur = 0, autoTimer, dragging = false, startX = 0, diffX = 0;
+  let cur = 0, autoTimer, dragging = false, mouseIsDown = false, startX = 0, diffX = 0;
 
   // 도트 생성
   cards.forEach((_, i) => {
@@ -96,8 +96,9 @@ function makePeekCarousel({ trackId, outerEl, dotsId, counterId, prevId, nextId,
   document.getElementById(nextId).addEventListener('click', () => { go(cur + 1); resetAuto(); });
 
   // 스와이프
-  function onStart(x) { dragging = false; startX = x; diffX = 0; }
+  function onStart(x) { mouseIsDown = true; dragging = false; startX = x; diffX = 0; }
   function onMove(x)  {
+    if (!mouseIsDown) return;
     diffX = x - startX;
     if (Math.abs(diffX) > 5) dragging = true;
     if (!dragging) return;
@@ -107,18 +108,21 @@ function makePeekCarousel({ trackId, outerEl, dotsId, counterId, prevId, nextId,
     track.style.transform  = `translateX(${offset - cur * (cardW + GAP) + diffX}px)`;
   }
   function onEnd() {
+    if (!mouseIsDown && !dragging) return;
+    mouseIsDown = false;
     if (Math.abs(diffX) > 60) go(diffX < 0 ? cur + 1 : cur - 1);
     else go(cur);
     resetAuto();
-    setTimeout(() => { dragging = false; }, 0);
+    setTimeout(() => { dragging = false; diffX = 0; }, 0);
   }
   track.addEventListener('touchstart', e => onStart(e.touches[0].clientX), { passive: true });
   track.addEventListener('touchmove',  e => onMove(e.touches[0].clientX),  { passive: true });
   track.addEventListener('touchend',   onEnd);
-  track.addEventListener('mousedown',  e => onStart(e.clientX));
-  track.addEventListener('mousemove',  e => { if (e.buttons === 1) onMove(e.clientX); });
+  track.addEventListener('mousedown',  e => { e.preventDefault(); onStart(e.clientX); });
+  track.addEventListener('mousemove',  e => { if (mouseIsDown) onMove(e.clientX); });
   track.addEventListener('mouseup',    onEnd);
-  track.addEventListener('mouseleave', () => { if (dragging) onEnd(); });
+  track.addEventListener('mouseleave', () => { if (mouseIsDown) onEnd(); });
+  document.addEventListener('mouseup', () => { if (mouseIsDown) onEnd(); });
 
   // 리사이즈 대응
   window.addEventListener('resize', () => go(cur));
@@ -1375,16 +1379,12 @@ document.addEventListener('click', e => {
   const saved = localStorage.getItem('theme');
   if (saved === 'light') {
     document.body.classList.add('light');
-    const btn = document.getElementById('themeToggleBtn');
-    if (btn) btn.textContent = '☀️';
   }
 })();
 
 function toggleTheme() {
   const isLight = document.body.classList.toggle('light');
   localStorage.setItem('theme', isLight ? 'light' : 'dark');
-  const btn = document.getElementById('themeToggleBtn');
-  if (btn) btn.textContent = isLight ? '☀️' : '🌙';
 }
 
 function slidePricing(dir) {
@@ -1731,3 +1731,15 @@ function initCanvas(id) {
   requestAnimationFrame(draw);
 })();
 
+
+function openRefundModal() {
+  document.getElementById('refundModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeRefundModal() {
+  document.getElementById('refundModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeRefundModal();
+});
