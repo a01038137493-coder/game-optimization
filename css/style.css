@@ -42,8 +42,7 @@ body.light .viewer-dot { box-shadow: none; }
 
 /* ─ HERO ─ */
 body.light .hero { background: linear-gradient(160deg, #dce8f8 0%, #eef2fb 50%, #f0f4f8 100%); }
-body.light .hero::before { content: none; }
-body.light .hero::after  { content: none; }
+/* hero canvas는 body.light canvas { opacity:0 } 으로 이미 숨김 */
 body.light .hero-badge {
   background: rgba(255,255,255,0.8);
   border-color: rgba(0,119,204,0.25);
@@ -471,7 +470,8 @@ section::before {
 ══════════════════════════════════════ */
 #services { background: var(--bg-card); }
 #services::before, #services::after { display: none; }
-/* hero 오로라는 라이트모드에서만 숨김 (다크모드는 유지) */
+/* hero canvas aurora 사용 — CSS pseudo 오버레이 비활성화 */
+.hero::before, .hero::after { content: none; }
 .section-bg-blur {
   position: absolute;
   inset: -20px;
