@@ -1197,11 +1197,11 @@
   const startTime = performance.now();
 
   const layers = [
-    { yBase: 0.44, amp: 0.06, freq: 1.2, speed: 0.000008, width: 0.13, colors: ['#00e87a','#00b85e'], offset: 0   },  // 녹색
-    { yBase: 0.38, amp: 0.08, freq: 0.9, speed: 0.000006, width: 0.10, colors: ['#ff4466','#cc1133'], offset: 2.1 },  // 빨간
-    { yBase: 0.50, amp: 0.05, freq: 1.5, speed: 0.00001,  width: 0.09, colors: ['#a855f7','#7c3aed'], offset: 4.3 },  // 보라
-    { yBase: 0.34, amp: 0.04, freq: 2.0, speed: 0.000012, width: 0.07, colors: ['#00aaff','#0066dd'], offset: 1.0 },  // 푸른
-    { yBase: 0.46, amp: 0.07, freq: 0.7, speed: 0.000005, width: 0.08, colors: ['#ffcc33','#ff9900'], offset: 3.5 },  // 황색
+    { yBase: 0.40, amp: 0.10, freq: 1.2, speed: 0.000008, width: 0.22, colors: ['#00e87a','#00b85e'], offset: 0   },  // 녹색
+    { yBase: 0.35, amp: 0.12, freq: 0.9, speed: 0.000006, width: 0.18, colors: ['#ff4466','#cc1133'], offset: 2.1 },  // 빨간
+    { yBase: 0.52, amp: 0.09, freq: 1.5, speed: 0.00001,  width: 0.16, colors: ['#a855f7','#7c3aed'], offset: 4.3 },  // 보라
+    { yBase: 0.30, amp: 0.07, freq: 2.0, speed: 0.000012, width: 0.13, colors: ['#00aaff','#0066dd'], offset: 1.0 },  // 푸른
+    { yBase: 0.48, amp: 0.11, freq: 0.7, speed: 0.000005, width: 0.15, colors: ['#ffcc33','#ff9900'], offset: 3.5 },  // 황색
   ];
 
   function resize() {
@@ -1229,9 +1229,9 @@
       const cy = (layer.yBase + Math.sin(nx * Math.PI * layer.freq + t * layer.speed * 1000 + layer.offset) * layer.amp) * H;
       const grad = ctx.createLinearGradient(x, cy - bandH, x, cy + bandH);
       grad.addColorStop(0,   'transparent');
-      grad.addColorStop(0.2, layer.colors[0] + '22');
-      grad.addColorStop(0.5, layer.colors[0] + '55');
-      grad.addColorStop(0.7, layer.colors[1] + '33');
+      grad.addColorStop(0.2, layer.colors[0] + '44');
+      grad.addColorStop(0.5, layer.colors[0] + '99');
+      grad.addColorStop(0.7, layer.colors[1] + '66');
       grad.addColorStop(1,   'transparent');
       ctx.fillStyle = grad;
       ctx.fillRect(x, cy - bandH, W / steps + 1, bandH * 2);
