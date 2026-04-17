@@ -284,7 +284,7 @@ function renderRecentOrders(orders) {
       <td>${o.buyer_name || '(미입력)'}</td>
       <td>${o.plan_name}</td>
       <td>₩${o.amount.toLocaleString()}</td>
-      <td><span class="status-${o.status}">${getStatusLabel(o.status)}</span></td>
+      <td><span class="status-${(o.order_id||'').startsWith('BANK-') && o.status==='pending' ? 'checking' : o.status}">${(o.order_id||'').startsWith('BANK-') && o.status==='pending' ? '결제확인중' : getStatusLabel(o.status)}</span></td>
       <td>${new Date(o.created_at).toLocaleDateString('ko-KR')}</td>
     </tr>
   `).join('');
@@ -346,7 +346,7 @@ function renderAllOrders(orders) {
         <td>${games}</td>
         <td>${o.memo ? o.memo.substring(0,20) + (o.memo.length > 20 ? '...' : '') : '-'}</td>
         <td>${dateTimeStr}</td>
-        <td><span class="status-${o.status}">${getStatusLabel(o.status)}</span></td>
+        <td><span class="status-${(o.order_id||'').startsWith('BANK-') && o.status==='pending' ? 'checking' : o.status}">${(o.order_id||'').startsWith('BANK-') && o.status==='pending' ? '결제확인중' : getStatusLabel(o.status)}</span></td>
         <td style="display:flex;gap:6px;">
           <button class="admin-btn" onclick="openOrderDetail('${o.id}')">상세</button>
           <select style="padding:6px 8px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;cursor:pointer;" onchange="if(this.value) { updateOrderStatus('${o.id}', this.value); this.value=''; }">
@@ -597,6 +597,7 @@ async function sendKakaoNotify() {
 // 헬퍼: 상태 라벨
 function getStatusLabel(status) {
   const labels = {
+    checking: '결제확인중',
     pending: '진행중',
     working: '작업중',
     done: '완료',

@@ -724,9 +724,6 @@ function openPayModal(planKey) {
   const saved = localStorage.getItem('kakaoUser');
   updateLoginUI(saved ? JSON.parse(saved) : null);
   setPayLock(!saved);
-  const btn = document.getElementById('payBtn');
-  btn.disabled = false;
-  btn.textContent = '카드로 결제하기 →';
 
   // 폼 화면
   document.getElementById('payStepForm').style.display = '';
@@ -749,29 +746,24 @@ document.getElementById('payModalBackdrop').addEventListener('click', function(e
 });
 
 function setPayLock(locked) {
-  const btn       = document.getElementById('payBtn');
-  const adminBtn  = document.getElementById('adminTestBtn');
-  const fields    = ['fi-name','fi-contact','fi-memo'];
+  const btn     = document.getElementById('payBtn');
+  const bankBtn = document.getElementById('bankBtn');
+  const fields  = ['fi-name','fi-contact','fi-memo'];
   if (!btn) return;
   if (locked) {
-    btn.disabled = true;
     btn.textContent = '카카오 로그인 후 결제 가능합니다';
     btn.style.opacity = '.4';
-    btn.style.cursor  = 'not-allowed';
+    if (bankBtn) { bankBtn.disabled = true; bankBtn.style.opacity = '.4'; bankBtn.style.cursor = 'not-allowed'; }
     fields.forEach(id => { const el = document.getElementById(id); if(el) el.disabled = true; });
     document.querySelectorAll('#gameDropdownMenu input').forEach(c => c.disabled = true);
     const gdd = document.getElementById('gameDropdown'); if (gdd) gdd.dataset.disabled = '1';
-    if (adminBtn) adminBtn.style.display = 'none';
   } else {
-    btn.disabled = false;
-    btn.textContent = '카드로 결제하기 →';
-    btn.style.opacity = '';
-    btn.style.cursor  = '';
+    btn.textContent = '카드로 결제하기 (준비중)';
+    btn.style.opacity = '.45';
+    if (bankBtn) { bankBtn.disabled = false; bankBtn.style.opacity = ''; bankBtn.style.cursor = ''; }
     fields.forEach(id => { const el = document.getElementById(id); if(el) el.disabled = false; });
     document.querySelectorAll('#gameDropdownMenu input').forEach(c => c.disabled = false);
     const gdd2 = document.getElementById('gameDropdown'); if (gdd2) gdd2.dataset.disabled = '0';
-    // 테스트 결제 완료 버튼 표시 (항상 활성화)
-    if (adminBtn) adminBtn.style.display = '';
   }
 }
 
@@ -865,7 +857,7 @@ async function triggerPortOne() {
     // 결제 실패/취소
     if (response && response.code !== undefined) {
       btn.disabled = false;
-      btn.textContent = '카드로 결제하기 →';
+      btn.textContent = '카드로 결제하기 (준비중)';
       setStep(1);
       showToast('❌ ' + (response.message || '결제가 취소되었습니다.'));
       return;
@@ -889,7 +881,7 @@ async function triggerPortOne() {
   } catch (err) {
     console.error('[PortOne] 결제 오류:', err);
     btn.disabled = false;
-    btn.textContent = '카드로 결제하기 →';
+    btn.textContent = '카드로 결제하기 (준비중)';
     setStep(1);
     showToast('❌ 결제 처리 중 오류가 발생했습니다.');
   }
@@ -1007,9 +999,112 @@ function renderComplete(success, info, orderId, amount, isReplay = false) {
 // 결제내역 폴링 인터벌 ID
 let payHistoryPollInterval = null;
 
+// 계좌이체 결제
+let _bankOrderId = null;
+let _bankOrderInfo = null;
+
+async function bankTransferPay() {
+  if (!_plan) { showToast('플랜을 선택해주세요.'); return; }
+  if (!validateForm()) return;
+
+  const name    = document.getElementById('fi-name').value.trim();
+  const contact = document.getElementById('fi-contact').value.trim();
+  const game    = getSelectedGames().join(', ');
+  const memo    = document.getElementById('fi-memo')?.value.trim() || '';
+  const finalAmt = _plan.price - (_couponDiscount || 0);
+
+  _bankOrderId   = 'BANK-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+  _bankOrderInfo = { planLabel: _plan.label, planName: _plan.name, name, contact, game, memo, amount: _plan.price };
+
+  // 버튼 누르는 즉시 주문 생성 → 어드민/결제내역에 바로 반영
+  const bankBtn = document.getElementById('bankBtn');
+  if (bankBtn) { bankBtn.disabled = true; bankBtn.textContent = '처리 중...'; }
+
+  const kakaoUser = JSON.parse(localStorage.getItem('kakaoUser') || 'null');
+  try {
+    const res = await fetch('/api/save-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId:        _bankOrderId,
+        planKey:        _plan.label,
+        planName:       _plan.name,
+        amount:         finalAmt,
+        couponCode:     _couponCode || null,
+        couponDiscount: _couponDiscount || 0,
+        buyerName:      name,
+        buyerContact:   contact,
+        games:          game || null,
+        memo:           memo || null,
+        kakaoId:        kakaoUser?.id || null,
+        payMethod:      'bank',
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.details || `HTTP ${res.status}`);
+    console.log('✅ 계좌이체 주문 저장:', data);
+  } catch (e) {
+    console.error('❌ 계좌이체 주문 저장 오류:', e);
+    showToast('❌ 주문 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
+    if (bankBtn) { bankBtn.disabled = false; bankBtn.textContent = '🏦 계좌이체로 결제하기'; }
+    return;
+  }
+
+  if (bankBtn) { bankBtn.disabled = false; bankBtn.textContent = '🏦 계좌이체로 결제하기'; }
+  kakaoNotify({ planName: _plan.name, amount: finalAmt, orderId: _bankOrderId, games: game, name });
+
+  const overlay = document.createElement('div');
+  overlay.id = 'bankModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px;';
+  overlay.innerHTML = `
+    <div style="background:#13131f;border:1px solid rgba(0,240,255,.2);border-radius:18px;padding:28px 24px;max-width:360px;width:100%;text-align:center;font-family:'Pretendard',sans-serif;">
+      <div style="font-size:2.2rem;margin-bottom:6px;">🏦</div>
+      <h3 style="color:#00f0ff;font-size:1.1rem;margin:0 0 4px;font-weight:800;">계좌이체 결제</h3>
+      <p style="color:rgba(255,255,255,.5);font-size:.82rem;margin:0 0 20px;line-height:1.5;">아래 계좌로 입금 후 카카오 채널로 알려주세요</p>
+      <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:18px;margin-bottom:16px;text-align:left;">
+        <div style="display:grid;gap:10px;">
+          <div>
+            <div style="color:rgba(255,255,255,.45);font-size:.72rem;margin-bottom:2px;">은행</div>
+            <div style="color:#fff;font-weight:700;font-size:.95rem;">카카오뱅크</div>
+          </div>
+          <div>
+            <div style="color:rgba(255,255,255,.45);font-size:.72rem;margin-bottom:4px;">계좌번호</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="color:#fff;font-weight:800;font-size:1rem;letter-spacing:.04em;">3333-37-1466614</span>
+              <button onclick="navigator.clipboard.writeText('3333-37-1466614').then(()=>showToast('✅ 복사됨'))" style="padding:3px 10px;border-radius:6px;border:1px solid rgba(0,240,255,.4);background:rgba(0,240,255,.08);color:#00f0ff;font-size:.73rem;cursor:pointer;white-space:nowrap;">복사</button>
+            </div>
+          </div>
+          <div>
+            <div style="color:rgba(255,255,255,.45);font-size:.72rem;margin-bottom:2px;">예금주</div>
+            <div style="color:#fff;font-weight:700;font-size:.95rem;">게임부스트프로(김기웅)</div>
+          </div>
+          <div>
+            <div style="color:rgba(255,255,255,.45);font-size:.72rem;margin-bottom:2px;">입금 금액</div>
+            <div style="color:#00f0ff;font-weight:900;font-size:1.3rem;">₩${finalAmt.toLocaleString()}</div>
+          </div>
+        </div>
+      </div>
+      <p style="color:rgba(255,255,255,.45);font-size:.78rem;margin:0 0 18px;line-height:1.6;">입금자명은 <strong style="color:rgba(255,255,255,.8);">${name}</strong> 또는 연락처로 해주세요.<br/>입금 확인 후 10분 내 카카오 채널로 안내드립니다.</p>
+      <button onclick="confirmBankTransfer()" style="width:100%;padding:13px;border-radius:12px;border:none;background:#FEE500;color:#3A1D1D;font-weight:800;font-size:.95rem;cursor:pointer;">💬 카카오 채널로 연락하기</button>
+      <button onclick="document.getElementById('bankModal').remove();closePayModal();" style="width:100%;margin-top:8px;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);font-weight:600;font-size:.85rem;cursor:pointer;">확인</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+
+function confirmBankTransfer() {
+  const modal = document.getElementById('bankModal');
+  if (modal) modal.remove();
+  closePayModal();
+  showToast('✅ 주문 접수 완료! 입금 후 카카오 채널로 연락해주세요.');
+  window.open('https://pf.kakao.com/_xkmvxlX/chat', '_blank');
+}
+
 // 주문 상태 라벨 변환
 function getStatusLabel(status) {
   switch(status) {
+    case 'checking':  return '결제확인중';
     case 'pending':   return '진행중';
     case 'working':   return '작업중';
     case 'done':      return '완료';
@@ -1085,10 +1180,12 @@ function updatePayHistoryDisplay(orders) {
   _payHistOrders = orders;
   const body = document.getElementById('payHistBody');
   body.innerHTML = orders.map((o, idx) => {
-    const statusLabel = getStatusLabel(o.status || 'pending');
+    const isBank = (o.order_id || '').startsWith('BANK-');
+    const statusLabel = isBank && o.status === 'pending' ? '결제확인중' : getStatusLabel(o.status || 'pending');
     const statusColor = o.status === 'done' || o.status === 'completed' ? 'var(--primary)' :
                        o.status === 'cancelled' ? '#ff6464' :
-                       o.status === 'working' ? '#ff9800' : '#ffa500';
+                       o.status === 'working' ? '#ff9800' :
+                       isBank ? '#a78bfa' : '#ffa500';
 
     const date = new Date(o.created_at);
     const dateStr = date.toLocaleDateString('ko-KR');

@@ -1281,8 +1281,17 @@ body.light .dsk-float-lbl  { color: rgba(30,30,60,.5); }
 @media (max-width: 860px) {
   .desktop-inner { flex-direction: column; gap: 40px; }
   .desktop-feature-list { grid-template-columns: 1fr; }
-  .desktop-mockup { width: 100%; }
+  .desktop-mockup { width: 100%; height: auto; }
   .mockup-window { width: 100%; max-width: 540px; margin: 0 auto; }
+  .dsk-main {
+    position: relative; left: auto; top: auto;
+    width: 100%; max-width: 380px;
+    margin: 0 auto;
+    transform: none;
+  }
+  .dsk-float { display: none; }
+  #desktop-app { min-height: auto; padding: 80px 6%; }
+  .desktop-dl-btn { display: none !important; }
 }
 
 /* ── CTA ── */
@@ -1530,9 +1539,9 @@ body.light .refund-row-head span { background: rgba(0,119,204,.07) !important; }
 
   /* ── HERO — 앱 스타일 풀스크린 ── */
   .hero {
-    min-height: auto;
-    padding: 80px 20px 60px;
-    justify-content: flex-start;
+    min-height: 100svh;
+    padding: 100px 20px 80px;
+    justify-content: center;
     text-align: left;
     align-items: flex-start;
   }

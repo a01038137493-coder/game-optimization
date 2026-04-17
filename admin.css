@@ -294,6 +294,16 @@ body {
   font-weight: 600;
 }
 
+.status-checking {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+  font-size: .85rem;
+  font-weight: 600;
+}
+
 .status-cancelled {
   display: inline-block;
   padding: 4px 12px;

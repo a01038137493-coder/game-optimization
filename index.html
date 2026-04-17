@@ -505,11 +505,8 @@
             <textarea class="pay-form-textarea" id="fi-memo" placeholder="예: 롤 할 때 잔렉이 심해요. 포맷 후 최적화까지 원합니다."></textarea>
           </div>
 
-          <button class="btn-pay" id="payBtn" onclick="triggerPortOne()">카드로 결제하기 →</button>
-          <!-- 어드민 테스트 버튼 (TEST_MODE일 때만 표시) -->
-          <button id="adminTestBtn" onclick="adminTestPay()" style="display:none;margin-top:10px;width:100%;padding:11px;border-radius:10px;border:1px dashed rgba(255,160,0,.4);background:rgba(255,160,0,.06);color:#ffa500;font-family:'Pretendard',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:background .2s;">
-            ⚙️ [ADMIN] 테스트 결제 완료 처리
-          </button>
+          <button class="btn-pay" id="payBtn" disabled style="opacity:.45;cursor:not-allowed;box-shadow:none;">카드로 결제하기 (준비중)</button>
+          <button class="btn-pay" id="bankBtn" onclick="bankTransferPay()" style="margin-top:10px;">🏦 계좌이체로 결제하기</button>
         </div>
       </div>
     </div>
@@ -1290,7 +1287,7 @@
 
   </div>
   </div>
-  <p class="section-sub fade-up" style="margin-top:20px;font-size:.82rem;color:var(--text-muted);">※ 컴퓨터 컨디션(하드웨어 상태)에 따라 개인 체감은 다를 수 있습니다.</p>
+  <p class="section-sub fade-up" style="margin-top:20px;font-size:.82rem;color:var(--text-muted);text-align:center;width:100%;">※ 컴퓨터 컨디션(하드웨어 상태)에 따라 개인 체감은 다를 수 있습니다.</p>
 </section>
 
 <!-- LAUNCH EVENT -->

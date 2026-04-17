@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     orderId, planKey, planName, amount,
     couponCode, couponDiscount,
     buyerName, buyerContact, games, memo,
-    kakaoId,
+    kakaoId, payMethod,
   } = req.body;
 
   if (!orderId || !planName || !amount) {
