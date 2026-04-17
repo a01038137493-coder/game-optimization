@@ -66,8 +66,8 @@ function makePeekCarousel({ trackId, outerEl, dotsId, counterId, prevId, nextId,
   // 양끝에 클론 추가 → 무한 루프 + 양옆 peek
   const origCards = Array.from(track.children);
   const total     = origCards.length;
-  for (let i = CLONES - 1; i >= 0; i--) {
-    const cl = origCards[(total - 1 - i + total) % total].cloneNode(true);
+  for (let i = 0; i < CLONES; i++) {
+    const cl = origCards[total - 1 - i].cloneNode(true);
     cl.dataset.clone = '1';
     track.insertBefore(cl, track.firstChild);
   }
