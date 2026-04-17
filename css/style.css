@@ -433,8 +433,9 @@ section::before {
   margin: -6px 0;
 }
 #gameOuter {
-  overflow-x: clip;
-  overflow-y: visible;
+  overflow: visible;
+  mask-image: linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
 }
 .peek-track {
   display: flex;
@@ -1775,6 +1776,7 @@ body.light .refund-row-head span { background: rgba(0,119,204,.07) !important; }
 .game-card:has(.tarkov):hover{ border-color: rgba(100,160,60,.5); }
 .game-card:has(.pubg):hover  { border-color: rgba(30,130,230,.5); }
 .game-card:has(.rust):hover  { border-color: rgba(220,80,0,.5); }
+.game-card.sudden:hover      { border-color: rgba(79,201,126,.5); }
 .game-body { padding: 20px 22px; }
 .game-tips { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .game-tips li { font-size: .88rem; color: var(--text-muted); display: flex; gap: 8px; align-items: flex-start; }

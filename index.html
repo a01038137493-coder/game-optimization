@@ -7,7 +7,7 @@
   <link rel="canonical" href="https://www.gameboostpro.co.kr/" />
   <link rel="icon" type="image/png" href="/images/favi.png" />
   <meta name="description" content="전문가가 1:1 원격으로 직접 PC를 최적화해드립니다. 게임 잔렉 제거, 윈도우 포맷, FPS 향상, 스터터링 해결. 로스트아크·배틀그라운드·롤·발로란트 등 전 게임 지원. 30분~90분 완료, 30,000원~." />
-  <meta name="keywords" content="게임 최적화, PC 최적화, 게임 잔렉 제거, FPS 향상, 윈도우 최적화, 컴퓨터 포맷, 원격 PC 설정, 게임 렉 제거, 배그 최적화, 롤 최적화, 발로란트 최적화, 로스트아크 최적화, 오버워치 최적화, 윈도우 세팅, 부팅 속도 개선, 듀얼부팅, 컴퓨터 성능 향상" />
+  <meta name="keywords" content="게임 최적화, PC 최적화, 게임 잔렉 제거, FPS 향상, 윈도우 최적화, 컴퓨터 포맷, 원격 PC 설정, 게임 렉 제거, 배그 최적화, 롤 최적화, 발로란트 최적화, 로스트아크 최적화, 오버워치 최적화, 서든어택 최적화, 윈도우 세팅, 부팅 속도 개선, 듀얼부팅, 컴퓨터 성능 향상" />
   <meta name="robots" content="index, follow" />
   <meta name="author" content="게임부스트프로" />
   <!-- Naver Search Advisor -->
@@ -492,6 +492,7 @@
                 <label class="game-option"><input type="checkbox" value="타르코프" onchange="onGameChange()"><div class="game-opt-chk">✓</div><span>🪖 타르코프</span></label>
                 <label class="game-option"><input type="checkbox" value="배틀그라운드" onchange="onGameChange()"><div class="game-opt-chk">✓</div><span>🔵 배틀그라운드</span></label>
                 <label class="game-option"><input type="checkbox" value="러스트" onchange="onGameChange()"><div class="game-opt-chk">✓</div><span>🪓 러스트</span></label>
+                <label class="game-option"><input type="checkbox" value="서든어택" onchange="onGameChange()"><div class="game-opt-chk">✓</div><span>🔰 서든어택</span></label>
                 <label class="game-option"><input type="checkbox" value="기타" onchange="onGameChange(true)"><div class="game-opt-chk">✓</div><span>🎮 기타</span></label>
                 <input type="text" id="fi-game-etc" class="game-opt-etc" placeholder="게임명을 직접 입력하세요" oninput="onGameChange()">
               </div>
@@ -858,181 +859,36 @@
   <div class="games-carousel-wrap fade-up" style="position:relative;z-index:2;">
   <div class="peek-outer" id="gameOuter">
   <div class="peek-track" id="gameTrack">
-    <!-- 리그 오브 레전드 -->
-    <div class="game-card lol">
+    <!-- 서든어택 (9) -->
+    <div class="game-card sudden">
       <div class="game-thumb-wrap">
         <img class="game-thumb" loading="lazy"
-          src="/images/lol/ChatGPT Image 2026년 4월 16일 오전 12_53_27.png"
+          src="/images/sudden/sudden_thumb.png"
           onerror="this.style.display='none'"
-          alt="League of Legends" />
+          alt="서든어택" />
         <div class="game-thumb-overlay">
-          <div class="game-icon">⚔️</div>
+          <div class="game-icon">🔰</div>
           <div>
-            <div class="game-name">리그 오브 레전드</div>
-            <div class="game-tag">League of Legends</div>
+            <div class="game-name">서든어택</div>
+            <div class="game-tag">Sudden Attack</div>
           </div>
         </div>
       </div>
       <div class="game-body">
         <ul class="game-tips">
-          <li>인게임 그래픽 최적 설정값 적용</li>
-          <li>핑 감소 · 패킷 안정화</li>
-          <li>클라이언트 렉 제거</li>
-          <li>부팅~게임 진입 속도 개선</li>
+          <li>낮은 사양에서 FPS 최대치 확보</li>
+          <li>마우스 반응 속도 · 인풋랙 최소화</li>
+          <li>넥슨 런처 최적화 및 충돌 해결</li>
+          <li>핑 안정화 · 패킷로스 제거</li>
         </ul>
         <div class="game-stat-row">
-          <div class="game-stat"><span>평균 핑</span><strong style="color:var(--primary)">↓ 8ms</strong></div>
-          <div class="game-stat"><span>FPS</span><strong style="color:var(--primary)">↑ 240+</strong></div>
+          <div class="game-stat"><span>평균 핑</span><strong style="color:#4fc97e">↓ 9ms</strong></div>
+          <div class="game-stat"><span>FPS</span><strong style="color:#4fc97e">↑ 180+</strong></div>
         </div>
       </div>
     </div>
 
-    <!-- 발로란트 -->
-    <div class="game-card valorant">
-      <div class="game-thumb-wrap">
-        <img class="game-thumb" loading="lazy"
-          src="/images/valorant/ChatGPT Image 2026년 4월 16일 오전 12_55_53.png"
-          onerror="this.style.display='none'"
-          alt="VALORANT" />
-        <div class="game-thumb-overlay">
-          <div class="game-icon">🔫</div>
-          <div>
-            <div class="game-name">발로란트</div>
-            <div class="game-tag">VALORANT</div>
-          </div>
-        </div>
-      </div>
-      <div class="game-body">
-        <ul class="game-tips">
-          <li>Vanguard 충돌 없는 최적화</li>
-          <li>그래픽 품질 vs FPS 균형 세팅</li>
-          <li>마우스 입력 지연 최소화</li>
-          <li>렌더 레이턴시 감소 설정</li>
-        </ul>
-        <div class="game-stat-row">
-          <div class="game-stat"><span>평균 핑</span><strong style="color:var(--accent)">↓ 6ms</strong></div>
-          <div class="game-stat"><span>FPS</span><strong style="color:var(--accent)">↑ 300+</strong></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 에이팩스 -->
-    <div class="game-card apex">
-      <div class="game-thumb-wrap">
-        <img class="game-thumb" loading="lazy"
-          src="/images/apex/ChatGPT Image 2026년 4월 16일 오전 12_57_11.png"
-          onerror="this.style.display='none'"
-          alt="Apex Legends" />
-        <div class="game-thumb-overlay">
-          <div class="game-icon">🎯</div>
-          <div>
-            <div class="game-name">에이팩스 레전드</div>
-            <div class="game-tag">Apex Legends</div>
-          </div>
-        </div>
-      </div>
-      <div class="game-body">
-        <ul class="game-tips">
-          <li>Respawn 런처 최적화</li>
-          <li>프레임 드롭 구간 분석·해결</li>
-          <li>인풋랙 최소화 설정</li>
-          <li>EA Anti-Cheat 호환 최적화</li>
-        </ul>
-        <div class="game-stat-row">
-          <div class="game-stat"><span>평균 핑</span><strong style="color:var(--primary)">↓ 10ms</strong></div>
-          <div class="game-stat"><span>FPS</span><strong style="color:var(--primary)">↑ 200+</strong></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 아크 레이더스 -->
-    <div class="game-card arc">
-      <div class="game-thumb-wrap">
-        <img class="game-thumb" loading="lazy"
-          src="/images/arc/ChatGPT Image 2026년 4월 16일 오전 12_58_33.png"
-          onerror="this.style.display='none'"
-          alt="Arc Raiders" />
-        <div class="game-thumb-overlay">
-          <div class="game-icon">🚀</div>
-          <div>
-            <div class="game-name">아크 레이더스</div>
-            <div class="game-tag">Arc Raiders</div>
-          </div>
-        </div>
-      </div>
-      <div class="game-body">
-        <ul class="game-tips">
-          <li>Unreal Engine 5 최적화</li>
-          <li>셰이더 컴파일 렉 제거</li>
-          <li>VRAM 점유율 최적화</li>
-          <li>추출 구간 프레임 안정화</li>
-        </ul>
-        <div class="game-stat-row">
-          <div class="game-stat"><span>평균 핑</span><strong style="color:var(--secondary)">↓ 12ms</strong></div>
-          <div class="game-stat"><span>FPS</span><strong style="color:var(--secondary)">↑ 120+</strong></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 오버워치 2 -->
-    <div class="game-card ow">
-      <div class="game-thumb-wrap">
-        <img class="game-thumb" loading="lazy"
-          src="/images/overwatch/ChatGPT Image 2026년 4월 16일 오전 12_59_49.png"
-          onerror="this.style.display='none'"
-          alt="Overwatch 2" />
-        <div class="game-thumb-overlay">
-          <div class="game-icon">🦸</div>
-          <div>
-            <div class="game-name">오버워치 2</div>
-            <div class="game-tag">Overwatch 2</div>
-          </div>
-        </div>
-      </div>
-      <div class="game-body">
-        <ul class="game-tips">
-          <li>Battle.net 클라이언트 최적화</li>
-          <li>팀파이트 구간 FPS 유지</li>
-          <li>사운드 지연 개선 설정</li>
-          <li>해상도 스케일 최적 조합</li>
-        </ul>
-        <div class="game-stat-row">
-          <div class="game-stat"><span>평균 핑</span><strong style="color:var(--primary)">↓ 9ms</strong></div>
-          <div class="game-stat"><span>FPS</span><strong style="color:var(--primary)">↑ 280+</strong></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 타르코프 -->
-    <div class="game-card tarkov">
-      <div class="game-thumb-wrap">
-        <img class="game-thumb" loading="lazy"
-          src="/images/tarkov/ChatGPT Image 2026년 4월 16일 오전 01_11_52.png"
-          onerror="this.style.display='none'"
-          alt="Escape from Tarkov" />
-        <div class="game-thumb-overlay">
-          <div class="game-icon">🪖</div>
-          <div>
-            <div class="game-name">타르코프</div>
-            <div class="game-tag">Escape from Tarkov</div>
-          </div>
-        </div>
-      </div>
-      <div class="game-body">
-        <ul class="game-tips">
-          <li>심각한 FPS 드롭 원인 제거</li>
-          <li>Unity 엔진 메모리 최적화</li>
-          <li>레이드 진입 렉 최소화</li>
-          <li>HDD→SSD 최적 설정 적용</li>
-        </ul>
-        <div class="game-stat-row">
-          <div class="game-stat"><span>평균 핑</span><strong style="color:var(--accent)">↓ 15ms</strong></div>
-          <div class="game-stat"><span>FPS</span><strong style="color:var(--accent)">↑ 100+</strong></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 배틀그라운드 -->
+    <!-- 배틀그라운드 (7) -->
     <div class="game-card pubg">
       <div class="game-thumb-wrap">
         <img class="game-thumb" loading="lazy"
@@ -1061,7 +917,181 @@
       </div>
     </div>
 
-    <!-- 러스트 -->
+    <!-- 오버워치 2 (5) -->
+    <div class="game-card ow">
+      <div class="game-thumb-wrap">
+        <img class="game-thumb" loading="lazy"
+          src="/images/overwatch/ChatGPT Image 2026년 4월 16일 오전 12_59_49.png"
+          onerror="this.style.display='none'"
+          alt="Overwatch 2" />
+        <div class="game-thumb-overlay">
+          <div class="game-icon">🦸</div>
+          <div>
+            <div class="game-name">오버워치 2</div>
+            <div class="game-tag">Overwatch 2</div>
+          </div>
+        </div>
+      </div>
+      <div class="game-body">
+        <ul class="game-tips">
+          <li>Battle.net 클라이언트 최적화</li>
+          <li>팀파이트 구간 FPS 유지</li>
+          <li>사운드 지연 개선 설정</li>
+          <li>해상도 스케일 최적 조합</li>
+        </ul>
+        <div class="game-stat-row">
+          <div class="game-stat"><span>평균 핑</span><strong style="color:var(--primary)">↓ 9ms</strong></div>
+          <div class="game-stat"><span>FPS</span><strong style="color:var(--primary)">↑ 280+</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 에이팩스 (3) -->
+    <div class="game-card apex">
+      <div class="game-thumb-wrap">
+        <img class="game-thumb" loading="lazy"
+          src="/images/apex/ChatGPT Image 2026년 4월 16일 오전 12_57_11.png"
+          onerror="this.style.display='none'"
+          alt="Apex Legends" />
+        <div class="game-thumb-overlay">
+          <div class="game-icon">🎯</div>
+          <div>
+            <div class="game-name">에이팩스 레전드</div>
+            <div class="game-tag">Apex Legends</div>
+          </div>
+        </div>
+      </div>
+      <div class="game-body">
+        <ul class="game-tips">
+          <li>Respawn 런처 최적화</li>
+          <li>프레임 드롭 구간 분석·해결</li>
+          <li>인풋랙 최소화 설정</li>
+          <li>EA Anti-Cheat 호환 최적화</li>
+        </ul>
+        <div class="game-stat-row">
+          <div class="game-stat"><span>평균 핑</span><strong style="color:var(--primary)">↓ 10ms</strong></div>
+          <div class="game-stat"><span>FPS</span><strong style="color:var(--primary)">↑ 200+</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 리그 오브 레전드 (1) -->
+    <div class="game-card lol">
+      <div class="game-thumb-wrap">
+        <img class="game-thumb" loading="lazy"
+          src="/images/lol/ChatGPT Image 2026년 4월 16일 오전 12_53_27.png"
+          onerror="this.style.display='none'"
+          alt="League of Legends" />
+        <div class="game-thumb-overlay">
+          <div class="game-icon">⚔️</div>
+          <div>
+            <div class="game-name">리그 오브 레전드</div>
+            <div class="game-tag">League of Legends</div>
+          </div>
+        </div>
+      </div>
+      <div class="game-body">
+        <ul class="game-tips">
+          <li>인게임 그래픽 최적 설정값 적용</li>
+          <li>핑 감소 · 패킷 안정화</li>
+          <li>클라이언트 렉 제거</li>
+          <li>부팅~게임 진입 속도 개선</li>
+        </ul>
+        <div class="game-stat-row">
+          <div class="game-stat"><span>평균 핑</span><strong style="color:var(--primary)">↓ 8ms</strong></div>
+          <div class="game-stat"><span>FPS</span><strong style="color:var(--primary)">↑ 240+</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 발로란트 (2) -->
+    <div class="game-card valorant">
+      <div class="game-thumb-wrap">
+        <img class="game-thumb" loading="lazy"
+          src="/images/valorant/ChatGPT Image 2026년 4월 16일 오전 12_55_53.png"
+          onerror="this.style.display='none'"
+          alt="VALORANT" />
+        <div class="game-thumb-overlay">
+          <div class="game-icon">🔫</div>
+          <div>
+            <div class="game-name">발로란트</div>
+            <div class="game-tag">VALORANT</div>
+          </div>
+        </div>
+      </div>
+      <div class="game-body">
+        <ul class="game-tips">
+          <li>Vanguard 충돌 없는 최적화</li>
+          <li>그래픽 품질 vs FPS 균형 세팅</li>
+          <li>마우스 입력 지연 최소화</li>
+          <li>렌더 레이턴시 감소 설정</li>
+        </ul>
+        <div class="game-stat-row">
+          <div class="game-stat"><span>평균 핑</span><strong style="color:var(--accent)">↓ 6ms</strong></div>
+          <div class="game-stat"><span>FPS</span><strong style="color:var(--accent)">↑ 300+</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 아크 레이더스 (4) -->
+    <div class="game-card arc">
+      <div class="game-thumb-wrap">
+        <img class="game-thumb" loading="lazy"
+          src="/images/arc/ChatGPT Image 2026년 4월 16일 오전 12_58_33.png"
+          onerror="this.style.display='none'"
+          alt="Arc Raiders" />
+        <div class="game-thumb-overlay">
+          <div class="game-icon">🚀</div>
+          <div>
+            <div class="game-name">아크 레이더스</div>
+            <div class="game-tag">Arc Raiders</div>
+          </div>
+        </div>
+      </div>
+      <div class="game-body">
+        <ul class="game-tips">
+          <li>Unreal Engine 5 최적화</li>
+          <li>셰이더 컴파일 렉 제거</li>
+          <li>VRAM 점유율 최적화</li>
+          <li>추출 구간 프레임 안정화</li>
+        </ul>
+        <div class="game-stat-row">
+          <div class="game-stat"><span>평균 핑</span><strong style="color:var(--secondary)">↓ 12ms</strong></div>
+          <div class="game-stat"><span>FPS</span><strong style="color:var(--secondary)">↑ 120+</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 타르코프 (6) -->
+    <div class="game-card tarkov">
+      <div class="game-thumb-wrap">
+        <img class="game-thumb" loading="lazy"
+          src="/images/tarkov/ChatGPT Image 2026년 4월 16일 오전 01_11_52.png"
+          onerror="this.style.display='none'"
+          alt="Escape from Tarkov" />
+        <div class="game-thumb-overlay">
+          <div class="game-icon">🪖</div>
+          <div>
+            <div class="game-name">타르코프</div>
+            <div class="game-tag">Escape from Tarkov</div>
+          </div>
+        </div>
+      </div>
+      <div class="game-body">
+        <ul class="game-tips">
+          <li>심각한 FPS 드롭 원인 제거</li>
+          <li>Unity 엔진 메모리 최적화</li>
+          <li>레이드 진입 렉 최소화</li>
+          <li>HDD→SSD 최적 설정 적용</li>
+        </ul>
+        <div class="game-stat-row">
+          <div class="game-stat"><span>평균 핑</span><strong style="color:var(--accent)">↓ 15ms</strong></div>
+          <div class="game-stat"><span>FPS</span><strong style="color:var(--accent)">↑ 100+</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 러스트 (8) -->
     <div class="game-card rust">
       <div class="game-thumb-wrap">
         <img class="game-thumb" loading="lazy"
@@ -1094,7 +1124,7 @@
   <div class="slider-controls" style="position:relative;z-index:3;">
     <button class="slider-arrow" id="gamePrev">&#8592;</button>
     <div class="slider-dots" id="gameDots"></div>
-    <span class="slider-counter" id="gameCounter">1 / 8</span>
+    <span class="slider-counter" id="gameCounter">1 / 9</span>
     <button class="slider-arrow" id="gameNext">&#8594;</button>
   </div>
   </div><!-- /games-carousel-wrap -->

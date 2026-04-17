@@ -56,56 +56,90 @@ if (statsEl) statObserver.observe(statsEl);
 
 // ══ PEEK CAROUSEL 공통 팩토리 ══
 function makePeekCarousel({ trackId, outerEl, dotsId, counterId, prevId, nextId, autoMs = 5000 }) {
-  const track   = document.getElementById(trackId);
-  const outer   = outerEl || track.parentElement;
-  const dotsWrap= document.getElementById(dotsId);
-  const counter = document.getElementById(counterId);
-  const cards   = Array.from(track.children);
-  const total   = cards.length;
-  const GAP     = 20;
-  let cur = 0, autoTimer, dragging = false, mouseIsDown = false, startX = 0, diffX = 0;
+  const track    = document.getElementById(trackId);
+  const outer    = outerEl || track.parentElement;
+  const dotsWrap = document.getElementById(dotsId);
+  const counter  = document.getElementById(counterId);
+  const GAP      = 20;
+  const CLONES   = 2;
 
-  // 도트 생성
-  cards.forEach((_, i) => {
-    const d = document.createElement('button');
-    d.className = 'slider-dot' + (i === 0 ? ' active' : '');
-    d.addEventListener('click', () => { go(i); resetAuto(); });
-    dotsWrap.appendChild(d);
-  });
+  // 양끝에 클론 추가 → 무한 루프 + 양옆 peek
+  const origCards = Array.from(track.children);
+  const total     = origCards.length;
+  for (let i = CLONES - 1; i >= 0; i--) {
+    const cl = origCards[(total - 1 - i + total) % total].cloneNode(true);
+    cl.dataset.clone = '1';
+    track.insertBefore(cl, track.firstChild);
+  }
+  for (let i = 0; i < CLONES; i++) {
+    const cl = origCards[i % total].cloneNode(true);
+    cl.dataset.clone = '1';
+    track.appendChild(cl);
+  }
 
-  function getOffset() {
-    const cardW = cards[0].offsetWidth;
-    return (outer.offsetWidth - cardW) / 2;
+  const cards = Array.from(track.children);
+  let cur = CLONES;
+  let autoTimer, dragging = false, mouseIsDown = false, startX = 0, diffX = 0;
+
+  // 도트 생성 (실제 카드 수만큼)
+  if (dotsWrap) {
+    origCards.forEach((_, i) => {
+      const d = document.createElement('button');
+      d.className = 'slider-dot' + (i === 0 ? ' active' : '');
+      d.addEventListener('click', () => { go(i + CLONES); resetAuto(); });
+      dotsWrap.appendChild(d);
+    });
+  }
+
+  function slideOffset() {
+    return (outer.offsetWidth - cards[0].offsetWidth) / 2;
+  }
+
+  function updateUI() {
+    const ri = ((cur - CLONES) % total + total) % total;
+    if (dotsWrap) dotsWrap.querySelectorAll('.slider-dot').forEach((d, i) => d.classList.toggle('active', i === ri));
+    if (counter) counter.textContent = `${ri + 1} / ${total}`;
   }
 
   function go(idx) {
-    cur = ((idx % total) + total) % total;
+    cur = idx;
     const cardW = cards[0].offsetWidth;
-    const offset = getOffset();
+    const off   = slideOffset();
     track.style.transition = 'transform .55s cubic-bezier(.4,0,.2,1)';
-    track.style.transform  = `translateX(${offset - cur * (cardW + GAP)}px)`;
+    track.style.transform  = `translateX(${off - cur * (cardW + GAP)}px)`;
     cards.forEach((c, i) => c.classList.toggle('active', i === cur));
-    dotsWrap.querySelectorAll('.slider-dot').forEach((d, i) => d.classList.toggle('active', i === cur));
-    if (counter) counter.textContent = `${cur + 1} / ${total}`;
+    updateUI();
+
+    // 클론 구간 → 애니메이션 후 실제 위치로 점프
+    if (cur < CLONES) {
+      setTimeout(() => {
+        track.style.transition = 'none';
+        cur += total;
+        track.style.transform = `translateX(${slideOffset() - cur * (cards[0].offsetWidth + GAP)}px)`;
+        cards.forEach((c, i) => c.classList.toggle('active', i === cur));
+      }, 560);
+    } else if (cur >= CLONES + total) {
+      setTimeout(() => {
+        track.style.transition = 'none';
+        cur -= total;
+        track.style.transform = `translateX(${slideOffset() - cur * (cards[0].offsetWidth + GAP)}px)`;
+        cards.forEach((c, i) => c.classList.toggle('active', i === cur));
+      }, 560);
+    }
   }
 
-  // 카드 클릭으로도 이동
   cards.forEach((c, i) => c.addEventListener('click', () => { if (!dragging) { go(i); resetAuto(); } }));
-
   document.getElementById(prevId).addEventListener('click', () => { go(cur - 1); resetAuto(); });
   document.getElementById(nextId).addEventListener('click', () => { go(cur + 1); resetAuto(); });
 
-  // 스와이프
   function onStart(x) { mouseIsDown = true; dragging = false; startX = x; diffX = 0; }
-  function onMove(x)  {
+  function onMove(x) {
     if (!mouseIsDown) return;
     diffX = x - startX;
     if (Math.abs(diffX) > 5) dragging = true;
     if (!dragging) return;
-    const cardW = cards[0].offsetWidth;
-    const offset = getOffset();
     track.style.transition = 'none';
-    track.style.transform  = `translateX(${offset - cur * (cardW + GAP) + diffX}px)`;
+    track.style.transform = `translateX(${slideOffset() - cur * (cards[0].offsetWidth + GAP) + diffX}px)`;
   }
   function onEnd() {
     if (!mouseIsDown && !dragging) return;
@@ -124,10 +158,15 @@ function makePeekCarousel({ trackId, outerEl, dotsId, counterId, prevId, nextId,
   track.addEventListener('mouseleave', () => { if (mouseIsDown) onEnd(); });
   document.addEventListener('mouseup', () => { if (mouseIsDown) onEnd(); });
 
-  // 리사이즈 대응
   window.addEventListener('resize', () => go(cur));
 
-  go(0);
+  function resetAuto() {
+    clearInterval(autoTimer);
+    if (autoMs) autoTimer = setInterval(() => go(cur + 1), autoMs);
+  }
+
+  go(CLONES);
+  resetAuto();
 }
 
 // 서비스 슬라이더 초기화
