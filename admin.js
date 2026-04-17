@@ -60,9 +60,10 @@ function setDashboardFilter(type) {
   loadDashboard();
 }
 
-function goHome() {
+async function goHome() {
   localStorage.removeItem('adminToken');
   localStorage.removeItem('adminEmail');
+  try { await fetch('/api/admin-logout', { method: 'POST' }); } catch(e) {}
   location.href = '/';
 }
 
@@ -84,7 +85,83 @@ function getDateRange(type) {
 }
 
 // 대시보드 데이터 로드
+async function loadVisitorStats(range = 'week') {
+  // 필터 버튼 활성화
+  ['today','week','month'].forEach(r => {
+    const btn = document.getElementById('vFilter' + r.charAt(0).toUpperCase() + r.slice(1));
+    if (btn) btn.classList.toggle('active-vf', r === range);
+  });
+
+  try {
+    const res = await fetch(`/api/admin-stats?range=${range}`, { headers: adminHeaders() });
+    if (!res.ok) throw new Error(res.status);
+    const d = await res.json();
+
+    document.getElementById('vTotal').textContent = d.total.toLocaleString();
+    document.getElementById('vUnique').textContent = d.uniqueSessions.toLocaleString();
+    document.getElementById('vReturning').textContent = d.returning.toLocaleString();
+
+    const chEl = document.getElementById('vChange');
+    if (d.changeRate === null) {
+      chEl.textContent = '--';
+      chEl.style.color = '';
+    } else {
+      chEl.textContent = (d.changeRate >= 0 ? '+' : '') + d.changeRate + '%';
+      chEl.style.color = d.changeRate >= 0 ? '#4ade80' : '#f87171';
+    }
+
+    // 기기 비율
+    const total = d.total || 1;
+    const dc = d.deviceCount;
+    document.getElementById('deviceChart').innerHTML = [
+      ['💻 데스크탑', dc.desktop, '#00b4ff'],
+      ['📱 모바일',   dc.mobile,  '#a855f7'],
+      ['📟 태블릿',   dc.tablet,  '#f97316'],
+    ].map(([label, count, color]) => {
+      const pct = Math.round(count / total * 100);
+      return `<div>
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px;">
+          <span>${label}</span><span style="color:${color};font-weight:700;">${pct}% (${count})</span>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:${color};border-radius:99px;transition:width .5s;"></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // 시간대 차트
+    const hourly = d.hourly;
+    const maxH = Math.max(...hourly, 1);
+    const hourChartEl = document.getElementById('hourChart');
+    const hourLabelsEl = document.getElementById('hourLabels');
+    hourChartEl.innerHTML = hourly.map((v, h) => {
+      const pct = Math.round(v / maxH * 100);
+      return `<div title="${h}시: ${v}명" style="flex:1;min-width:6px;height:${pct}%;background:linear-gradient(to top,#00b4ff,#7b2fff);border-radius:2px 2px 0 0;opacity:${v ? 1 : 0.15};"></div>`;
+    }).join('');
+    hourLabelsEl.innerHTML = hourly.map((_, h) =>
+      `<div style="flex:1;font-size:.55rem;color:rgba(200,207,224,.4);text-align:center;">${h % 6 === 0 ? h + 'h' : ''}</div>`
+    ).join('');
+
+    // 일별 추이
+    const daily = d.daily;
+    const days = Object.keys(daily).sort();
+    const maxD = Math.max(...Object.values(daily), 1);
+    document.getElementById('dailyChart').innerHTML = days.map(day => {
+      const v = daily[day];
+      const pct = Math.round(v / maxD * 100);
+      return `<div title="${day}: ${v}명" style="flex:0 0 28px;height:${Math.max(pct,2)}%;background:linear-gradient(to top,#00e87a,#00b4ff);border-radius:3px 3px 0 0;"></div>`;
+    }).join('');
+    document.getElementById('dailyLabels').innerHTML = days.map(day =>
+      `<div style="flex:0 0 28px;font-size:.6rem;color:rgba(200,207,224,.4);text-align:center;white-space:nowrap;">${day.slice(5)}</div>`
+    ).join('');
+
+  } catch(e) {
+    console.error('[visitor stats]', e);
+  }
+}
+
 async function loadDashboard() {
+  loadVisitorStats('week');
   try {
     console.log('[ADMIN] 대시보드 데이터 로드 시작');
     const res = await fetch('/api/admin-orders', { headers: adminHeaders() });

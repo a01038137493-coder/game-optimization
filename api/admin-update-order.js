@@ -1,7 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
+function getCookieToken(req) {
+  const raw = req.headers['cookie'] || '';
+  const match = raw.split(';').find(c => c.trim().startsWith('adminToken='));
+  return match ? match.trim().slice('adminToken='.length) : null;
+}
 async function verifyAdmin(req) {
-  const token = (req.headers['authorization'] || '').replace('Bearer ', '').trim();
+  const token = getCookieToken(req)
+    || (req.headers['authorization'] || '').replace('Bearer ', '').trim();
   if (!token) return false;
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
   const { data: { user }, error } = await supabase.auth.getUser(token);

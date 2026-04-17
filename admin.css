@@ -345,3 +345,22 @@ body {
 .admin-btn:hover {
   background: rgba(0, 240, 255, 0.12);
 }
+
+.v-filter-btn {
+  padding: 5px 12px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Pretendard', sans-serif;
+  font-size: .75rem;
+  font-weight: 600;
+  transition: all .2s;
+}
+.v-filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+.v-filter-btn.active-vf {
+  background: rgba(0,180,255,.15);
+  border-color: rgba(0,180,255,.5);
+  color: #00b4ff;
+}

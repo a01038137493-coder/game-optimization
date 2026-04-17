@@ -63,7 +63,11 @@ export default async function handler(req, res) {
     };
     const adminName = nameMap[data.user.email] || data.user.email;
 
-    // Supabase JWT 토큰 반환 (서버에서 검증 가능)
+    // httpOnly 쿠키로 토큰 저장 (XSS 방어)
+    res.setHeader('Set-Cookie',
+      `adminToken=${data.session.access_token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+    );
+
     return res.status(200).json({
       success: true,
       message: '로그인 성공',

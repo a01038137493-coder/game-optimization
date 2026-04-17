@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /admin-login.html
+Disallow: /analytics.html
+Disallow: /api/
+
+Sitemap: https://www.gameboostpro.co.kr/sitemap.xml

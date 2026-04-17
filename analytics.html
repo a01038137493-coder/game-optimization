@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GameBoost Pro - 방문자 통계</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .an-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .an-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .an-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+    }
+    .an-card h3 {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin: 0 0 18px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .an-big-num {
+      font-size: 2.4rem;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .an-sub { font-size: .8rem; color: var(--text-muted); }
+    .an-change {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: .78rem; font-weight: 700;
+      padding: 3px 8px; border-radius: 6px;
+      margin-top: 8px;
+    }
+    .an-change.up   { background: rgba(74,222,128,.12); color: #4ade80; }
+    .an-change.down { background: rgba(248,113,113,.12); color: #f87171; }
+    .an-change.flat { background: rgba(148,163,184,.12); color: #94a3b8; }
+    .an-device-row { display: flex; flex-direction: column; gap: 12px; }
+    .an-device-item span { font-size: .82rem; }
+    .an-bar-wrap {
+      height: 7px; background: rgba(255,255,255,.07);
+      border-radius: 99px; overflow: hidden; margin-top: 5px;
+    }
+    .an-bar-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
+    .an-hour-wrap {
+      display: flex; align-items: flex-end; gap: 4px; height: 90px;
+    }
+    .an-hour-bar {
+      flex: 1; border-radius: 3px 3px 0 0;
+      background: linear-gradient(to top, #3b82f6, #7b2fff);
+      transition: height .4s ease;
+      cursor: default;
+      position: relative;
+    }
+    .an-hour-bar:hover::after {
+      content: attr(data-tip);
+      position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+      background: #1e293b; color: #fff; font-size: .65rem;
+      padding: 3px 6px; border-radius: 4px; white-space: nowrap;
+      pointer-events: none;
+    }
+    .an-hour-labels {
+      display: flex; gap: 4px; margin-top: 6px;
+    }
+    .an-hour-labels span {
+      flex: 1; font-size: .58rem; color: var(--text-muted);
+      text-align: center;
+    }
+    .filter-row {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .an-filter-btn {
+      padding: 6px 16px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Pretendard', sans-serif;
+      font-size: .8rem; font-weight: 600;
+      transition: all .2s;
+    }
+    .an-filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .an-filter-btn.active {
+      background: rgba(59,130,246,.15);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .an-chart-wrap { position: relative; height: 220px; }
+    .an-empty {
+      display: flex; align-items: center; justify-content: center;
+      height: 100%; color: var(--text-muted); font-size: .85rem;
+    }
+    @media (max-width: 768px) {
+      .an-grid-2, .an-grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="admin-container">
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="admin-header">
+      <img src="/logo_simbol.png" alt="GameBoost Pro" style="height:60px;width:60px;object-fit:contain;">
+    </div>
+    <nav class="admin-nav">
+      <a href="/admin.html" class="admin-nav-btn" style="text-decoration:none;display:block;text-align:left;">📊 대시보드</a>
+      <a href="/admin.html" class="admin-nav-btn" style="text-decoration:none;display:block;text-align:left;">📦 주문관리</a>
+      <a href="/admin.html" class="admin-nav-btn" style="text-decoration:none;display:block;text-align:left;">👥 고객조회</a>
+      <a href="/admin.html" class="admin-nav-btn" style="text-decoration:none;display:block;text-align:left;">🎟️ 쿠폰관리</a>
+      <a href="/analytics.html" class="admin-nav-btn active" style="text-decoration:none;display:block;text-align:left;">👁️ 방문자 통계</a>
+    </nav>
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:6px;width:100%;">
+      <button class="admin-logout" onclick="goBack()">← 돌아가기</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <h1 style="margin:0;font-size:1.6rem;">👁️ 방문자 통계</h1>
+        <p style="margin:6px 0 0;color:var(--text-muted);font-size:.85rem;" id="anDateRange">--</p>
+      </div>
+      <div class="filter-row">
+        <button class="an-filter-btn active" onclick="loadStats('today')" id="af-today">오늘</button>
+        <button class="an-filter-btn" onclick="loadStats('week')"  id="af-week">7일</button>
+        <button class="an-filter-btn" onclick="loadStats('month')" id="af-month">30일</button>
+        <button class="an-filter-btn" onclick="loadStats(_curRange)" style="background:rgba(59,130,246,.1);">↺ 새로고침</button>
+      </div>
+    </div>
+
+    <!-- 요약 카드 4개 -->
+    <div class="an-grid-3" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+      <div class="an-card">
+        <h3>총 방문</h3>
+        <div class="an-big-num" id="anTotal" style="color:#3b82f6;">--</div>
+        <div class="an-sub">페이지뷰 합계</div>
+        <div class="an-change flat" id="anTotalChange" style="display:none;"></div>
+      </div>
+      <div class="an-card">
+        <h3>신규 방문</h3>
+        <div class="an-big-num" id="anUnique" style="color:#4ade80;">--</div>
+        <div class="an-sub">고유 세션 수</div>
+      </div>
+      <div class="an-card">
+        <h3>재방문</h3>
+        <div class="an-big-num" id="anReturning" style="color:#a855f7;">--</div>
+        <div class="an-sub">재방문 세션 수</div>
+      </div>
+      <div class="an-card">
+        <h3>전일 대비</h3>
+        <div class="an-big-num" id="anChange" style="color:#f97316;">--</div>
+        <div class="an-sub">오늘 vs 어제</div>
+      </div>
+    </div>
+
+    <!-- 일별 추이 차트 -->
+    <div class="an-card" style="margin-bottom:20px;">
+      <h3>일별 방문자 추이</h3>
+      <div class="an-chart-wrap">
+        <canvas id="dailyChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 유입 경로 -->
+    <div class="an-card" style="margin-bottom:20px;">
+      <h3>유입 경로</h3>
+      <div id="referrerRows">
+        <div class="an-empty">데이터 로딩 중...</div>
+      </div>
+    </div>
+
+    <!-- 기기 비율 + 시간대 -->
+    <div class="an-grid-2" style="margin-bottom:20px;">
+      <div class="an-card">
+        <h3>기기 비율</h3>
+        <div class="an-device-row" id="deviceRows"></div>
+        <div style="margin-top:20px;position:relative;height:180px;">
+          <canvas id="devicePieChart"></canvas>
+        </div>
+      </div>
+      <div class="an-card">
+        <h3>시간대별 방문 분포</h3>
+        <div class="an-hour-wrap" id="hourBars"></div>
+        <div class="an-hour-labels" id="hourLabels"></div>
+        <div style="margin-top:16px;font-size:.75rem;color:var(--text-muted);" id="peakHour"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="/analytics.js"></script>
+</body>
+</html>
