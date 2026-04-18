@@ -208,7 +208,7 @@ body.light .nav-dropdown-btn.logout { color: #c0143c; }
 /* ─ hero trust badge ─ */
 body.light .hero-trust-item { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.1); color: var(--text); }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; word-break: keep-all; overflow-wrap: break-word; }
 
 html { scroll-behavior: smooth; }
 
@@ -534,7 +534,7 @@ section::before {
   text-transform: uppercase; color: var(--sc-color);
   margin-bottom: 14px; opacity: .65;
 }
-.service-card h3 { font-size: 1.9rem; font-weight: 900; line-height: 1.15; margin-bottom: 14px; letter-spacing: -.5px; }
+.service-card h3 { font-size: 1.9rem; font-weight: 900; line-height: 1.3; margin-bottom: 14px; letter-spacing: -.5px; }
 .service-card p { font-size: .95rem; color: var(--text-muted); line-height: 1.7; max-width: 360px; }
 .sc-tag {
   display: inline-flex; align-items: center; gap: 6px;
@@ -599,7 +599,7 @@ section::before {
   margin: 0 auto 18px;
 }
 .step h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
-.step p { font-size: .87rem; color: var(--text-muted); line-height: 1.6; }
+.step p { font-size: .87rem; color: var(--text-muted); line-height: 1.7; }
 
 /* ── HOW REMOTE ── */
 .how-remote-wrap { margin-top: 40px; }
@@ -648,7 +648,7 @@ section::before {
   display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
 }
 .feature-item h4 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
-.feature-item p { font-size: .87rem; color: var(--text-muted); line-height: 1.6; }
+.feature-item p { font-size: .87rem; color: var(--text-muted); line-height: 1.7; }
 .fps-display {
   background: var(--bg-card2); border: 1px solid var(--border);
   border-radius: 20px; padding: 36px; position: relative; overflow: hidden;
@@ -699,7 +699,7 @@ section::before {
 .plan-name { font-size: .85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
 .plan-price { font-size: 3rem; font-weight: 900; line-height: 1; margin-bottom: 6px; }
 .plan-price span { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
-.plan-desc { font-size: .88rem; color: var(--text-muted); margin-bottom: 28px; line-height: 1.5; }
+.plan-desc { font-size: .88rem; color: var(--text-muted); margin-bottom: 28px; line-height: 1.7; }
 .plan-features { list-style: none; margin-bottom: 32px; display: flex; flex-direction: column; gap: 12px; }
 .plan-features li { font-size: .9rem; display: flex; gap: 10px; align-items: center; }
 .plan-features li::before { content: '✓'; color: var(--primary); font-weight: 700; min-width: 16px; }
@@ -791,7 +791,7 @@ section::before {
   display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
 }
 .guarantee-item strong { display: block; font-size: .95rem; font-weight: 700; margin-bottom: 4px; }
-.guarantee-item p { font-size: .83rem; color: var(--text-muted); line-height: 1.6; }
+.guarantee-item p { font-size: .83rem; color: var(--text-muted); line-height: 1.7; }
 
 /* ── FAQ ── */
 .faq-section { padding: 140px 6%; }
@@ -1517,8 +1517,7 @@ body.light .refund-row-head span { background: rgba(0,119,204,.07) !important; }
   /* 모바일 오로라 깜빡임 방지 */
   .hero::before { animation: none; }
 
-  /* 한국어 줄바꿈 최적화 */
-  * { word-break: keep-all; overflow-wrap: break-word; }
+  /* 한국어 줄바꿈 — 전역 리셋에서 적용됨 */
 
   /* ── 기본 ── */
   body { padding-bottom: 80px; }
