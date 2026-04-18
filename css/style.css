@@ -31,7 +31,23 @@ body.light ::-webkit-scrollbar-track { background: #e8edf3; }
 
 /* ─ 캔버스 — hero만 유지, 나머지 숨김 ─ */
 body.light canvas { opacity: 0; }
-body.light #heroCanvas { opacity: 0.45; }
+body.light #heroCanvas { opacity: 0.55; }
+body.light .hero::before {
+  background:
+    radial-gradient(ellipse 170% 45% at 38% 32%, rgba(0,200,80,0.35)  0%, transparent 60%),
+    radial-gradient(ellipse 110% 32% at 65% 22%, rgba(30,220,130,0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 80%  28% at 20% 28%, rgba(0,180,90,0.30)  0%, transparent 50%),
+    radial-gradient(ellipse 70%  30% at 80% 28%, rgba(0,180,240,0.22) 0%, transparent 52%),
+    radial-gradient(ellipse 55%  38% at 88% 38%, rgba(120,40,240,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 50%  35% at 8%  42%, rgba(90,20,200,0.18)  0%, transparent 55%),
+    radial-gradient(ellipse 90%  55% at 50% 55%, rgba(0,100,50,0.12)   0%, transparent 70%);
+  filter: blur(44px);
+}
+body.light .hero::after {
+  background:
+    repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0,180,80,0.025) 3px, rgba(0,180,80,0.025) 4px),
+    linear-gradient(to bottom, transparent 0%, transparent 42%, rgba(240,244,248,0.7) 62%, #f0f4f8 80%);
+}
 
 /* ─ NAV ─ */
 body.light nav { background: rgba(240,244,248,0.92); box-shadow: 0 1px 0 rgba(0,0,0,0.08); }
