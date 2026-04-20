@@ -698,6 +698,7 @@ section::before {
   background: var(--bg-card2); border: 1px solid var(--border);
   border-radius: 20px; padding: 40px 32px;
   transition: transform .25s, box-shadow .25s;
+  display: flex; flex-direction: column;
 }
 .price-card:hover { transform: translateY(-6px); }
 .price-card.popular {
@@ -716,7 +717,7 @@ section::before {
 .plan-price { font-size: 3rem; font-weight: 900; line-height: 1; margin-bottom: 6px; }
 .plan-price span { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
 .plan-desc { font-size: .88rem; color: var(--text-muted); margin-bottom: 28px; line-height: 1.7; }
-.plan-features { list-style: none; margin-bottom: 32px; display: flex; flex-direction: column; gap: 12px; }
+.plan-features { list-style: none; margin-bottom: 32px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
 .plan-features li { font-size: .9rem; display: flex; gap: 10px; align-items: center; }
 .plan-features li::before { content: '✓'; color: var(--primary); font-weight: 700; min-width: 16px; }
 .plan-features li.off { color: var(--text-muted); }
