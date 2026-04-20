@@ -1143,6 +1143,7 @@ function confirmBankTransfer() {
 function getStatusLabel(status) {
   switch(status) {
     case 'checking':  return '결제확인중';
+    case 'confirmed': return '결제확인';
     case 'pending':   return '진행중';
     case 'working':   return '작업중';
     case 'done':      return '완료';
@@ -1223,6 +1224,7 @@ function updatePayHistoryDisplay(orders) {
     const statusColor = o.status === 'done' || o.status === 'completed' ? 'var(--primary)' :
                        o.status === 'cancelled' ? '#ff6464' :
                        o.status === 'working' ? '#ff9800' :
+                       o.status === 'confirmed' ? '#38bdf8' :
                        isBank ? '#a78bfa' : '#ffa500';
 
     const date = new Date(o.created_at);
