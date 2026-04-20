@@ -4,6 +4,28 @@ function adminHeaders(extra = {}) {
   return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...extra };
 }
 
+// 세션 만료 감지 — 401 응답 시 조용히 로그인 화면으로 리다이렉트
+let _redirectingToLogin = false;
+function handleAuthExpired() {
+  if (_redirectingToLogin) return;
+  _redirectingToLogin = true;
+  localStorage.removeItem('adminToken');
+  localStorage.removeItem('adminEmail');
+  location.href = '/admin-login.html';
+}
+
+// 관리자 API 전용 fetch — 자동으로 adminHeaders + 401 처리
+async function adminFetch(url, options = {}) {
+  const headers = adminHeaders(options.headers || {});
+  const res = await fetch(url, { ...options, headers });
+  if (res.status === 401) {
+    handleAuthExpired();
+    // 이후 코드가 돌지 않도록 pending Promise 반환
+    return new Promise(() => {});
+  }
+  return res;
+}
+
 // 대시보드 필터
 let dashboardFilter = 'today';
 
@@ -93,7 +115,7 @@ async function loadVisitorStats(range = 'week') {
   });
 
   try {
-    const res = await fetch(`/api/admin-stats?range=${range}`, { headers: adminHeaders() });
+    const res = await adminFetch(`/api/admin-stats?range=${range}`);
     if (!res.ok) throw new Error(res.status);
     const d = await res.json();
 
@@ -164,7 +186,7 @@ async function loadDashboard() {
   loadVisitorStats('week');
   try {
     console.log('[ADMIN] 대시보드 데이터 로드 시작');
-    const res = await fetch('/api/admin-orders', { headers: adminHeaders() });
+    const res = await adminFetch('/api/admin-orders');
     console.log('[ADMIN] API 응답 상태:', res.status, res.ok);
 
     if (!res.ok) throw new Error(`API 오류: ${res.status}`);
@@ -297,7 +319,7 @@ let allOrdersData = [];
 async function loadOrders() {
   try {
     console.log('[ADMIN] 주문 목록 로드 시작');
-    const res = await fetch('/api/admin-orders', { headers: adminHeaders() });
+    const res = await adminFetch('/api/admin-orders');
     console.log('[ADMIN] API 응답 상태:', res.status, res.ok);
 
     if (!res.ok) throw new Error(`API 오류: ${res.status}`);
@@ -380,9 +402,8 @@ async function updateOrderStatus(orderId, newStatus) {
       new_status: newStatus
     });
 
-    const res = await fetch('/api/admin-update-order', {
+    const res = await adminFetch('/api/admin-update-order', {
       method: 'POST',
-      headers: adminHeaders(),
       body: JSON.stringify({ orderId, status: newStatus })
     });
 
@@ -422,9 +443,8 @@ async function deleteOrder(orderId, orderIdText) {
 
   try {
     console.log('[ADMIN] 주문 삭제 요청:', { orderId });
-    const res = await fetch('/api/admin-delete-order', {
+    const res = await adminFetch('/api/admin-delete-order', {
       method: 'POST',
-      headers: adminHeaders(),
       body: JSON.stringify({ orderId })
     });
 
@@ -452,7 +472,7 @@ async function deleteOrder(orderId, orderIdText) {
 async function loadCustomers() {
   try {
     console.log('[ADMIN] 고객 목록 로드 시작');
-    const res = await fetch('/api/admin-customers', { headers: adminHeaders() });
+    const res = await adminFetch('/api/admin-customers');
     console.log('[ADMIN] API 응답 상태:', res.status, res.ok);
 
     if (!res.ok) throw new Error(`API 오류: ${res.status}`);
@@ -608,9 +628,8 @@ async function sendKakaoNotify() {
   }
 
   try {
-    const res = await fetch('/api/admin-notify', {
+    const res = await adminFetch('/api/admin-notify', {
       method: 'POST',
-      headers: adminHeaders(),
       body: JSON.stringify({
         orderId,
         buyerName,
@@ -801,7 +820,7 @@ async function loadCoupons() {
   const tbody = document.getElementById('couponsTable');
   tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);">불러오는 중...</td></tr>';
   try {
-    const res = await fetch('/api/admin-coupons', { headers: adminHeaders() });
+    const res = await adminFetch('/api/admin-coupons');
     const data = await res.json();
     if (!data.coupons?.length) {
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);">쿠폰이 없습니다.</td></tr>';
@@ -878,7 +897,7 @@ async function saveCoupon() {
   if (id) body.id = id;
 
   try {
-    const res = await fetch('/api/admin-coupons', { method: 'POST', headers: adminHeaders(), body: JSON.stringify(body) });
+    const res = await adminFetch('/api/admin-coupons', { method: 'POST', body: JSON.stringify(body) });
     const data = await res.json();
     if (!data.success) { errEl.textContent = data.error || '저장 실패'; errEl.style.display = ''; return; }
     closeCouponModal();
@@ -889,12 +908,12 @@ async function saveCoupon() {
 }
 
 async function toggleCoupon(id, current) {
-  await fetch('/api/admin-coupons', { method: 'POST', headers: adminHeaders(), body: JSON.stringify({ id, is_active: !current, _action: 'toggle' }) });
+  await adminFetch('/api/admin-coupons', { method: 'POST', body: JSON.stringify({ id, is_active: !current, _action: 'toggle' }) });
   loadCoupons();
 }
 
 async function deleteCoupon(id) {
   if (!confirm('정말 삭제하시겠습니까?')) return;
-  await fetch('/api/admin-coupons?id=' + id, { method: 'DELETE', headers: adminHeaders() });
+  await adminFetch('/api/admin-coupons?id=' + id, { method: 'DELETE' });
   loadCoupons();
 }
