@@ -97,6 +97,7 @@
           <input type="text" id="searchInput" placeholder="이름 / 전화번호 / 주문번호로 검색" onkeyup="filterOrders()" style="flex:1;min-width:250px;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Pretendard',sans-serif;outline:none;" />
           <select id="statusFilter" onchange="filterOrders()" style="padding:10px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Pretendard',sans-serif;outline:none;cursor:pointer;">
             <option value="">전체 상태</option>
+            <option value="checking">결제확인중</option>
             <option value="pending">진행중</option>
             <option value="working">작업중</option>
             <option value="done">완료</option>

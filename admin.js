@@ -351,6 +351,7 @@ function renderAllOrders(orders) {
           <button class="admin-btn" onclick="openOrderDetail('${o.id}')">상세</button>
           <select style="padding:6px 8px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;cursor:pointer;" onchange="if(this.value) { updateOrderStatus('${o.id}', this.value); this.value=''; }">
             <option value="">상태</option>
+            <option value="checking">결제확인중</option>
             <option value="pending">진행중</option>
             <option value="working">작업중</option>
             <option value="done">완료</option>
