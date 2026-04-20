@@ -27,12 +27,12 @@ export default async function handler(req, res) {
     console.log('[admin-dashboard] Supabase connected');
 
     // 총 매출
-    const { data: orders, error: ordersError } = await supabase.from('orders').select('amount');
+    const { data: orders, error: ordersError } = await supabase.from('orders').select('amount, status');
     if (ordersError) {
       console.error('[admin-dashboard] Orders query error:', ordersError);
       throw ordersError;
     }
-    const totalRevenue = (orders || []).reduce((sum, o) => sum + (o.amount || 0), 0);
+    const totalRevenue = (orders || []).reduce((sum, o) => o.status === 'cancelled' ? sum : sum + (o.amount || 0), 0);
 
     // 통계
     const { data: stats } = await supabase.from('orders').select('status');

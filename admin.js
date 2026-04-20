@@ -210,7 +210,7 @@ async function loadDashboard() {
     let completedOrders = 0;
 
     filteredOrders.forEach(order => {
-      totalRevenue += order.amount || 0;
+      if (order.status !== 'cancelled') totalRevenue += order.amount || 0;
       if (order.status === 'pending') pendingOrders++;
       else if (order.status === 'done' || order.status === 'working') completedOrders++;
     });
@@ -242,6 +242,7 @@ function renderRevenueChart(orders) {
   last7Days.forEach(d => dailyRevenue[d] = 0);
 
   orders.forEach(o => {
+    if (o.status === 'cancelled') return;
     const date = o.created_at.split('T')[0];
     if (date in dailyRevenue) {
       dailyRevenue[date] += o.amount;

@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     // 전체 customers + orders 한 번에 로드
     const [{ data: customers }, { data: allOrders }] = await Promise.all([
       supabase.from('customers').select('id, nickname, phone, kakao_id, created_at').order('created_at', { ascending: false }),
-      supabase.from('orders').select('id, order_id, amount, customer_id, buyer_contact, buyer_name'),
+      supabase.from('orders').select('id, order_id, amount, customer_id, buyer_contact, buyer_name, status'),
     ]);
 
     // phone 기준 그룹핑 — 중복 customer row 를 하나로 합침
@@ -78,7 +78,7 @@ export default async function handler(req, res) {
         nickname: g.nickname,
         phone: g.phone,
         order_count: unique.length,
-        total_spent: unique.reduce((sum, o) => sum + (o.amount || 0), 0),
+        total_spent: unique.reduce((sum, o) => o.status === 'cancelled' ? sum : sum + (o.amount || 0), 0),
       };
     }).filter(r => r.order_count > 0 || r.phone); // 주문 없고 전화번호도 없는 유령 레코드 제외
 
