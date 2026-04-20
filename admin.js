@@ -64,7 +64,7 @@ async function goHome() {
   localStorage.removeItem('adminToken');
   localStorage.removeItem('adminEmail');
   try { await fetch('/api/admin-logout', { method: 'POST' }); } catch(e) {}
-  location.href = '/';
+  location.href = '/admin';
 }
 
 // 날짜 범위 계산

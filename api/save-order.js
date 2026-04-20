@@ -93,6 +93,53 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to save order', details: orderErr.message });
     }
 
+    // 2-1. 텔레그램 알림 (환경변수 없으면 스킵, 실패해도 주문 저장엔 영향 없음)
+    try {
+      const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+      const TG_CHAT  = process.env.TELEGRAM_CHAT_ID;
+      if (TG_TOKEN && TG_CHAT) {
+        const isBank = (orderId || '').startsWith('BANK-');
+        const payLabel = isBank ? '무통장입금 (확인 대기)' : (payMethod || '카드/간편결제');
+        const gamesStr = Array.isArray(games) ? games.join(', ') : (games || '-');
+        const lines = [
+          `🔔 <b>새 주문이 들어왔습니다</b>`,
+          ``,
+          `📦 주문번호: <code>${orderId}</code>`,
+          `🧾 상품: ${planName}`,
+          `💰 결제금액: ₩${Number(amount).toLocaleString()}`,
+          couponCode ? `🎟️ 쿠폰: ${couponCode} (-₩${Number(couponDiscount||0).toLocaleString()})` : null,
+          `💳 결제수단: ${payLabel}`,
+          `👤 이름: ${buyerName || '-'}`,
+          `📞 연락처: ${buyerContact || '-'}`,
+          `🎮 게임: ${gamesStr}`,
+          memo ? `📝 메모: ${memo}` : null,
+          ``,
+          `🔗 https://www.gameboostpro.co.kr/admin`,
+        ].filter(Boolean);
+
+        const tgRes = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: TG_CHAT,
+            text: lines.join('\n'),
+            parse_mode: 'HTML',
+            disable_web_page_preview: true,
+          }),
+        });
+        if (!tgRes.ok) {
+          const errText = await tgRes.text().catch(() => '');
+          console.error('[save-order] Telegram 발송 실패:', tgRes.status, errText);
+        } else {
+          console.log('[save-order] Telegram 알림 발송됨');
+        }
+      } else {
+        console.log('[save-order] TELEGRAM_BOT_TOKEN/CHAT_ID 미설정 — 알림 스킵');
+      }
+    } catch (tgErr) {
+      console.error('[save-order] Telegram 예외:', tgErr);
+    }
+
     // 3. 쿠폰 used_count 증가 (RPC)
     if (couponCode) {
       const { error: rpcErr } = await supabase.rpc('increment_coupon_uses', {
