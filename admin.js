@@ -405,7 +405,8 @@ async function updateOrderStatus(orderId, newStatus) {
       console.log('[ADMIN] ===== 상태 변경 완료 =====');
     } else {
       console.error('[ADMIN] ❌ 상태 변경 실패:', data);
-      showError('상태 변경 실패: ' + (data.error || data.details || ''));
+      const detail = [data.error, data.details].filter(Boolean).join(' — ');
+      showError('상태 변경 실패: ' + detail);
     }
   } catch (err) {
     console.error('[ADMIN] 상태 변경 중 예외 발생:', err);

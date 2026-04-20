@@ -47,8 +47,13 @@ export default async function handler(req, res) {
     console.log('[admin-update-order] 업데이트 결과:', { data, error });
 
     if (error) {
-      console.error('[admin-update-order] 에러:', error);
-      throw error;
+      console.error('[admin-update-order] 에러 전체:', JSON.stringify(error));
+      return res.status(500).json({
+        error: 'Update failed',
+        details: error.message || JSON.stringify(error),
+        code: error.code,
+        hint: error.hint,
+      });
     }
 
     if (!data || data.length === 0) {
