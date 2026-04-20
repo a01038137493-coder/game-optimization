@@ -357,6 +357,7 @@ function renderAllOrders(orders) {
             <option value="done">완료</option>
             <option value="cancelled">취소</option>
           </select>
+          <button onclick="deleteOrder('${o.id}', '${(o.order_id||'').replace(/'/g,'&#39;')}')" style="padding:6px 10px;border:1px solid rgba(255,100,100,.3);border-radius:6px;background:transparent;color:#ff6464;font-family:'Pretendard',sans-serif;font-size:.85rem;cursor:pointer;">삭제</button>
         </td>
       </tr>
     `;
@@ -411,6 +412,39 @@ async function updateOrderStatus(orderId, newStatus) {
   } catch (err) {
     console.error('[ADMIN] 상태 변경 중 예외 발생:', err);
     showError('상태 변경 실패: ' + err.message);
+  }
+}
+
+// 주문 삭제 (되돌릴 수 없음)
+async function deleteOrder(orderId, orderIdText) {
+  const label = orderIdText || orderId;
+  if (!confirm(`주문을 영구 삭제합니다.\n\n주문번호: ${label}\n\n정말 삭제할까요? 이 동작은 되돌릴 수 없습니다.`)) return;
+
+  try {
+    console.log('[ADMIN] 주문 삭제 요청:', { orderId });
+    const res = await fetch('/api/admin-delete-order', {
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ orderId })
+    });
+
+    const data = await res.json();
+    console.log('[ADMIN] 삭제 응답:', res.status, data);
+
+    if (res.ok) {
+      const msg = document.createElement('div');
+      msg.textContent = '✓ 주문이 삭제되었습니다.';
+      msg.style.cssText = 'position:fixed;top:20px;right:20px;background:#ef4444;color:white;padding:12px 20px;border-radius:8px;font-weight:600;z-index:9999;font-family:Pretendard,sans-serif;font-size:0.9rem;';
+      document.body.appendChild(msg);
+      setTimeout(() => msg.remove(), 3000);
+      await loadOrders();
+    } else {
+      const detail = [data.error, data.details].filter(Boolean).join(' — ');
+      showError('삭제 실패: ' + detail);
+    }
+  } catch (err) {
+    console.error('[ADMIN] 삭제 중 예외:', err);
+    showError('삭제 실패: ' + err.message);
   }
 }
 
