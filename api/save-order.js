@@ -96,8 +96,9 @@ export default async function handler(req, res) {
     // 2-1. 텔레그램 알림 (환경변수 없으면 스킵, 실패해도 주문 저장엔 영향 없음)
     try {
       const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-      const TG_CHAT  = process.env.TELEGRAM_CHAT_ID;
-      if (TG_TOKEN && TG_CHAT) {
+      const TG_CHAT_RAW = process.env.TELEGRAM_CHAT_ID || '';
+      const chatIds = TG_CHAT_RAW.split(',').map(s => s.trim()).filter(Boolean);
+      if (TG_TOKEN && chatIds.length) {
         const isBank = (orderId || '').startsWith('BANK-');
         const payLabel = isBank ? '무통장입금 (확인 대기)' : (payMethod || '카드/간편결제');
         const gamesStr = Array.isArray(games) ? games.join(', ') : (games || '-');
@@ -116,23 +117,27 @@ export default async function handler(req, res) {
           ``,
           `🔗 https://www.gameboostpro.co.kr/admin`,
         ].filter(Boolean);
+        const text = lines.join('\n');
 
-        const tgRes = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: TG_CHAT,
-            text: lines.join('\n'),
-            parse_mode: 'HTML',
-            disable_web_page_preview: true,
-          }),
+        const results = await Promise.allSettled(chatIds.map(chatId =>
+          fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text,
+              parse_mode: 'HTML',
+              disable_web_page_preview: true,
+            }),
+          }).then(async r => {
+            if (!r.ok) throw new Error(`${r.status} ${await r.text().catch(() => '')}`);
+            return chatId;
+          })
+        ));
+        results.forEach((r, i) => {
+          if (r.status === 'rejected') console.error(`[save-order] Telegram 발송 실패 (${chatIds[i]}):`, r.reason?.message || r.reason);
+          else console.log(`[save-order] Telegram 알림 발송됨 (${chatIds[i]})`);
         });
-        if (!tgRes.ok) {
-          const errText = await tgRes.text().catch(() => '');
-          console.error('[save-order] Telegram 발송 실패:', tgRes.status, errText);
-        } else {
-          console.log('[save-order] Telegram 알림 발송됨');
-        }
       } else {
         console.log('[save-order] TELEGRAM_BOT_TOKEN/CHAT_ID 미설정 — 알림 스킵');
       }
