@@ -367,6 +367,15 @@ h1 .grad {
 body.light .hero p { color: #222222; }
 .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
 .hero-trust { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 28px; }
+.pricing-stats {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 10px 22px; border-radius: 999px;
+  background: rgba(0, 232, 122, 0.08);
+  border: 1px solid rgba(0, 232, 122, 0.25);
+  font-size: .9rem; font-weight: 500; color: rgba(255,255,255,.88);
+}
+.pricing-stats .ps-dot { width: 7px; height: 7px; border-radius: 50%; background: #00e87a; box-shadow: 0 0 8px #00e87a; animation: blink 1.6s infinite; }
+body.light .pricing-stats { background: rgba(0, 180, 80, .08); color: #1a5a2a; border-color: rgba(0,160,70,.35); }
 .hero-trust-item {
   display: flex; align-items: center; gap: 7px;
   padding: 8px 16px; border-radius: 999px;

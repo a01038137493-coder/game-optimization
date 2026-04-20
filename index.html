@@ -113,6 +113,30 @@
         "mainEntity": [
           {
             "@type": "Question",
+            "name": "유튜브 보고 직접 하면 안 되나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "유튜브 가이드는 대부분 일반론이라, 본인 PC 스펙과 게임 조합에 맞는 최적화 포인트를 찾으려면 보통 3~5시간 시행착오가 발생합니다. 잘못 만졌다가 부팅이 꼬이면 복구에 추가 시간이 드는 건 덤입니다. 저희는 스펙·드라이버·사용 게임을 먼저 진단한 뒤 맞춤 세팅을 적용해 30~90분 안에 끝내드립니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "정말 체감 효과가 있나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "체감은 PC 상태와 게임별 편차가 있습니다. 그래서 7일 무료 재작업 보장을 드립니다. 효과가 미흡하면 추가 비용 없이 재조정합니다. 실제 작업의 핵심은 FPS 수치보다 스터터링·프리징·잔렉 해결이라, 숫자보다 걸림 없이 부드럽게 돌아간다는 쪽에서 확실히 느껴지는 부분입니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "게임 계정이나 저장된 비밀번호가 노출되지 않나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "AnyDesk 화면 공유만 사용합니다. 브라우저·문서·메신저 창은 절대 열지 않으며, 작업은 전부 윈도우 설정과 시스템 폴더 안에서만 진행됩니다. 작업 중 고객이 직접 화면을 보고 있으니 의심되는 동작이 있으면 바로 중지시킬 수 있습니다. 연결 종료 후 AnyDesk 접근 권한도 함께 끊어지고, 다음 접속은 고객이 ID를 다시 알려줘야만 가능합니다."
+            }
+          },
+          {
+            "@type": "Question",
             "name": "원격 작업이 안전한가요? 개인정보가 걱정됩니다.",
             "acceptedAnswer": {
               "@type": "Answer",
@@ -617,8 +641,14 @@
   <h1 style="position:relative;z-index:1;">게임 성능을<br /><span class="grad">극한까지 끌어올리세요</span></h1>
   <p class="hero-desc" style="position:relative;z-index:1;">전문가가 직접 원격으로 PC를 세팅해드립니다.<br />포맷부터 잔렉 제거까지, 빠르고 확실하게 달라집니다.</p>
   <div class="hero-btns" style="position:relative;z-index:1;">
-    <button class="btn-primary" onclick="window.open('https://pf.kakao.com/_xkmvxlX/chat','_blank')">카톡으로 문의하기 →</button>
-    <button class="btn-outline" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">이용방법 보기</button>
+    <button class="btn-primary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">지금 최적화 시작하기 →</button>
+    <button class="btn-outline" onclick="window.open('https://pf.kakao.com/_xkmvxlX/chat','_blank')">카톡 상담</button>
+  </div>
+  <div class="hero-trust" style="position:relative;z-index:1;">
+    <span class="hero-trust-item">⚡ 평균 30~90분 완료</span>
+    <span class="hero-trust-item">🔄 7일 무료 재작업</span>
+    <span class="hero-trust-item">🔒 1:1 원격·정보 보호</span>
+    <span class="hero-trust-item">💳 상담 없이 즉시 결제</span>
   </div>
 </section>
 
@@ -1218,7 +1248,8 @@
   <div class="center fade-up" style="position:relative;z-index:1;">
     <div class="section-tag">가격 안내</div>
     <h2 class="section-title">전문가 원격 작업<br />단 1회 결제</h2>
-    <p class="section-sub">월정액 없이 필요한 서비스만 한 번 결제. 카카오톡으로 문의 후 원격 진행합니다.</p>
+    <p class="section-sub">월정액 없이 필요한 서비스만 한 번 결제. 카카오톡 문의 없이 사이트에서 바로 진행도 가능합니다.</p>
+    <div id="pricingStats" class="pricing-stats" style="margin-top:20px;display:none;"></div>
   </div>
   <div class="pricing-grid" style="position:relative;z-index:1;">
 
@@ -1368,6 +1399,36 @@
 
     <div class="faq-item">
       <button class="faq-q" onclick="toggleFaq(this)">
+        <span>유튜브 보고 직접 하면 안 되나요?</span>
+        <span class="faq-arrow">﹀</span>
+      </button>
+      <div class="faq-a">
+        유튜브 가이드는 대부분 <strong>일반론</strong>이라, 본인 PC 스펙과 게임 조합에 맞는 최적화 포인트를 찾으려면 보통 <strong>3~5시간 시행착오</strong>가 발생합니다. 잘못 만졌다가 부팅 꼬이면 복구에 추가 시간이 드는 건 덤입니다. 저희는 스펙·드라이버·사용 게임을 먼저 진단한 뒤 맞춤 세팅을 적용해 30~90분 안에 끝내드립니다.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>정말 체감 효과가 있나요?</span>
+        <span class="faq-arrow">﹀</span>
+      </button>
+      <div class="faq-a">
+        체감은 PC 상태·게임별 편차가 있습니다. 그래서 <strong>7일 무료 재작업 보장</strong>을 드립니다 — 효과가 미흡하면 추가 비용 없이 재조정합니다. 실제 작업의 핵심은 FPS 수치보다 <strong>스터터링·프리징·잔렉 해결</strong>이라, "숫자" 보다는 "걸림 없이 부드럽게 돌아간다"는 쪽에서 확실히 느껴지는 부분입니다.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>게임 계정이나 저장된 비밀번호가 노출되지 않나요?</span>
+        <span class="faq-arrow">﹀</span>
+      </button>
+      <div class="faq-a">
+        <strong>AnyDesk 화면 공유만</strong> 사용합니다. 브라우저·문서·메신저 창은 절대 열지 않으며, 작업은 전부 윈도우 설정과 시스템 폴더 안에서만 진행됩니다. 작업 중 고객님이 직접 화면을 보고 있으니 의심되는 동작이 있으면 바로 중지시킬 수 있습니다. 연결 종료 후 AnyDesk 접근 권한도 함께 끊어지고, 다음 접속은 고객님이 ID를 다시 알려주셔야만 가능합니다.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
         <span>원격 작업이 안전한가요? 개인정보가 걱정됩니다.</span>
         <span class="faq-arrow">﹀</span>
       </button>
@@ -1432,7 +1493,7 @@
         <span class="faq-arrow">﹀</span>
       </button>
       <div class="faq-a">
-        카카오 채널로 문의 후 작업 진행 전 계좌이체 또는 카카오페이로 결제합니다. 작업 완료 후 결제를 요청드리지 않으니 안심하세요.
+        사이트 상단 <strong>가격 안내</strong>에서 플랜 선택 후 바로 결제할 수 있습니다. <strong>카카오페이·신용카드·계좌이체</strong>를 지원하며, 번거로우시면 카카오 채널 문의 후 진행도 가능합니다. 결제 완료 시점에 작업 순번이 예약되며 안내 메시지를 받아보실 수 있습니다.
       </div>
     </div>
 
