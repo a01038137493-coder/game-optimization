@@ -10,30 +10,34 @@
   <style>
     .an-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .an-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .an-grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
     .an-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 22px 24px;
     }
+    .an-card.compact { padding: 18px 20px; }
     .an-card h3 {
       font-size: .85rem;
       font-weight: 600;
       color: var(--text-muted);
-      margin: 0 0 18px;
+      margin: 0 0 14px;
       text-transform: uppercase;
       letter-spacing: .06em;
     }
+    .an-card.compact h3 { font-size: .72rem; margin-bottom: 10px; }
     .an-big-num {
-      font-size: 2.4rem;
+      font-size: 2.1rem;
       font-weight: 900;
       line-height: 1;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
-    .an-sub { font-size: .8rem; color: var(--text-muted); }
+    .an-card.compact .an-big-num { font-size: 1.7rem; }
+    .an-sub { font-size: .75rem; color: var(--text-muted); }
     .an-change {
       display: inline-flex; align-items: center; gap: 4px;
-      font-size: .78rem; font-weight: 700;
+      font-size: .74rem; font-weight: 700;
       padding: 3px 8px; border-radius: 6px;
       margin-top: 8px;
     }
@@ -62,7 +66,7 @@
       position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
       background: #1e293b; color: #fff; font-size: .65rem;
       padding: 3px 6px; border-radius: 4px; white-space: nowrap;
-      pointer-events: none;
+      pointer-events: none; z-index: 10;
     }
     .an-hour-labels {
       display: flex; gap: 4px; margin-top: 6px;
@@ -72,7 +76,10 @@
       text-align: center;
     }
     .filter-row {
-      display: flex; gap: 8px; align-items: center;
+      display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    }
+    .filter-sep {
+      width: 1px; height: 22px; background: var(--border); margin: 0 4px;
     }
     .an-filter-btn {
       padding: 6px 16px;
@@ -91,13 +98,61 @@
       border-color: var(--primary);
       color: var(--primary);
     }
-    .an-chart-wrap { position: relative; height: 220px; }
+    .an-date-input {
+      padding: 6px 10px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      font-family: 'Pretendard', sans-serif;
+      font-size: .8rem;
+      color-scheme: dark;
+    }
+    .an-date-input:focus { outline: none; border-color: var(--primary); }
+    .an-chart-wrap { position: relative; height: 240px; }
+    .an-chart-wrap.sm { height: 200px; }
     .an-empty {
       display: flex; align-items: center; justify-content: center;
       height: 100%; color: var(--text-muted); font-size: .85rem;
+      padding: 20px 0;
+    }
+    .an-weekday-row {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+      align-items: end;
+    }
+    .an-weekday-bar {
+      position: relative; height: 100px;
+      display: flex; align-items: end; justify-content: center;
+    }
+    .an-weekday-fill {
+      width: 70%;
+      background: linear-gradient(to top, #3b82f6, #7b2fff);
+      border-radius: 4px 4px 0 0;
+      transition: height .5s ease;
+      position: relative;
+    }
+    .an-weekday-fill:hover::after {
+      content: attr(data-tip);
+      position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+      margin-bottom: 6px;
+      background: #1e293b; color: #fff; font-size: .7rem;
+      padding: 4px 8px; border-radius: 4px; white-space: nowrap;
+      pointer-events: none; z-index: 10;
+    }
+    .an-weekday-labels {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+      margin-top: 8px;
+    }
+    .an-weekday-labels span {
+      text-align: center; font-size: .72rem; color: var(--text-muted);
+    }
+    .an-weekday-labels span.weekend { color: #f87171; }
+    @media (max-width: 900px) {
+      .an-grid-5 { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 768px) {
       .an-grid-2, .an-grid-3 { grid-template-columns: 1fr; }
+      .an-grid-5 { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -122,47 +177,69 @@
 
   <!-- MAIN -->
   <main class="admin-main">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
       <div>
         <h1 style="margin:0;font-size:1.6rem;">👁️ 방문자 통계</h1>
         <p style="margin:6px 0 0;color:var(--text-muted);font-size:.85rem;" id="anDateRange">--</p>
       </div>
-      <div class="filter-row">
-        <button class="an-filter-btn active" onclick="loadStats('today')" id="af-today">오늘</button>
-        <button class="an-filter-btn" onclick="loadStats('week')"  id="af-week">7일</button>
-        <button class="an-filter-btn" onclick="loadStats('month')" id="af-month">30일</button>
-        <button class="an-filter-btn" onclick="loadStats(_curRange)" style="background:rgba(59,130,246,.1);">↺ 새로고침</button>
-      </div>
     </div>
 
-    <!-- 요약 카드 4개 -->
-    <div class="an-grid-3" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
-      <div class="an-card">
+    <!-- 필터 영역 -->
+    <div class="an-card" style="margin-bottom:20px;padding:16px 20px;">
+      <div class="filter-row">
+        <button class="an-filter-btn active" onclick="applyPreset('today')" id="af-today">오늘</button>
+        <button class="an-filter-btn" onclick="applyPreset('yesterday')" id="af-yesterday">어제</button>
+        <button class="an-filter-btn" onclick="applyPreset('week')"  id="af-week">7일</button>
+        <button class="an-filter-btn" onclick="applyPreset('month')" id="af-month">30일</button>
+        <div class="filter-sep"></div>
+        <label style="font-size:.8rem;color:var(--text-muted);">기간</label>
+        <input type="date" class="an-date-input" id="dateFrom" />
+        <span style="color:var(--text-muted);font-size:.8rem;">~</span>
+        <input type="date" class="an-date-input" id="dateTo" />
+        <button class="an-filter-btn" onclick="applyCustomRange()" style="background:rgba(59,130,246,.15);color:var(--primary);border-color:var(--primary);">적용</button>
+        <div class="filter-sep"></div>
+        <button class="an-filter-btn" onclick="refresh()" style="background:rgba(255,255,255,.04);">↺ 새로고침</button>
+      </div>
+      <p style="margin:10px 0 0;font-size:.72rem;color:var(--text-muted);" id="compareRangeLabel"></p>
+    </div>
+
+    <!-- 요약 카드 5개 (모두 전기간 대비 변화율 포함) -->
+    <div class="an-grid-5" style="margin-bottom:20px;">
+      <div class="an-card compact">
         <h3>총 방문</h3>
         <div class="an-big-num" id="anTotal" style="color:#3b82f6;">--</div>
         <div class="an-sub">페이지뷰 합계</div>
         <div class="an-change flat" id="anTotalChange" style="display:none;"></div>
       </div>
-      <div class="an-card">
+      <div class="an-card compact">
         <h3>신규 방문</h3>
         <div class="an-big-num" id="anUnique" style="color:#4ade80;">--</div>
         <div class="an-sub">고유 세션 수</div>
+        <div class="an-change flat" id="anUniqueChange" style="display:none;"></div>
       </div>
-      <div class="an-card">
+      <div class="an-card compact">
         <h3>재방문</h3>
         <div class="an-big-num" id="anReturning" style="color:#a855f7;">--</div>
         <div class="an-sub">재방문 세션 수</div>
+        <div class="an-change flat" id="anReturningChange" style="display:none;"></div>
       </div>
-      <div class="an-card">
-        <h3>전일 대비</h3>
-        <div class="an-big-num" id="anChange" style="color:#f97316;">--</div>
-        <div class="an-sub">오늘 vs 어제</div>
+      <div class="an-card compact">
+        <h3>세션당 페이지</h3>
+        <div class="an-big-num" id="anAvgSession" style="color:#f97316;">--</div>
+        <div class="an-sub">평균 탐색 깊이</div>
+        <div class="an-change flat" id="anAvgChange" style="display:none;"></div>
+      </div>
+      <div class="an-card compact">
+        <h3>이탈률</h3>
+        <div class="an-big-num" id="anBounce" style="color:#f43f5e;">--</div>
+        <div class="an-sub">1페이지만 보고 떠남</div>
+        <div class="an-change flat" id="anBounceChange" style="display:none;"></div>
       </div>
     </div>
 
     <!-- 일별 추이 차트 -->
     <div class="an-card" style="margin-bottom:20px;">
-      <h3>일별 방문자 추이</h3>
+      <h3>일별 방문자 추이 (총 방문 vs 고유 세션)</h3>
       <div class="an-chart-wrap">
         <canvas id="dailyChart"></canvas>
       </div>
@@ -176,7 +253,7 @@
       </div>
     </div>
 
-    <!-- 기기 비율 + 시간대 -->
+    <!-- 기기 + 시간대 -->
     <div class="an-grid-2" style="margin-bottom:20px;">
       <div class="an-card">
         <h3>기기 비율</h3>
@@ -191,6 +268,32 @@
         <div class="an-hour-labels" id="hourLabels"></div>
         <div style="margin-top:16px;font-size:.75rem;color:var(--text-muted);" id="peakHour"></div>
       </div>
+    </div>
+
+    <!-- 브라우저 + OS -->
+    <div class="an-grid-2" style="margin-bottom:20px;">
+      <div class="an-card">
+        <h3>🌐 브라우저 TOP</h3>
+        <div id="browserRows">
+          <div class="an-empty">데이터 없음</div>
+        </div>
+      </div>
+      <div class="an-card">
+        <h3>💻 운영체제 TOP</h3>
+        <div id="osRows">
+          <div class="an-empty">데이터 없음</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 요일별 분포 -->
+    <div class="an-card" style="margin-bottom:20px;">
+      <h3>요일별 방문 분포</h3>
+      <div class="an-weekday-row" id="weekdayBars"></div>
+      <div class="an-weekday-labels">
+        <span class="weekend">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="weekend">토</span>
+      </div>
+      <div style="margin-top:14px;font-size:.75rem;color:var(--text-muted);" id="peakDay"></div>
     </div>
 
   </main>
