@@ -11,6 +11,7 @@
     .an-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .an-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .an-grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+    .an-grid-3-time { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .an-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -149,10 +150,12 @@
     .an-weekday-labels span.weekend { color: #f87171; }
     @media (max-width: 900px) {
       .an-grid-5 { grid-template-columns: repeat(2, 1fr); }
+      .an-grid-3-time { grid-template-columns: 1fr; }
     }
     @media (max-width: 768px) {
       .an-grid-2, .an-grid-3 { grid-template-columns: 1fr; }
       .an-grid-5 { grid-template-columns: 1fr; }
+      .an-grid-3-time { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -234,6 +237,26 @@
         <div class="an-big-num" id="anBounce" style="color:#f43f5e;">--</div>
         <div class="an-sub">1페이지만 보고 떠남</div>
         <div class="an-change flat" id="anBounceChange" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- 체류 시간 카드 (3개) -->
+    <div class="an-grid-3-time" style="margin-bottom:20px;">
+      <div class="an-card compact">
+        <h3>⏱ 평균 세션 시간</h3>
+        <div class="an-big-num" id="anAvgDur" style="color:#22d3ee;">--</div>
+        <div class="an-sub">탭이 활성 상태인 시간의 평균</div>
+        <div class="an-change flat" id="anAvgDurChange" style="display:none;"></div>
+      </div>
+      <div class="an-card compact">
+        <h3>⏱ 중앙값 세션 시간</h3>
+        <div class="an-big-num" id="anMedDur" style="color:#14b8a6;">--</div>
+        <div class="an-sub">이상치에 덜 민감한 대표값</div>
+      </div>
+      <div class="an-card compact">
+        <h3>📈 추적 커버리지</h3>
+        <div class="an-big-num" id="anDurCov" style="color:#64748b;">--</div>
+        <div class="an-sub">체류 시간이 측정된 세션 비율</div>
       </div>
     </div>
 

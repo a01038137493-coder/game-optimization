@@ -104,7 +104,7 @@ async function loadStats() {
   if (!await checkAuth()) return;
 
   // 로딩 상태
-  ['anTotal','anUnique','anReturning','anAvgSession','anBounce'].forEach(id => {
+  ['anTotal','anUnique','anReturning','anAvgSession','anBounce','anAvgDur','anMedDur','anDurCov'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.textContent = '...'; el.style.opacity = '.4'; }
   });
@@ -129,7 +129,14 @@ async function loadStats() {
     document.getElementById('anAvgSession').textContent = (d.avgPerSession ?? 0).toFixed(1);
     document.getElementById('anBounce').textContent = (d.bounceRate ?? 0).toFixed(1) + '%';
 
-    ['anTotal','anUnique','anReturning','anAvgSession','anBounce'].forEach(id => {
+    // 체류 시간
+    document.getElementById('anAvgDur').textContent = fmtDuration(d.avgDurationMs || 0);
+    document.getElementById('anMedDur').textContent = fmtDuration(d.medianDurationMs || 0);
+    const cov = (d.durationCoverage ?? 0);
+    document.getElementById('anDurCov').textContent =
+      cov.toFixed(1) + '% (' + (d.trackedSessions || 0).toLocaleString() + '개)';
+
+    ['anTotal','anUnique','anReturning','anAvgSession','anBounce','anAvgDur','anMedDur','anDurCov'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.opacity = '1';
     });
@@ -140,6 +147,7 @@ async function loadStats() {
     renderChange('anReturningChange', d.compare?.returning,      '%');
     renderChange('anAvgChange',       d.compare?.avgPerSession,  '',  true);
     renderChange('anBounceChange',    d.compare?.bounceRate,     'p', true, true);
+    renderChange('anAvgDurChange',    d.compare?.avgDurationMs,  '%');
 
     // 일별 차트
     renderDailyChart(d.daily, d.dailyUnique || {});
@@ -168,6 +176,18 @@ async function loadStats() {
 function setNum(id, val) {
   const el = document.getElementById(id);
   if (el) el.textContent = (val || 0).toLocaleString();
+}
+
+// ── ms → "3분 42초" / "12초"
+function fmtDuration(ms) {
+  if (!ms || ms < 1000) return '0초';
+  const totalSec = Math.round(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  if (h > 0) return `${h}시간 ${m}분`;
+  if (m > 0) return `${m}분 ${s}초`;
+  return `${s}초`;
 }
 
 // ── 변화율 배지

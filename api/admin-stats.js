@@ -88,10 +88,15 @@ function computeMetrics(rows) {
 
   const sessionSet = new Set();
   const sessionViewCount = {}; // session_id -> view count
+  const sessionDuration = {};  // session_id -> max duration_ms observed
   rows.forEach(r => {
     if (!r.session_id) return;
     sessionSet.add(r.session_id);
     sessionViewCount[r.session_id] = (sessionViewCount[r.session_id] || 0) + 1;
+    if (r.duration_ms != null) {
+      const cur = sessionDuration[r.session_id] || 0;
+      if (r.duration_ms > cur) sessionDuration[r.session_id] = r.duration_ms;
+    }
   });
   const uniqueSessions = sessionSet.size;
   const returning = Math.max(0, total - uniqueSessions);
@@ -102,6 +107,23 @@ function computeMetrics(rows) {
 
   // 세션당 평균 페이지
   const avgPerSession = uniqueSessions ? Math.round(total / uniqueSessions * 10) / 10 : 0;
+
+  // 체류 시간 — duration_ms가 측정된 세션만 평균에 반영
+  const durVals = Object.values(sessionDuration);
+  const trackedSessions = durVals.length;
+  const avgDurationMs = trackedSessions
+    ? Math.round(durVals.reduce((a, b) => a + b, 0) / trackedSessions)
+    : 0;
+  const medianDurationMs = trackedSessions
+    ? (() => {
+        const sorted = [...durVals].sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+      })()
+    : 0;
+  const durationCoverage = uniqueSessions
+    ? Math.round(trackedSessions / uniqueSessions * 1000) / 10
+    : 0;
 
   // 기기
   const deviceCount = { desktop: 0, mobile: 0, tablet: 0 };
@@ -140,6 +162,7 @@ function computeMetrics(rows) {
   return {
     total, uniqueSessions, returning,
     bounceRate, avgPerSession,
+    avgDurationMs, medianDurationMs, durationCoverage, trackedSessions,
     deviceCount, referrers, browsers, osList,
   };
 }
@@ -184,7 +207,7 @@ export default async function handler(req, res) {
 
     const { data: rows, error } = await supabase
       .from('page_views')
-      .select('visited_at, device, session_id, referrer, user_agent')
+      .select('visited_at, device, session_id, referrer, user_agent, duration_ms')
       .gte('visited_at', prevFrom.toISOString())
       .lte('visited_at', toDate.toISOString())
       .order('visited_at', { ascending: true });
@@ -228,11 +251,12 @@ export default async function handler(req, res) {
     const pct = (a, b) => (b === 0 ? null : Math.round((a - b) / b * 1000) / 10);
 
     const compare = {
-      total:          pct(cur.total,          prev.total),
-      uniqueSessions: pct(cur.uniqueSessions, prev.uniqueSessions),
-      returning:      pct(cur.returning,      prev.returning),
-      bounceRate:     cur.bounceRate - prev.bounceRate,
-      avgPerSession:  Math.round((cur.avgPerSession - prev.avgPerSession) * 10) / 10,
+      total:            pct(cur.total,          prev.total),
+      uniqueSessions:   pct(cur.uniqueSessions, prev.uniqueSessions),
+      returning:        pct(cur.returning,      prev.returning),
+      bounceRate:       cur.bounceRate - prev.bounceRate,
+      avgPerSession:    Math.round((cur.avgPerSession - prev.avgPerSession) * 10) / 10,
+      avgDurationMs:    pct(cur.avgDurationMs,  prev.avgDurationMs),
     };
 
     // 하위 호환: 기존 필드 유지
@@ -257,6 +281,10 @@ export default async function handler(req, res) {
       // 신규 키
       bounceRate: cur.bounceRate,
       avgPerSession: cur.avgPerSession,
+      avgDurationMs: cur.avgDurationMs,
+      medianDurationMs: cur.medianDurationMs,
+      durationCoverage: cur.durationCoverage,
+      trackedSessions: cur.trackedSessions,
       browsers: cur.browsers,
       osList: cur.osList,
       dailyUnique,
@@ -268,6 +296,7 @@ export default async function handler(req, res) {
         returning: prev.returning,
         bounceRate: prev.bounceRate,
         avgPerSession: prev.avgPerSession,
+        avgDurationMs: prev.avgDurationMs,
       },
       range: {
         from: ymd(fromDate),

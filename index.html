@@ -1566,22 +1566,86 @@
 
 <script src="/js/app.js"></script>
 <script>
-// 방문자 트래킹
+// 방문자 트래킹 + 체류 시간 측정 (Page Visibility API)
 (function() {
   try {
-    const key = 'gbp_sid';
-    let sid = sessionStorage.getItem(key);
+    const SID_KEY  = 'gbp_sid';
+    const PVID_KEY = 'gbp_sid_pvid';
+    const VIS_KEY  = 'gbp_sid_visms';
+
+    // 1) 세션 ID 확보 & 신규 세션일 때만 track-visit
+    let sid = sessionStorage.getItem(SID_KEY);
+    let pvid = sessionStorage.getItem(PVID_KEY);
+
     if (!sid) {
       sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
-      sessionStorage.setItem(key, sid);
-      // 신규 세션만 전송
+      sessionStorage.setItem(SID_KEY, sid);
       fetch('/api/track-visit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sid, referrer: document.referrer || '' }),
         keepalive: true,
-      }).catch(() => {});
+      })
+        .then(r => r.json())
+        .then(d => { if (d && d.id) { sessionStorage.setItem(PVID_KEY, d.id); pvid = d.id; } })
+        .catch(() => {});
     }
+
+    // 2) 체류 시간 측정 — 탭이 visible일 때만 카운팅
+    let visibleStart = (document.visibilityState === 'visible') ? Date.now() : null;
+
+    function flushVisible() {
+      if (visibleStart === null) return;
+      const add = Date.now() - visibleStart;
+      const cur = parseInt(sessionStorage.getItem(VIS_KEY) || '0', 10) || 0;
+      sessionStorage.setItem(VIS_KEY, String(cur + add));
+      visibleStart = null;
+    }
+
+    function currentDurationMs() {
+      let acc = parseInt(sessionStorage.getItem(VIS_KEY) || '0', 10) || 0;
+      if (visibleStart !== null) acc += (Date.now() - visibleStart);
+      return acc;
+    }
+
+    function sendDuration() {
+      const id = pvid || sessionStorage.getItem(PVID_KEY);
+      if (!id) return;
+      const ms = currentDurationMs();
+      if (ms < 1000) return;
+      const body = JSON.stringify({ id, duration_ms: ms });
+      try {
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon('/api/track-duration', new Blob([body], { type: 'application/json' }));
+        } else {
+          fetch('/api/track-duration', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body,
+            keepalive: true,
+          }).catch(() => {});
+        }
+      } catch(e) {}
+    }
+
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') {
+        if (visibleStart === null) visibleStart = Date.now();
+      } else {
+        flushVisible();
+        sendDuration();
+      }
+    });
+
+    // 페이지 이탈 시 최종 전송
+    window.addEventListener('pagehide', function() { flushVisible(); sendDuration(); });
+    window.addEventListener('beforeunload', function() { flushVisible(); sendDuration(); });
+
+    // 장기 체류 대비 주기적 업데이트 (30초)
+    setInterval(function() {
+      if (document.visibilityState === 'visible') { flushVisible(); visibleStart = Date.now(); }
+      sendDuration();
+    }, 30000);
   } catch(e) {}
 })();
 </script>

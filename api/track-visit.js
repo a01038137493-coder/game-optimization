@@ -1,6 +1,7 @@
 /**
  * 방문자 트래킹 API
  * POST /api/track-visit
+ * 응답: { ok, id } — 체류 시간 업데이트용 row id 반환
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -31,14 +32,20 @@ export default async function handler(req, res) {
       process.env.SUPABASE_SERVICE_KEY
     );
 
-    await supabase.from('page_views').insert({
-      session_id: session_id || null,
-      device,
-      referrer: referrer || null,
-      user_agent: ua.slice(0, 300),
-    });
+    const { data, error } = await supabase
+      .from('page_views')
+      .insert({
+        session_id: session_id || null,
+        device,
+        referrer: referrer || null,
+        user_agent: ua.slice(0, 300),
+      })
+      .select('id')
+      .single();
 
-    return res.status(200).json({ ok: true });
+    if (error) throw error;
+
+    return res.status(200).json({ ok: true, id: data?.id || null });
   } catch (err) {
     console.error('[track-visit]', err);
     return res.status(500).json({ ok: false });
