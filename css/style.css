@@ -225,6 +225,8 @@ body.light .nav-dropdown-btn.logout { color: #c0143c; }
 body.light .hero-trust-item { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.1); color: var(--text); }
 
 * { margin: 0; padding: 0; box-sizing: border-box; word-break: keep-all; overflow-wrap: break-word; }
+/* 폼 컨트롤(button/input 등)은 기본적으로 body 폰트를 상속하지 않으므로 강제 상속 — 버튼 한글 폰트 깨짐 방지 */
+button, input, select, textarea { font-family: inherit; }
 
 html { scroll-behavior: smooth; }
 
