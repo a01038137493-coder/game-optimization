@@ -27,10 +27,8 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to fetch stats' });
     }
 
-    // 마케팅 기준 누적치(런칭 이전 실적 반영). 실주문이 쌓이면 그 위로 자연 증가.
-    const BASE_COUNT = 429;
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
-    return res.status(200).json({ completedCount: (count || 0) + BASE_COUNT });
+    return res.status(200).json({ completedCount: count || 0 });
   } catch (err) {
     console.error('[public-stats] 예외:', err);
     return res.status(500).json({ error: 'Internal error' });

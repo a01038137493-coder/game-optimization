@@ -565,7 +565,6 @@
     <li><a href="#how">이용방법</a></li>
     <li><a href="#features">기능</a></li>
     <li><a href="#pricing">가격 안내</a></li>
-    <li><a href="#reviews">이벤트</a></li>
   </ul>
   <div style="display:flex;align-items:center;gap:10px;">
     <!-- 다크/라이트 모드 토글 -->
@@ -608,11 +607,7 @@
   <a href="#how" onclick="closeMenu()"><span class="mn-icon">📡</span>이용방법</a>
   <a href="#features" onclick="closeMenu()"><span class="mn-icon">⚡</span>핵심 기능</a>
   <a href="#pricing" onclick="closeMenu()"><span class="mn-icon">💳</span>가격 안내</a>
-  <a href="#reviews" onclick="closeMenu()"><span class="mn-icon">🎁</span>이벤트</a>
   <button class="mobile-cta" onclick="closeMenu();document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">지금 바로 최적화 시작하기 →</button>
-  <div class="mobile-nav-bottom">
-    <span>🔥</span> 오픈 이벤트 진행 중 · 선착순 <strong style="color:#ffa500;">20명</strong> 한정
-  </div>
 </div>
 
 <!-- 결제내역 모달 -->
@@ -905,7 +900,7 @@
     <div class="game-card sudden">
       <div class="game-thumb-wrap">
         <img class="game-thumb" loading="lazy"
-          src="/images/sudden/sudden_thumb.png"
+          src="/images/서든어택.jpeg"
           onerror="this.style.display='none'"
           alt="서든어택" />
         <div class="game-thumb-overlay">
@@ -991,6 +986,10 @@
     <!-- 아크 레이더스 -->
     <div class="game-card arc">
       <div class="game-thumb-wrap">
+        <img class="game-thumb" loading="lazy"
+          src="/images/아크레이더스.webp"
+          onerror="this.style.display='none'"
+          alt="아크 레이더스" />
         <div class="game-thumb-overlay">
           <div class="game-icon">🚀</div>
           <div>
@@ -1093,7 +1092,7 @@
     <span>⚡</span>
     <span>⚡ 평균 <strong>30~60분</strong> 완료</span>
     <span style="color:var(--border);">|</span>
-    <span>대기 없이 <strong>순번제</strong> 진행</span>
+    <span>대기 없이 <strong>순번제로</strong> 진행</span>
     <span style="color:var(--border);">|</span>
     <span>작업 중 <strong>실시간 소통</strong> 가능</span>
   </div>
@@ -1148,7 +1147,6 @@
     <div class="section-tag">가격 안내</div>
     <h2 class="section-title">전문가 원격 작업<br />단 1회 결제</h2>
     <p class="section-sub">월정액 없이 필요한 서비스만 한 번 결제. 카카오톡 문의 없이 사이트에서 바로 진행도 가능합니다.</p>
-    <div id="pricingStats" class="pricing-stats" style="margin-top:20px;display:none;"></div>
   </div>
   <div class="pricing-grid" style="position:relative;z-index:1;">
 
@@ -1225,61 +1223,6 @@
   <p class="section-sub fade-up" style="margin-top:20px;font-size:.82rem;color:var(--text-muted);text-align:center;width:100%;">※ 컴퓨터 컨디션(하드웨어 상태)에 따라 개인 체감은 다를 수 있습니다.</p>
 </section>
 
-<!-- LAUNCH EVENT -->
-<section id="reviews" class="launch-section">
-  <div class="launch-inner fade-up">
-    <div class="launch-left">
-      <div class="launch-badge">
-        <span class="viewer-dot"></span> 오픈 기념 한정 이벤트
-      </div>
-      <h2 class="launch-title">오픈 기념<br /><span>₩10,000 할인</span></h2>
-      <p class="launch-desc">런칭 기념으로 선착순 <strong>20명</strong>에게 모든 서비스 1만원 할인을 드립니다.<br />카카오 채널로 문의 시 자동 적용됩니다.</p>
-      <div class="launch-slots">
-        <div class="slot-bar-wrap">
-          <div class="slot-bar-fill" id="slotBar"></div>
-        </div>
-        <div class="slot-text">남은 자리 <strong id="slotsLeft">13</strong> / 20</div>
-      </div>
-      <div class="launch-btns">
-        <button class="btn-primary" onclick="window.open('https://pf.kakao.com/_xkmvxlX/chat','_blank')">카카오로 할인 받기 →</button>
-        <button class="btn-outline" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">가격 보기</button>
-      </div>
-    </div>
-    <div class="launch-right">
-      <div class="launch-guarantee-title">서비스 보장</div>
-      <div class="guarantee-list">
-        <div class="guarantee-item">
-          <div class="g-icon">🔒</div>
-          <div>
-            <strong>개인정보 완전 보호</strong>
-            <p>원격 작업 중 파일 열람·복사 절대 없음. 작업 완료 후 즉시 연결 종료.</p>
-          </div>
-        </div>
-        <div class="guarantee-item">
-          <div class="g-icon">🔄</div>
-          <div>
-            <strong>재작업 보장</strong>
-            <p>작업 후 7일 이내 문제 발생 시 무료 재작업을 보장합니다.</p>
-          </div>
-        </div>
-        <div class="guarantee-item">
-          <div class="g-icon">⏱️</div>
-          <div>
-            <strong>빠른 작업 완료</strong>
-            <p>대부분의 작업은 30~90분 내 완료. 긴 대기 없이 순번 진행.</p>
-          </div>
-        </div>
-        <div class="guarantee-item">
-          <div class="g-icon">💬</div>
-          <div>
-            <strong>작업 중 실시간 소통</strong>
-            <p>진행 상황을 단계별로 설명드리며 궁금한 점은 바로 답변합니다.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- FAQ + CTA (공유 캔버스) -->
 <div class="faq-cta-wrap" style="position:relative;background:var(--bg-dark);">

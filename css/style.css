@@ -1694,7 +1694,7 @@ body.light .refund-row-head span { background: rgba(0,119,204,.07) !important; }
     display: flex; flex-direction: row; gap: 14px;
     overflow-x: auto; scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    padding: 8px 20px 20px;
+    padding: 24px 20px 20px;
     scrollbar-width: none;
     margin-top: 28px;
   }

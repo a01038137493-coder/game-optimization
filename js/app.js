@@ -203,38 +203,6 @@ function toggleFaq(btn) {
   }
 }
 
-// ── 남은 자리 슬롯바 ──
-(function() {
-  const slots = 13; const total = 20;
-  const bar   = document.getElementById('slotBar');
-  const label = document.getElementById('slotsLeft');
-  if (!bar) return;
-  const pct = ((total - slots) / total * 100).toFixed(0);
-  // 페이지 로드 후 약간 딜레이 주어 애니메이션 보이게
-  setTimeout(() => { bar.style.width = pct + '%'; }, 400);
-  if (label) label.textContent = slots;
-})();
-
-// ── 가격 섹션 상단 실적 카운터 (공개 통계 API) ──
-(async function renderPricingStats() {
-  const el = document.getElementById('pricingStats');
-  if (!el) return;
-  try {
-    const res = await fetch('/api/public-stats');
-    if (!res.ok) return;
-    const { completedCount } = await res.json();
-    const count = Number(completedCount || 0);
-    if (count >= 10) {
-      el.innerHTML = `<span class="ps-dot"></span>지금까지 <strong>${count.toLocaleString('ko-KR')}건</strong> 진행 · 평균 30~90분 · 7일 재작업 보장`;
-    } else {
-      el.innerHTML = `<span class="ps-dot"></span>오픈 기념 서비스 진행 중 · 평균 30~90분 · 7일 재작업 보장`;
-    }
-    el.style.display = 'inline-flex';
-  } catch (e) {
-    console.warn('[public-stats] 로드 실패', e);
-  }
-})();
-
 // 카카오 플로팅 버튼 - 스크롤 시 등장
 const kakaoFloat = document.getElementById('kakaoFloat');
 window.addEventListener('scroll', () => {
