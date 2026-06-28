@@ -67,8 +67,7 @@ body.light .hero-badge {
 }
 body.light .hero-badge span { background: var(--primary); }
 body.light .hero-trust-item {
-  background: rgba(255,255,255,0.75);
-  border-color: rgba(0,0,0,0.1);
+  border-color: rgba(0,0,0,0.12);
   color: var(--text);
 }
 
@@ -222,7 +221,7 @@ body.light .nav-dropdown-btn:hover { background: rgba(0,0,0,0.04); color: var(--
 body.light .nav-dropdown-btn.logout { color: #c0143c; }
 
 /* ─ hero trust badge ─ */
-body.light .hero-trust-item { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.1); color: var(--text); }
+body.light .hero-trust-item { border-color: rgba(0,0,0,0.12); color: var(--text); }
 
 * { margin: 0; padding: 0; box-sizing: border-box; word-break: keep-all; overflow-wrap: break-word; }
 /* 폼 컨트롤(button/input 등)은 기본적으로 body 폰트를 상속하지 않으므로 강제 상속 — 버튼 한글 폰트 깨짐 방지 */
@@ -368,7 +367,7 @@ h1 .grad {
 }
 body.light .hero p { color: #222222; }
 .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
-.hero-trust { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 28px; }
+.hero-trust { display: flex; gap: 0; row-gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 28px; }
 .pricing-stats {
   display: inline-flex; align-items: center; gap: 10px;
   padding: 10px 22px; border-radius: 999px;
@@ -379,12 +378,12 @@ body.light .hero p { color: #222222; }
 .pricing-stats .ps-dot { width: 7px; height: 7px; border-radius: 50%; background: #00e87a; box-shadow: 0 0 8px #00e87a; animation: blink 1.6s infinite; }
 body.light .pricing-stats { background: rgba(0, 180, 80, .08); color: #1a5a2a; border-color: rgba(0,160,70,.35); }
 .hero-trust-item {
-  display: flex; align-items: center; gap: 7px;
-  padding: 8px 16px; border-radius: 999px;
-  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
-  font-size: .83rem; color: rgba(255,255,255,.85); font-weight: 500;
-  backdrop-filter: blur(8px);
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 2px 18px;
+  font-size: .85rem; color: rgba(255,255,255,.82); font-weight: 500;
+  border-left: 1px solid rgba(255,255,255,.18);
 }
+.hero-trust-item:first-child { border-left: none; }
 .btn-primary {
   padding: 14px 36px; border-radius: 10px; border: none; cursor: pointer;
   font-weight: 700; font-size: 1rem;
@@ -1590,8 +1589,8 @@ body.light .refund-row-head span { background: rgba(0,119,204,.07) !important; }
   .hero-btns { flex-direction: column; width: 100%; gap: 10px; }
   .hero-btns .btn-primary { width: 100%; padding: 17px; font-size: 1rem; border-radius: 14px; }
   .hero-btns .btn-outline { width: 100%; padding: 17px; font-size: 1rem; border-radius: 14px; }
-  .hero-trust { gap: 8px; margin-top: 20px; justify-content: flex-start; }
-  .hero-trust-item { font-size: .78rem; padding: 7px 13px; }
+  .hero-trust { gap: 6px 10px; margin-top: 20px; justify-content: center; }
+  .hero-trust-item { font-size: .78rem; padding: 2px 4px; border-left: none; }
 
   /* hero 통계 — 수평 스크롤 pill */
   .stats {
