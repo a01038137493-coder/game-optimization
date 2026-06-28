@@ -559,7 +559,7 @@
 
 <!-- NAV -->
 <nav>
-  <a class="logo" href="/" style="text-decoration:none;cursor:pointer;"><img src="/images/hori_logo.png" alt="GameBoost Pro" style="height:36px;display:block;" /></a>
+  <a class="logo" href="/" style="text-decoration:none;cursor:pointer;"><img src="/images/hori_logo.png" alt="GameBoost Pro" style="height:28px;display:block;" /></a>
   <ul class="nav-links">
     <li><a href="#services">서비스</a></li>
     <li><a href="#how">이용방법</a></li>
@@ -1514,10 +1514,18 @@
 
   function resize() {
     const hero = canvas.parentElement;
-    W = hero.offsetWidth;
-    H = hero.offsetHeight || 600;
+    const w = hero.offsetWidth;
+    const h = hero.offsetHeight || 600;
+    // 모바일 주소창 show/hide로 인한 미세한 높이 변화는 무시 — 캔버스 재설정(=clear) 시 생기는
+    // 스크롤 깜빡임 방지. 폭이 바뀌거나(가로전환/창크기) 높이가 크게 바뀔 때만 재설정.
+    if (w === W && Math.abs(h - H) < 120) return;
+    W = w;
+    H = h;
     canvas.width  = W;
     canvas.height = H;
+    // 재설정 직후 빈 캔버스가 노출되지 않도록 즉시 한 프레임 렌더
+    ctx.clearRect(0, 0, W, H);
+    layers.forEach(drawLayer);
   }
   resize();
   window.addEventListener('resize', resize);
