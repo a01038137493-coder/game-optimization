@@ -604,28 +604,40 @@ section::before {
 }
 
 /* ── HOW IT WORKS ── */
+/* ── 이용방법 — 세로 타임라인 (시안 3) ── */
 .steps {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0; margin-top: 64px; position: relative;
+  position: relative; max-width: 680px; margin: 56px auto 0; padding-left: 8px;
 }
 .step {
-  padding: 32px 28px; text-align: center; position: relative;
+  display: flex; align-items: flex-start; gap: 26px;
+  padding: 0 0 34px; position: relative; text-align: left;
 }
-.step:not(:last-child)::after {
-  content: '→';
-  position: absolute; right: -4px; top: 50%;
-  transform: translateY(-50%);
-  color: var(--border); font-size: 1.6rem;
+/* 번호와 번호를 잇는 연결선 — 마지막 단계엔 없어 깔끔하게 종료 */
+.step:not(:last-child)::before {
+  content: '';
+  position: absolute; left: 24px; top: 25px; bottom: 0; width: 2px;
+  background: linear-gradient(to bottom, var(--primary), var(--secondary));
+  opacity: .6; z-index: 0; border-radius: 2px;
 }
+.step:last-child { padding-bottom: 0; }
 .step-num {
-  width: 52px; height: 52px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  flex-shrink: 0; width: 50px; height: 50px; border-radius: 50%;
+  position: relative; z-index: 1;
   display: flex; align-items: center; justify-content: center;
-  font-weight: 900; font-size: 1.1rem; color: #000;
-  margin: 0 auto 18px;
+  font-weight: 900; font-size: 1.1rem; color: var(--text);
+  background: var(--bg-card2); border: 2px solid var(--primary);
+  box-shadow: 0 0 0 5px var(--bg-dark), 0 0 18px rgba(0,240,255,.25);
 }
-.step h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
-.step p { font-size: .87rem; color: var(--text-muted); line-height: 1.7; }
+.step:nth-child(2) .step-num { border-color: #5a8cff; box-shadow: 0 0 0 5px var(--bg-dark), 0 0 18px rgba(90,140,255,.25); }
+.step:nth-child(3) .step-num { border-color: var(--secondary); box-shadow: 0 0 0 5px var(--bg-dark), 0 0 18px rgba(123,47,255,.25); }
+.step:nth-child(4) .step-num { border-color: var(--accent); box-shadow: 0 0 0 5px var(--bg-dark), 0 0 18px rgba(255,60,110,.25); }
+.step-body { padding-top: 4px; }
+.step-body h3 { font-size: 1.08rem; font-weight: 700; margin-bottom: 7px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.step-tagline {
+  font-size: .66rem; font-weight: 700; letter-spacing: .5px; color: var(--primary);
+  border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px;
+}
+.step-body p { font-size: .9rem; color: var(--text-muted); line-height: 1.7; max-width: 560px; }
 
 /* ── HOW REMOTE ── */
 .how-remote-wrap { margin-top: 40px; }
@@ -1509,8 +1521,6 @@ body.light .refund-row-head span { background: rgba(0,119,204,.07) !important; }
 
   .features-wrap { grid-template-columns: 1fr; gap: 40px; }
   .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
-  .step:not(:last-child)::after { display: none; }
-  .steps { grid-template-columns: 1fr 1fr; gap: 24px; }
   .pricing-grid { grid-template-columns: 1fr 1fr; max-width: 720px; margin: 48px auto 0; }
 
   .launch-inner { gap: 36px; }
@@ -1643,34 +1653,14 @@ body.light .refund-row-head span { background: rgba(0,119,204,.07) !important; }
   .remote-icon { font-size: 2rem; }
   .remote-title { font-size: 1.05rem; }
   .remote-desc { font-size: .85rem; }
-  .steps {
-    display: flex; flex-direction: column;
-    gap: 0; margin-top: 32px;
-    position: relative; padding: 0 20px;
-  }
-  /* 타임라인 세로 선 */
-  .steps::before {
-    content: '';
-    position: absolute; left: calc(20px + 26px); top: 26px;
-    bottom: 26px; width: 2px;
-    background: linear-gradient(to bottom, var(--primary), var(--secondary));
-    border-radius: 2px;
-  }
-  .step {
-    display: flex; align-items: flex-start; gap: 16px;
-    padding: 0 0 24px 0; text-align: left;
-    position: relative;
-  }
-  .step:last-child { padding-bottom: 0; }
-  .step-num {
-    width: 52px; height: 52px; flex-shrink: 0;
-    font-size: 1rem; border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 900; color: #000; position: relative; z-index: 1;
-  }
-  .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; margin-top: 12px; color: #fff; }
-  .step p { font-size: .85rem; color: rgba(255,255,255,.75); line-height: 1.65; }
+  .steps { max-width: 100%; margin: 36px 0 0; padding: 0 20px; }
+  .step { gap: 16px; padding: 0 0 28px; }
+  .step:not(:last-child)::before { left: 21px; top: 22px; }
+  .step-num { width: 44px; height: 44px; font-size: 1rem; }
+  .step-body { padding-top: 2px; }
+  .step-body h3 { font-size: 1rem; gap: 8px; }
+  .step-body p { font-size: .85rem; }
+  .step-tagline { font-size: .6rem; padding: 2px 6px; }
   .remote-notice { margin: 24px 20px 0; font-size: .82rem; padding: 14px 16px; border-radius: 10px; gap: 8px; }
   .remote-notice span[style] { display: none; }
 
@@ -1782,7 +1772,7 @@ body.light .refund-row-head span { background: rgba(0,119,204,.07) !important; }
   display: flex; align-items: flex-end; gap: 10px;
   padding: 14px 16px;
 }
-.game-icon { font-size: 1.5rem; flex-shrink: 0; }
+.game-icon { display: none; }
 .game-name { font-size: 1.05rem; font-weight: 800; line-height: 1.2; }
 .game-tag { font-size: .72rem; color: rgba(255,255,255,.5); margin-top: 2px; }
 /* fallback gradients when image fails */
